@@ -22,7 +22,8 @@ use App\Http\Controllers\Admin\NotificationController;
 // Authenticated admin routes
 Route::middleware(['auth', App\Http\Middleware\AdminMiddleware::class])->group(function () {
     // Dashboard
-    Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/', [DashboardController::class, 'index'])->name('admin.dashboard');
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     
     // Notifications
     Route::prefix('notifications')->name('notifications.')->group(function () {
