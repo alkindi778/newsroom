@@ -113,10 +113,36 @@ export const useArticles = () => {
     )
   }
 
+  /**
+   * جلب الأخبار العاجلة
+   */
+  const fetchBreakingNews = (limit: number = 5) => {
+    return useAsyncData(
+      `articles-breaking-${limit}`,
+      async (_nuxtApp, { signal }) => {
+        const data: any = await $fetch(`${apiBase}/articles/breaking-news`, {
+          params: { limit },
+          signal: signal as AbortSignal,
+        })
+        return data?.data || []
+      },
+      {
+        lazy: true,
+        server: true,
+        // تحديث كل دقيقة للأخبار العاجلة
+        getCachedData: (key, nuxtApp, ctx) => {
+          if (ctx.cause === 'refresh:manual') return undefined
+          return nuxtApp.payload.data[key]
+        }
+      }
+    )
+  }
+
   return {
     fetchLatestArticles,
     fetchArticleBySlug,
     fetchArticlesByCategory,
     searchArticles,
+    fetchBreakingNews,
   }
 }

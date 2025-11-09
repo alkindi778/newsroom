@@ -11,6 +11,11 @@
     
     <LayoutFooter />
     
+    <!-- شريط الأخبار العاجلة -->
+    <ClientOnly>
+      <BreakingNewsBar />
+    </ClientOnly>
+    
     <!-- زر العودة للأعلى -->
     <Transition name="fade">
       <button

@@ -566,18 +566,18 @@ class ArticleController extends Controller
             $transformedData = $articles->map(function ($article) {
                 return [
                     'id' => $article->id,
-                    'title' => $article->title,
-                    'subtitle' => $article->subtitle,
-                    'source' => $article->source,
+                    'title' => $article->title ? mb_convert_encoding($article->title, 'UTF-8', 'UTF-8') : null,
+                    'subtitle' => $article->subtitle ? mb_convert_encoding($article->subtitle, 'UTF-8', 'UTF-8') : null,
+                    'source' => $article->source ? mb_convert_encoding($article->source, 'UTF-8', 'UTF-8') : null,
                     'slug' => $article->slug,
-                    'excerpt' => $article->excerpt ?? substr(strip_tags($article->content), 0, 100) . '...',
+                    'excerpt' => $article->excerpt ? mb_convert_encoding($article->excerpt, 'UTF-8', 'UTF-8') : mb_convert_encoding(substr(strip_tags($article->content), 0, 100) . '...', 'UTF-8', 'UTF-8'),
                     'image' => $article->image_path,
                     'thumbnail' => $article->thumbnail_path,
                     'views' => $article->views ?? 0,
                     'published_at' => $article->published_at?->toISOString(),
                     'category' => $article->category ? [
                         'id' => $article->category->id,
-                        'name' => $article->category->name,
+                        'name' => mb_convert_encoding($article->category->name, 'UTF-8', 'UTF-8'),
                         'slug' => $article->category->slug
                     ] : null
                 ];
@@ -587,7 +587,7 @@ class ArticleController extends Controller
                 'status' => 'success',
                 'data' => $transformedData,
                 'count' => $transformedData->count()
-            ]);
+            ], 200, [], JSON_UNESCAPED_UNICODE);
 
         } catch (\Exception $e) {
             \Log::error('API Breaking News Articles Error: ' . $e->getMessage());
