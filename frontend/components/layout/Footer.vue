@@ -1,10 +1,17 @@
 <template>
-  <footer class="bg-navy-900 text-gray-300 mt-16">
+  <footer class="bg-navy-900 text-white mt-16">
     <div class="container mx-auto px-4 py-12">
       <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
         <!-- عن الموقع -->
         <div>
-          <h3 class="text-white text-xl font-bold mb-4">{{ siteName }}</h3>
+          <img 
+            v-if="siteLogo" 
+            :src="siteLogo" 
+            :alt="siteName"
+            :style="{ width: logoWidth + 'px', height: 'auto', maxWidth: '100%' }"
+            class="mb-4 logo-white"
+          />
+          <h3 v-if="!siteLogo" class="text-white text-xl font-bold mb-4">{{ siteName }}</h3>
           <p class="text-sm mb-4">
             {{ siteDescription }}
           </p>
@@ -16,7 +23,7 @@
             </a>
             <a v-if="socialTwitter" :href="socialTwitter" target="_blank" rel="noopener" class="social-icon">
               <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/>
+                <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
               </svg>
             </a>
             <a v-if="socialInstagram" :href="socialInstagram" target="_blank" rel="noopener" class="social-icon">
@@ -83,7 +90,8 @@
 
       <!-- حقوق النشر -->
       <div class="border-t border-gray-800 mt-8 pt-8 text-center text-sm">
-        <p>© {{ currentYear }} غرفة الأخبار. جميع الحقوق محفوظة.</p>
+        <p class="mb-2">© {{ currentYear }} {{ siteName }}. جميع الحقوق محفوظة.</p>
+        <p class="text-gray-400">تصميم وتطوير: <span class="text-white font-semibold">عبدالسلام التوي</span></p>
       </div>
     </div>
   </footer>
@@ -92,6 +100,7 @@
 <script setup lang="ts">
 const categoriesStore = useCategoriesStore()
 const settingsStore = useSettingsStore()
+const config = useRuntimeConfig()
 const categories = computed(() => categoriesStore.categories)
 
 const email = ref('')
@@ -105,6 +114,18 @@ const socialTwitter = computed(() => settingsStore.getSetting('social_twitter'))
 const socialInstagram = computed(() => settingsStore.getSetting('social_instagram'))
 const socialYoutube = computed(() => settingsStore.getSetting('social_youtube'))
 
+// Logo Settings
+const siteLogo = computed(() => {
+  const logo = settingsStore.getSetting('site_logo')
+  if (!logo) return null
+  // إذا كان الشعار يبدأ بـ / نستخدمه مباشرة، وإلا نضيف storage/
+  return logo.startsWith('http') ? logo : `${(config as any).public.apiBase.replace('/api/v1', '')}/storage/${logo}`
+})
+const logoWidth = computed(() => {
+  const width = settingsStore.getSetting('site_logo_width', '180')
+  return parseInt(width) || 180
+})
+
 const handleSubscribe = () => {
   // TODO: إضافة منطق الاشتراك في النشرة البريدية
   console.log('Subscribe:', email.value)
@@ -114,6 +135,10 @@ const handleSubscribe = () => {
 </script>
 
 <style scoped>
+.logo-white {
+  filter: brightness(0) invert(1);
+}
+
 .social-icon {
   width: 2.5rem;
   height: 2.5rem;

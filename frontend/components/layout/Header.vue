@@ -60,13 +60,6 @@
             </svg>
           </button>
 
-          <!-- الوضع الليلي -->
-          <button @click="toggleDarkMode" class="hidden sm:block p-2 hover:bg-gray-100 rounded-full transition-colors">
-            <svg class="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
-            </svg>
-          </button>
-
           <!-- زر مباشر -->
           <button class="hidden md:flex items-center gap-2 bg-accent hover:bg-accent-700 text-white px-4 py-2 rounded text-sm font-semibold transition-colors">
             <span class="w-2 h-2 bg-white rounded-full animate-pulse"></span>
@@ -231,11 +224,6 @@ const toggleMobileMenu = () => {
 const toggleSearch = () => {
   showSearch.value = !showSearch.value
   showMobileMenu.value = false
-}
-
-const toggleDarkMode = () => {
-  // يمكن تطبيق الوضع الليلي لاحقاً
-  console.log('Dark mode toggle')
 }
 
 const closeMobileMenu = () => {
