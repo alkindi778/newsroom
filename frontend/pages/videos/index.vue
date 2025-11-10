@@ -1,9 +1,16 @@
 <template>
   <div class="container mx-auto px-4 py-8">
     <!-- Page Header -->
-    <div class="mb-8">
-      <h1 class="text-4xl font-bold text-gray-900 mb-2"><i class="fas fa-video text-red-600"></i> {{ sectionTitle }}</h1>
-      <p class="text-gray-600">شاهد أحدث الفيديوهات والتقارير الإخبارية</p>
+    <div class="mb-8 flex items-center gap-4">
+      <div class="flex-shrink-0 w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl shadow-lg flex items-center justify-center">
+        <svg class="w-9 h-9 text-white" fill="currentColor" viewBox="0 0 20 20">
+          <path d="M2 6a2 2 0 012-2h6a2 2 0 012 2v8a2 2 0 01-2 2H4a2 2 0 01-2-2V6zM14.553 7.106A1 1 0 0014 8v4a1 1 0 00.553.894l2 1A1 1 0 0018 13V7a1 1 0 00-1.447-.894l-2 1z" />
+        </svg>
+      </div>
+      <div>
+        <h1 class="text-4xl font-bold text-gray-900 mb-1">{{ sectionTitle }}</h1>
+        <p class="text-gray-600">شاهد أحدث الفيديوهات والتقارير الإخبارية</p>
+      </div>
     </div>
 
     <!-- Videos Top Advertisement -->
@@ -52,7 +59,9 @@
             class="absolute inset-0 bg-gray-800 animate-pulse"
           >
             <div class="w-full h-full flex items-center justify-center">
-              <i class="fas fa-play-circle text-6xl text-gray-600"></i>
+              <svg class="w-12 h-12 text-gray-600" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M2 6a2 2 0 012-2h6a2 2 0 012 2v8a2 2 0 01-2 2H4a2 2 0 01-2-2V6zM14.553 7.106A1 1 0 0014 8v4a1 1 0 00.553.894l2 1A1 1 0 0018 13V7a1 1 0 00-1.447-.894l-2 1z" />
+              </svg>
             </div>
           </div>
 
@@ -75,7 +84,10 @@
 
           <!-- Views Badge -->
           <div class="absolute top-3 left-3 bg-black/70 text-white px-2.5 py-1 text-xs font-medium rounded shadow-lg flex items-center gap-1">
-            <i class="fas fa-eye"></i>
+            <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+              <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"/>
+              <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd"/>
+            </svg>
             <span>{{ formatNumber(video.views) }}</span>
           </div>
         </div>
@@ -92,7 +104,9 @@
 
     <!-- Empty State -->
     <div v-else class="text-center py-16">
-      <i class="fas fa-video-slash text-6xl text-gray-400 mb-4"></i>
+      <svg class="w-16 h-16 mx-auto text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+      </svg>
       <h3 class="text-xl font-semibold text-gray-900 mb-2">لا توجد فيديوهات</h3>
       <p class="text-gray-600">لم يتم العثور على فيديوهات متاحة حالياً</p>
     </div>
