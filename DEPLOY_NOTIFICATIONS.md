@@ -4,6 +4,10 @@
 
 ```bash
 ssh -i "c:\xampp\htdocs\newsroom\newsroom-key.pem" ubuntu@13.36.176.20
+
+
+$service = app('App\Services\PushNotificationService');
+$service->sendNewArticleNotification($article);
 ```
 
 ---

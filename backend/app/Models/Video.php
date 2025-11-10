@@ -51,7 +51,17 @@ class Video extends Model
 
         static::creating(function ($video) {
             if (empty($video->slug)) {
-                $video->slug = Str::slug($video->title);
+                $slug = Str::slug($video->title);
+                $originalSlug = $slug;
+                $count = 1;
+                
+                // تحقق من وجود slug (بما في ذلك المحذوفة soft deleted)
+                while (static::withTrashed()->where('slug', $slug)->exists()) {
+                    $slug = $originalSlug . '-' . $count;
+                    $count++;
+                }
+                
+                $video->slug = $slug;
             }
         });
     }
