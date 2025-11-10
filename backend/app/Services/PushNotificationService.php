@@ -125,11 +125,11 @@ class PushNotificationService
             'image' => $imageUrl, // إضافة image للصورة الكبيرة
             'badge' => config('app.url') . '/badge-72x72.png',
             'tag' => 'article-' . $article->id,
-            'url' => config('app.url') . '/articles/' . $article->slug,
+            'url' => config('app.url') . '/news/' . $article->slug,
             'data' => [
                 'type' => 'article',
                 'id' => $article->id,
-                'url' => '/articles/' . $article->slug
+                'url' => '/news/' . $article->slug
             ]
         ];
 
