@@ -95,6 +95,10 @@ class PushNotificationService
         // إذا لم توجد، جرب حقل image
         if (!$imageUrl && $article->image) {
             $imageUrl = $article->image;
+            // إذا كان المسار يبدأ بـ media/ أضف storage/ قبله
+            if (strpos($imageUrl, 'media/') === 0) {
+                $imageUrl = 'storage/' . $imageUrl;
+            }
         }
         
         // إذا الصورة نسبية (relative path)، اجعلها absolute
@@ -139,6 +143,9 @@ class PushNotificationService
         
         if (!$imageUrl && $video->image) {
             $imageUrl = $video->image;
+            if (strpos($imageUrl, 'media/') === 0) {
+                $imageUrl = 'storage/' . $imageUrl;
+            }
         }
         
         if ($imageUrl && !filter_var($imageUrl, FILTER_VALIDATE_URL)) {
@@ -181,6 +188,9 @@ class PushNotificationService
         
         if (!$imageUrl && $opinion->image) {
             $imageUrl = $opinion->image;
+            if (strpos($imageUrl, 'media/') === 0) {
+                $imageUrl = 'storage/' . $imageUrl;
+            }
         }
         
         if ($imageUrl && !filter_var($imageUrl, FILTER_VALIDATE_URL)) {
