@@ -6,6 +6,8 @@ use Illuminate\Support\ServiceProvider;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 use App\Jobs\OptimizeMediaImage;
 use Illuminate\Support\Facades\Log;
+use App\Support\CustomPathGenerator;
+use Spatie\MediaLibrary\Support\PathGenerator\PathGenerator;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -14,7 +16,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        // تسجيل Custom Path Generator للصور
+        $this->app->bind(PathGenerator::class, CustomPathGenerator::class);
     }
 
     /**

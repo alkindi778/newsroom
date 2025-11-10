@@ -79,26 +79,95 @@ export default defineEventHandler(async (event) => {
     })
 
     // إضافة الأخبار
-    articles.forEach((article: any) => {
-      urls.push({
+    const newsUrls = articles.map((article: any) => {
+      // الحصول على الصورة المميزة
+      let imageUrl = null
+      if (article.featured_image) {
+        if (article.featured_image.startsWith('http')) {
+          imageUrl = article.featured_image
+        } else {
+          // إزالة "media/" من بداية المسار إذا كان موجوداً
+          const imagePath = article.featured_image.replace(/^media\//, '')
+          imageUrl = `${apiBase.replace('/api/v1', '')}/storage/${imagePath}`
+        }
+      } else if (article.image) {
+        if (article.image.startsWith('http')) {
+          imageUrl = article.image
+        } else {
+          // إزالة "media/" من بداية المسار إذا كان موجوداً
+          const imagePath = article.image.replace(/^media\//, '')
+          imageUrl = `${apiBase.replace('/api/v1', '')}/storage/${imagePath}`
+        }
+      }
+
+      return {
         loc: `${baseUrl}/news/${article.slug}`,
         changefreq: 'weekly',
         priority: 0.7,
-        lastmod: article.updated_at || article.published_at || new Date().toISOString()
-      })
+        lastmod: article.updated_at || article.published_at || new Date().toISOString(),
+        title: article.title,
+        image: imageUrl,
+        imageCaption: article.subtitle || article.excerpt,
+        isNews: true
+      }
     })
+
+    urls.push(...newsUrls)
 
     // توليد XML
     const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
         xmlns:news="http://www.google.com/schemas/sitemap-news/0.9"
         xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
-${urls.map(url => `  <url>
+${urls.map((url: any) => {
+      let xmlUrl = `  <url>
     <loc>${url.loc}</loc>
     <lastmod>${url.lastmod}</lastmod>
     <changefreq>${url.changefreq}</changefreq>
-    <priority>${url.priority}</priority>
-  </url>`).join('\n')}
+    <priority>${url.priority}</priority>`
+
+      // إضافة News Sitemap Tags للمقالات
+      if (url.isNews && url.title) {
+        const escapedTitle = url.title.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
+        xmlUrl += `
+    <news:news>
+      <news:publication>
+        <news:name>غرفة الأخبار</news:name>
+        <news:language>ar</news:language>
+      </news:publication>
+      <news:publication_date>${url.lastmod}</news:publication_date>
+      <news:title>${escapedTitle}</news:title>
+    </news:news>`
+      }
+
+      // إضافة Image Sitemap Tags
+      if (url.image) {
+        const escapedTitle = url.title ? url.title.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;') : ''
+        const escapedCaption = url.imageCaption ? url.imageCaption.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;') : ''
+        
+        xmlUrl += `
+    <image:image>
+      <image:loc>${url.image}</image:loc>`
+        
+        if (escapedTitle) {
+          xmlUrl += `
+      <image:title>${escapedTitle}</image:title>`
+        }
+        
+        if (escapedCaption) {
+          xmlUrl += `
+      <image:caption>${escapedCaption}</image:caption>`
+        }
+        
+        xmlUrl += `
+    </image:image>`
+      }
+
+      xmlUrl += `
+  </url>`
+      
+      return xmlUrl
+    }).join('\n')}
 </urlset>`
 
     // تعيين headers

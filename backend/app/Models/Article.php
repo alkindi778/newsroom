@@ -4,7 +4,9 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Support\Str;
+use App\Support\CustomPathGenerator;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
@@ -192,7 +194,6 @@ class Article extends Model implements HasMedia
             ->width(1200)
             ->height(600)
             ->sharpen(10)
-            ->optimize()
             ->nonQueued();
     }
 
@@ -260,7 +261,11 @@ class Article extends Model implements HasMedia
 
         // Fallback to old image column if exists
         if (!empty($this->attributes['image'])) {
-            return asset('storage/' . $this->attributes['image']);
+            $imagePath = $this->attributes['image'];
+            // تحقق من وجود نسخة WebP
+            $webpPath = $this->getWebPVersion($imagePath);
+            $finalPath = $webpPath ?: $imagePath;
+            return asset('storage/' . $finalPath);
         }
 
         return null;
@@ -277,7 +282,58 @@ class Article extends Model implements HasMedia
             return $thumbnail;
         }
 
-        // Fallback to main image
+        // Fallback to featured_image or image with WebP support
+        if (!empty($this->attributes['featured_image'])) {
+            $imagePath = $this->attributes['featured_image'];
+            $webpPath = $this->getWebPVersion($imagePath);
+            $finalPath = $webpPath ?: $imagePath;
+            return asset('storage/' . $finalPath);
+        }
+
+        // Final fallback to main image
         return $this->image_path;
+    }
+
+    /**
+     * Get featured_image attribute with WebP optimization
+     */
+    protected function featuredImage(): Attribute
+    {
+        return Attribute::make(
+            get: fn ($value) => $value ? ($this->getWebPVersion($value) ?: $value) : null
+        );
+    }
+
+    /**
+     * Get image attribute with WebP optimization
+     */
+    protected function image(): Attribute
+    {
+        return Attribute::make(
+            get: fn ($value) => $value ? ($this->getWebPVersion($value) ?: $value) : null
+        );
+    }
+
+    /**
+     * استبدال امتداد الصورة بـ WebP والتحقق من وجودها
+     */
+    protected function getWebPVersion(string $imagePath): ?string
+    {
+        // استبدال الامتداد بـ .webp
+        $webpPath = preg_replace('/\.(jpg|jpeg|png|gif)$/i', '.webp', $imagePath);
+        
+        // إذا لم يتغير المسار (أصلاً webp أو امتداد آخر)، إرجاع null
+        if ($webpPath === $imagePath) {
+            return null;
+        }
+
+        // التحقق من وجود ملف WebP
+        $fullPath = storage_path('app/public/' . $webpPath);
+        
+        if (file_exists($fullPath)) {
+            return $webpPath;
+        }
+
+        return null;
     }
 }

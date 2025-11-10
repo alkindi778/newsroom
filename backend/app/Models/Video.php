@@ -5,7 +5,9 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Support\Str;
+use App\Support\CustomPathGenerator;
 
 class Video extends Model
 {
@@ -120,8 +122,13 @@ class Video extends Model
      */
     public function getThumbnailUrlAttribute()
     {
-        if ($this->thumbnail) {
-            return asset('storage/' . $this->thumbnail);
+        // دعم WebP للصور المحلية
+        if (!empty($this->attributes['thumbnail'])) {
+            $thumbnailPath = $this->attributes['thumbnail'];
+            // تحقق من وجود نسخة WebP
+            $webpPath = $this->getWebPVersion($thumbnailPath);
+            $finalPath = $webpPath ?: $thumbnailPath;
+            return asset('storage/' . $finalPath);
         }
 
         // Generate thumbnail from video type
@@ -167,5 +174,38 @@ class Video extends Model
         }
 
         return $this->video_url;
+    }
+
+    /**
+     * Get thumbnail attribute with WebP optimization
+     */
+    protected function thumbnail(): Attribute
+    {
+        return Attribute::make(
+            get: fn ($value) => $value ? ($this->getWebPVersion($value) ?: $value) : null
+        );
+    }
+
+    /**
+     * استبدال امتداد الصورة بـ WebP والتحقق من وجودها
+     */
+    protected function getWebPVersion(string $imagePath): ?string
+    {
+        // استبدال الامتداد بـ .webp
+        $webpPath = preg_replace('/\.(jpg|jpeg|png|gif)$/i', '.webp', $imagePath);
+        
+        // إذا لم يتغير المسار (أصلاً webp أو امتداد آخر)، إرجاع null
+        if ($webpPath === $imagePath) {
+            return null;
+        }
+
+        // التحقق من وجود ملف WebP
+        $fullPath = storage_path('app/public/' . $webpPath);
+        
+        if (file_exists($fullPath)) {
+            return $webpPath;
+        }
+
+        return null;
     }
 }

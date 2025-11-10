@@ -6,7 +6,9 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Support\Str;
+use App\Support\CustomPathGenerator;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
@@ -200,9 +202,16 @@ class Opinion extends Model implements HasMedia
             return $mediaUrl;
         }
         
-        // fallback للصور القديمة
-        if ($this->image && file_exists(public_path('storage/' . $this->image))) {
-            return asset('storage/' . $this->image);
+        // fallback للصور القديمة مع دعم WebP
+        if (!empty($this->attributes['image'])) {
+            $imagePath = $this->attributes['image'];
+            // تحقق من وجود نسخة WebP
+            $webpPath = $this->getWebPVersion($imagePath);
+            $finalPath = $webpPath ?: $imagePath;
+            
+            if (file_exists(public_path('storage/' . $finalPath))) {
+                return asset('storage/' . $finalPath);
+            }
         }
         
         // إرجاع null إذا لم توجد صورة (بدلاً من الصورة الافتراضية)
@@ -315,7 +324,14 @@ class Opinion extends Model implements HasMedia
      */
     public function getThumbnailUrlAttribute(): ?string
     {
-        return MediaHelper::getThumbnailUrl($this, MediaHelper::COLLECTION_OPINIONS);
+        // Try Media Library thumbnail
+        $thumbnail = MediaHelper::getThumbnailUrl($this, MediaHelper::COLLECTION_OPINIONS);
+        if ($thumbnail) {
+            return $thumbnail;
+        }
+
+        // Fallback to image with WebP support
+        return $this->image_url;
     }
 
     /**
@@ -340,5 +356,38 @@ class Opinion extends Model implements HasMedia
     public function getHasImageAttribute(): bool
     {
         return MediaHelper::hasImage($this, MediaHelper::COLLECTION_OPINIONS);
+    }
+
+    /**
+     * Get image attribute with WebP optimization
+     */
+    protected function image(): Attribute
+    {
+        return Attribute::make(
+            get: fn ($value) => $value ? ($this->getWebPVersion($value) ?: $value) : null
+        );
+    }
+
+    /**
+     * استبدال امتداد الصورة بـ WebP والتحقق من وجودها
+     */
+    protected function getWebPVersion(string $imagePath): ?string
+    {
+        // استبدال الامتداد بـ .webp
+        $webpPath = preg_replace('/\.(jpg|jpeg|png|gif)$/i', '.webp', $imagePath);
+        
+        // إذا لم يتغير المسار (أصلاً webp أو امتداد آخر)، إرجاع null
+        if ($webpPath === $imagePath) {
+            return null;
+        }
+
+        // التحقق من وجود ملف WebP
+        $fullPath = storage_path('app/public/' . $webpPath);
+        
+        if (file_exists($fullPath)) {
+            return $webpPath;
+        }
+
+        return null;
     }
 }

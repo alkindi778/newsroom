@@ -1,2 +1,10 @@
 User-agent: *
-Disallow:
+Disallow: /admin
+Disallow: /api/admin
+
+# السماح لمحركات البحث بالزحف إلى المحتوى
+Allow: /
+Allow: /api/v1/
+
+# رابط Sitemap
+Sitemap: http://192.168.1.101:3000/sitemap.xml
