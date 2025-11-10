@@ -84,11 +84,30 @@ class PushNotificationService
      */
     public function sendNewArticleNotification($article)
     {
+        // الحصول على الصورة من Media Library
+        $imageUrl = $article->getFirstMediaUrl('articles');
+        
+        // إذا لم توجد صورة من Media Library، جرب featured_image
+        if (!$imageUrl && $article->featured_image) {
+            $imageUrl = $article->featured_image;
+        }
+        
+        // إذا الصورة نسبية (relative path)، اجعلها absolute
+        if ($imageUrl && !filter_var($imageUrl, FILTER_VALIDATE_URL)) {
+            $imageUrl = config('app.url') . '/' . ltrim($imageUrl, '/');
+        }
+        
+        // استخدم الأيقونة الافتراضية إذا لم توجد صورة
+        if (!$imageUrl) {
+            $imageUrl = config('app.url') . '/icon-192x192.png';
+        }
+        
         $payload = [
             'title' => 'خبر جديد',
             'body' => $article->title,
-            'icon' => $article->featured_image ?? '/icon-192x192.png',
-            'badge' => '/badge-72x72.png',
+            'icon' => $imageUrl,
+            'image' => $imageUrl, // إضافة image للصورة الكبيرة
+            'badge' => config('app.url') . '/badge-72x72.png',
             'tag' => 'article-' . $article->id,
             'url' => config('app.url') . '/articles/' . $article->slug,
             'data' => [
@@ -106,11 +125,27 @@ class PushNotificationService
      */
     public function sendNewVideoNotification($video)
     {
+        // الحصول على الصورة
+        $imageUrl = $video->getFirstMediaUrl('videos');
+        
+        if (!$imageUrl && $video->thumbnail) {
+            $imageUrl = $video->thumbnail;
+        }
+        
+        if ($imageUrl && !filter_var($imageUrl, FILTER_VALIDATE_URL)) {
+            $imageUrl = config('app.url') . '/' . ltrim($imageUrl, '/');
+        }
+        
+        if (!$imageUrl) {
+            $imageUrl = config('app.url') . '/icon-192x192.png';
+        }
+        
         $payload = [
             'title' => 'فيديو جديد',
             'body' => $video->title,
-            'icon' => $video->thumbnail ?? '/icon-192x192.png',
-            'badge' => '/badge-72x72.png',
+            'icon' => $imageUrl,
+            'image' => $imageUrl,
+            'badge' => config('app.url') . '/badge-72x72.png',
             'tag' => 'video-' . $video->id,
             'url' => config('app.url') . '/videos/' . $video->slug,
             'data' => [
@@ -128,11 +163,27 @@ class PushNotificationService
      */
     public function sendNewOpinionNotification($opinion)
     {
+        // الحصول على الصورة
+        $imageUrl = $opinion->getFirstMediaUrl('opinions');
+        
+        if (!$imageUrl && $opinion->featured_image) {
+            $imageUrl = $opinion->featured_image;
+        }
+        
+        if ($imageUrl && !filter_var($imageUrl, FILTER_VALIDATE_URL)) {
+            $imageUrl = config('app.url') . '/' . ltrim($imageUrl, '/');
+        }
+        
+        if (!$imageUrl) {
+            $imageUrl = config('app.url') . '/icon-192x192.png';
+        }
+        
         $payload = [
             'title' => 'رأي جديد',
             'body' => $opinion->title,
-            'icon' => $opinion->featured_image ?? '/icon-192x192.png',
-            'badge' => '/badge-72x72.png',
+            'icon' => $imageUrl,
+            'image' => $imageUrl,
+            'badge' => config('app.url') . '/badge-72x72.png',
             'tag' => 'opinion-' . $opinion->id,
             'url' => config('app.url') . '/opinions/' . $opinion->slug,
             'data' => [

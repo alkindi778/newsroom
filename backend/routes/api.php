@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\SearchController;
 use App\Http\Controllers\Api\VideoController;
 use App\Http\Controllers\Api\AdvertisementController;
 use App\Http\Controllers\Api\PushSubscriptionController;
+use App\Http\Controllers\Api\ManifestController;
 
 /*
 |--------------------------------------------------------------------------
@@ -91,6 +92,9 @@ Route::prefix('v1')->group(function () {
     Route::post('/push/unsubscribe', [PushSubscriptionController::class, 'unsubscribe']);
     Route::post('/push/update-preferences', [PushSubscriptionController::class, 'updatePreferences']);
     Route::post('/push/test', [PushSubscriptionController::class, 'sendTestNotification']);
+    
+    // PWA Manifest (Public)
+    Route::get('/manifest', [ManifestController::class, 'getManifest']);
 });
 
 // CORS is handled automatically by config/cors.php

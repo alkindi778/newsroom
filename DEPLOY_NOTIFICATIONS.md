@@ -1,5 +1,13 @@
 # دليل نشر نظام الإشعارات على السيرفر
 
+## معلومات الاتصال بالسيرفر
+
+```bash
+ssh -i "c:\xampp\htdocs\newsroom\newsroom-key.pem" ubuntu@13.36.176.20
+```
+
+---
+
 ## المتطلبات الأساسية
 
 ### ⚠️ مهم جداً:
@@ -13,28 +21,29 @@
 ### باستخدام SCP/SFTP:
 
 ```bash
-# من جهازك المحلي، ارفع الملفات الجديدة:
-scp -i newsroom-key.pem -r backend/app/Events root@your-server-ip:/var/www/html/newsroom/backend/app/
-scp -i newsroom-key.pem -r backend/app/Listeners root@your-server-ip:/var/www/html/newsroom/backend/app/
-scp -i newsroom-key.pem backend/app/Services/PushNotificationService.php root@your-server-ip:/var/www/html/newsroom/backend/app/Services/
-scp -i newsroom-key.pem backend/app/Http/Controllers/Api/PushSubscriptionController.php root@your-server-ip:/var/www/html/newsroom/backend/app/Http/Controllers/Api/
-scp -i newsroom-key.pem backend/app/Models/PushSubscription.php root@your-server-ip:/var/www/html/newsroom/backend/app/Models/
-scp -i newsroom-key.pem backend/database/migrations/2025_11_09_104300_create_push_subscriptions_table.php root@your-server-ip:/var/www/html/newsroom/backend/database/migrations/
+# ⚠️ لا تحتاج لهذا - استخدم git pull مباشرة على السيرفر
+# الملفات موجودة على GitHub بالفعل
 ```
 
 ---
 
-## 2️⃣ تثبيت المكتبات على السيرفر
+## 2️⃣ على السيرفر: سحب التحديثات وتثبيت المكتبات
 
 ```bash
 # الاتصال بالسيرفر
-ssh -i newsroom-key.pem root@your-server-ip
+ssh -i "c:\xampp\htdocs\newsroom\newsroom-key.pem" ubuntu@13.36.176.20
 
 # الانتقال إلى مجلد المشروع
-cd /var/www/html/newsroom/backend
+cd /var/www/newsroom
 
-# تثبيت minishlink/web-push
-composer require minishlink/web-push
+# سحب آخر التحديثات من GitHub
+git pull origin main
+
+# الانتقال للـ Backend
+cd backend
+
+# تثبيت المكتبات الجديدة
+composer install
 
 # تشغيل Migrations
 php artisan migrate
@@ -61,7 +70,7 @@ npx web-push generate-vapid-keys
 ### إضافة المفاتيح إلى `.env`:
 
 ```bash
-nano /var/www/html/newsroom/backend/.env
+nano /var/www/newsroom/backend/.env
 ```
 
 أضف في نهاية الملف:
@@ -94,15 +103,15 @@ sudo nano /etc/supervisor/conf.d/newsroom-worker.conf
 ```ini
 [program:newsroom-worker]
 process_name=%(program_name)s_%(process_num)02d
-command=php /var/www/html/newsroom/backend/artisan queue:work --sleep=3 --tries=3 --max-time=3600
+command=php /var/www/newsroom/backend/artisan queue:work --sleep=3 --tries=3 --max-time=3600
 autostart=true
 autorestart=true
 stopasgroup=true
 killasgroup=true
-user=www-data
+user=ubuntu
 numprocs=2
 redirect_stderr=true
-stdout_logfile=/var/www/html/newsroom/backend/storage/logs/worker.log
+stdout_logfile=/var/www/newsroom/backend/storage/logs/worker.log
 stopwaitsecs=3600
 ```
 
@@ -139,7 +148,7 @@ scp -i newsroom-key.pem frontend/public/manifest.json root@your-server-ip:/var/w
 ### على السيرفر:
 
 ```bash
-cd /var/www/html/newsroom/frontend
+cd /var/www/newsroom/frontend
 
 # إعادة بناء المشروع
 npm run build
@@ -184,13 +193,13 @@ curl https://your-domain.com/api/v1/push/public-key
 ### Worker Logs:
 
 ```bash
-tail -f /var/www/html/newsroom/backend/storage/logs/worker.log
+tail -f /var/www/newsroom/backend/storage/logs/worker.log
 ```
 
 ### Laravel Logs:
 
 ```bash
-tail -f /var/www/html/newsroom/backend/storage/logs/laravel.log
+tail -f /var/www/newsroom/backend/storage/logs/laravel.log
 ```
 
 ### Supervisor Logs:
