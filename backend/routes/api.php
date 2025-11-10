@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\SearchController;
 use App\Http\Controllers\Api\VideoController;
 use App\Http\Controllers\Api\AdvertisementController;
+use App\Http\Controllers\Api\PushSubscriptionController;
 
 /*
 |--------------------------------------------------------------------------
@@ -83,6 +84,13 @@ Route::prefix('v1')->group(function () {
     Route::get('/advertisements/after-section/{sectionId}', [AdvertisementController::class, 'getAfterSection'])->whereNumber('sectionId');
     Route::post('/advertisements/{id}/view', [AdvertisementController::class, 'trackView'])->whereNumber('id');
     Route::post('/advertisements/{id}/click', [AdvertisementController::class, 'trackClick'])->whereNumber('id');
+
+    // Push Notifications (Public)
+    Route::get('/push/public-key', [PushSubscriptionController::class, 'getPublicKey']);
+    Route::post('/push/subscribe', [PushSubscriptionController::class, 'subscribe']);
+    Route::post('/push/unsubscribe', [PushSubscriptionController::class, 'unsubscribe']);
+    Route::post('/push/update-preferences', [PushSubscriptionController::class, 'updatePreferences']);
+    Route::post('/push/test', [PushSubscriptionController::class, 'sendTestNotification']);
 });
 
 // CORS is handled automatically by config/cors.php

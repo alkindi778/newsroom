@@ -107,7 +107,14 @@ class VideoService
                 $data['published_at'] = now();
             }
 
-            return $this->videoRepository->create($data);
+            $video = $this->videoRepository->create($data);
+            
+            // إطلاق Event لإرسال Push Notifications عند النشر
+            if ($video && $video->is_published) {
+                event(new \App\Events\VideoPublished($video));
+            }
+            
+            return $video;
         } catch (\Exception $e) {
             Log::error('Error creating video: ' . $e->getMessage());
             throw $e;

@@ -18,6 +18,17 @@ class EventServiceProvider extends ServiceProvider
         MediaHasBeenAdded::class => [
             OptimizeUploadedImage::class,
         ],
+
+        // إشعارات المحتوى الجديد
+        \App\Events\ArticlePublished::class => [
+            \App\Listeners\SendArticleNotification::class,
+        ],
+        \App\Events\VideoPublished::class => [
+            \App\Listeners\SendVideoNotification::class,
+        ],
+        \App\Events\OpinionPublished::class => [
+            \App\Listeners\SendOpinionNotification::class,
+        ],
     ];
 
     /**

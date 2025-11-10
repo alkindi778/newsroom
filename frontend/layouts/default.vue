@@ -16,6 +16,11 @@
       <BreakingNewsBar />
     </ClientOnly>
     
+    <!-- مطالبة الإشعارات -->
+    <ClientOnly>
+      <NotificationPrompt />
+    </ClientOnly>
+    
     <!-- زر العودة للأعلى -->
     <Transition name="fade">
       <button

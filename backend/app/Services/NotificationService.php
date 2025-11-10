@@ -148,7 +148,7 @@ class NotificationService
     public function notifyArticleCreated(int $articleId, string $title, int $authorId): void
     {
         // إشعار المحررين والمديرين
-        $editors = User::permission(['نشر الأخبار', 'إدارة الأخبار'])->pluck('id')->toArray();
+        $editors = User::permission(['publish_articles', 'manage_articles'])->pluck('id')->toArray();
         
         $this->createForMultipleUsers($editors, [
             'type' => Notification::TYPE_ARTICLE_CREATED,
@@ -167,7 +167,7 @@ class NotificationService
     public function notifyArticlePending(int $articleId, string $title, int $authorId): void
     {
         // إشعار المحررين الذين لهم صلاحية الموافقة
-        $approvers = User::permission(['approve_articles', 'نشر الأخبار'])->pluck('id')->toArray();
+        $approvers = User::permission(['approve_articles', 'publish_articles'])->pluck('id')->toArray();
         
         $this->createForMultipleUsers($approvers, [
             'type' => Notification::TYPE_ARTICLE_PENDING,

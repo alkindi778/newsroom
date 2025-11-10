@@ -105,6 +105,9 @@ class ArticleService
                 $article->title,
                 auth()->id()
             );
+            
+            // إطلاق Event لإرسال Push Notifications
+            event(new \App\Events\ArticlePublished($article));
         }
 
         return $article;
@@ -161,11 +164,20 @@ class ArticleService
             }
         }
 
+        // Track if article is being published for the first time
+        $wasUnpublished = !$article->is_published;
+        
         $result = $this->articleRepository->update($article, $processedData);
         
         // Handle image upload after article update
         if ($result) {
             $this->handleImageUpload($article->fresh(), $request);
+            
+            // إطلاق Event إذا تم نشر المقال للمرة الأولى
+            $article->refresh();
+            if ($wasUnpublished && $article->is_published && $article->approval_status === 'approved') {
+                event(new \App\Events\ArticlePublished($article));
+            }
         }
         
         return $result;
@@ -229,7 +241,20 @@ class ArticleService
             return false;
         }
         
-        return $this->articleRepository->toggleStatus($article);
+        // Track if article is being published
+        $wasUnpublished = !$article->is_published;
+        
+        $result = $this->articleRepository->toggleStatus($article);
+        
+        // إطلاق Event إذا تم نشر المقال
+        if ($result && $wasUnpublished) {
+            $article->refresh();
+            if ($article->is_published) {
+                event(new \App\Events\ArticlePublished($article));
+            }
+        }
+        
+        return $result;
     }
 
     /**

@@ -122,6 +122,11 @@ class OpinionService
                 'is_published' => $opinion->is_published,
                 'user_id' => auth()->id()
             ]);
+            
+            // إطلاق Event لإرسال Push Notifications عند النشر
+            if ($opinion->is_published) {
+                event(new \App\Events\OpinionPublished($opinion));
+            }
 
             return $opinion;
         } catch (Exception $e) {
