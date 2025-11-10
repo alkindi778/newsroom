@@ -4,11 +4,11 @@
     class="fixed bottom-0 left-0 right-0 w-full bg-red-600 text-white shadow-2xl border-t-4 border-red-800 animate-slide-up"
     style="z-index: 9999 !important;"
   >
-    <div class="container mx-auto px-4">
-      <div class="flex items-center py-5">
+    <div class="container mx-auto px-2 md:px-4">
+      <div class="flex items-center py-2 md:py-5">
         <!-- أيقونة عاجل -->
-        <div class="flex-shrink-0 ml-6">
-          <span class="bg-white text-red-600 px-6 py-3 rounded-lg font-bold text-3xl animate-pulse">
+        <div class="flex-shrink-0 ml-2 md:ml-6">
+          <span class="bg-white text-red-600 px-3 py-1.5 md:px-6 md:py-3 rounded-lg font-bold text-sm md:text-3xl animate-pulse">
             عاجل
           </span>
         </div>
@@ -19,33 +19,33 @@
             <div v-if="currentNews" :key="currentIndex" class="flex items-center">
               <NuxtLink
                 :to="`/news/${currentNews.slug}`"
-                class="text-white hover:text-gray-200 transition-colors duration-200 font-bold text-3xl truncate"
+                class="text-white hover:text-gray-200 transition-colors duration-200 font-bold text-sm md:text-3xl truncate"
               >
                 {{ currentNews.title }}
               </NuxtLink>
             </div>
-            <div v-else class="text-white text-3xl">جاري التحميل...</div>
+            <div v-else class="text-white text-sm md:text-3xl">جاري التحميل...</div>
           </Transition>
         </div>
         
         <!-- أزرار التحكم -->
-        <div class="flex-shrink-0 flex items-center gap-2 mr-4" v-if="breakingNews && breakingNews.length > 1">
+        <div class="flex-shrink-0 flex items-center gap-1 md:gap-2 mr-2 md:mr-4" v-if="breakingNews && breakingNews.length > 1">
           <button
             @click="previousNews"
             class="hover:bg-red-700 p-1 rounded transition-colors duration-200"
             title="السابق"
           >
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
             </svg>
           </button>
-          <span class="text-sm">{{ currentIndex + 1 }} / {{ breakingNews.length }}</span>
+          <span class="text-xs md:text-sm">{{ currentIndex + 1 }} / {{ breakingNews.length }}</span>
           <button
             @click="nextNews"
             class="hover:bg-red-700 p-1 rounded transition-colors duration-200"
             title="التالي"
           >
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
             </svg>
           </button>
@@ -54,10 +54,10 @@
         <!-- زر الإغلاق -->
         <button
           @click="closeBar"
-          class="flex-shrink-0 hover:bg-red-700 p-1 rounded transition-colors duration-200 mr-2"
+          class="flex-shrink-0 hover:bg-red-700 p-1 rounded transition-colors duration-200 mr-1 md:mr-2"
           title="إغلاق"
         >
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg class="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
           </svg>
         </button>
