@@ -92,6 +92,11 @@ class PushNotificationService
             $imageUrl = $article->featured_image;
         }
         
+        // إذا لم توجد، جرب حقل image
+        if (!$imageUrl && $article->image) {
+            $imageUrl = $article->image;
+        }
+        
         // إذا الصورة نسبية (relative path)، اجعلها absolute
         if ($imageUrl && !filter_var($imageUrl, FILTER_VALIDATE_URL)) {
             $imageUrl = config('app.url') . '/' . ltrim($imageUrl, '/');
@@ -132,6 +137,10 @@ class PushNotificationService
             $imageUrl = $video->thumbnail;
         }
         
+        if (!$imageUrl && $video->image) {
+            $imageUrl = $video->image;
+        }
+        
         if ($imageUrl && !filter_var($imageUrl, FILTER_VALIDATE_URL)) {
             $imageUrl = config('app.url') . '/' . ltrim($imageUrl, '/');
         }
@@ -168,6 +177,10 @@ class PushNotificationService
         
         if (!$imageUrl && $opinion->featured_image) {
             $imageUrl = $opinion->featured_image;
+        }
+        
+        if (!$imageUrl && $opinion->image) {
+            $imageUrl = $opinion->image;
         }
         
         if ($imageUrl && !filter_var($imageUrl, FILTER_VALIDATE_URL)) {
