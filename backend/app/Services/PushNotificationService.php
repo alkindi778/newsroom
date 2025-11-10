@@ -112,10 +112,10 @@ class PushNotificationService
         }
         
         // الحصول على اسم الموقع من الإعدادات
-        $siteName = \App\Models\Setting::where('key', 'site_name')->value('value') ?? 'نبض الشارع';
+        $siteName = \App\Models\Setting::where('key', 'site_name')->value('value');
         
         $payload = [
-            'title' => $siteName . ' - خبر جديد',
+            'title' => ($siteName ? $siteName . ' - ' : '') . 'خبر جديد',
             'body' => $article->title,
             'icon' => $imageUrl,
             'image' => $imageUrl, // إضافة image للصورة الكبيرة
@@ -160,10 +160,10 @@ class PushNotificationService
         }
         
         // الحصول على اسم الموقع من الإعدادات
-        $siteName = \App\Models\Setting::where('key', 'site_name')->value('value') ?? 'نبض الشارع';
+        $siteName = \App\Models\Setting::where('key', 'site_name')->value('value');
         
         $payload = [
-            'title' => $siteName . ' - فيديو جديد',
+            'title' => ($siteName ? $siteName . ' - ' : '') . 'فيديو جديد',
             'body' => $video->title,
             'icon' => $imageUrl,
             'image' => $imageUrl,
@@ -208,10 +208,10 @@ class PushNotificationService
         }
         
         // الحصول على اسم الموقع من الإعدادات
-        $siteName = \App\Models\Setting::where('key', 'site_name')->value('value') ?? 'نبض الشارع';
+        $siteName = \App\Models\Setting::where('key', 'site_name')->value('value');
         
         $payload = [
-            'title' => $siteName . ' - رأي جديد',
+            'title' => ($siteName ? $siteName . ' - ' : '') . 'رأي جديد',
             'body' => $opinion->title,
             'icon' => $imageUrl,
             'image' => $imageUrl,
