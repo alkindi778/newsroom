@@ -8,6 +8,10 @@ export default defineEventHandler(async (event) => {
   const apiBase = config.public.apiBase
 
   try {
+    // جلب الإعدادات للحصول على اسم الموقع
+    const settingsResponse = await $fetch(`${apiBase}/settings`)
+    const siteName = (settingsResponse as any).data?.flat?.site_name || ''
+
     // جلب جميع الأخبار المنشورة
     const articlesResponse = await $fetch(`${apiBase}/articles`, {
       params: {
@@ -129,10 +133,11 @@ ${urls.map((url: any) => {
       // إضافة News Sitemap Tags للمقالات
       if (url.isNews && url.title) {
         const escapedTitle = url.title.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
+        const escapedSiteName = siteName.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
         xmlUrl += `
     <news:news>
       <news:publication>
-        <news:name>غرفة الأخبار</news:name>
+        <news:name>${escapedSiteName}</news:name>
         <news:language>ar</news:language>
       </news:publication>
       <news:publication_date>${url.lastmod}</news:publication_date>
