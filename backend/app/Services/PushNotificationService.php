@@ -111,13 +111,17 @@ class PushNotificationService
             $imageUrl = config('app.url') . '/icon-192x192.png';
         }
         
-        // الحصول على اسم الموقع من الإعدادات
+        // الحصول على اسم الموقع وأيقونته من الإعدادات
         $siteName = \App\Models\SiteSetting::where('key', 'site_name')->value('value');
+        $siteIcon = \App\Models\SiteSetting::where('key', 'site_logo')->value('value');
+        
+        // استخدام أيقونة الموقع أو الأيقونة الافتراضية
+        $iconUrl = $siteIcon ? config('app.url') . '/storage/' . ltrim($siteIcon, '/') : config('app.url') . '/icon-192x192.png';
         
         $payload = [
             'title' => ($siteName ? $siteName . ' - ' : '') . 'خبر جديد',
             'body' => $article->title,
-            'icon' => $imageUrl,
+            'icon' => $iconUrl,
             'image' => $imageUrl, // إضافة image للصورة الكبيرة
             'badge' => config('app.url') . '/badge-72x72.png',
             'tag' => 'article-' . $article->id,
@@ -159,13 +163,17 @@ class PushNotificationService
             $imageUrl = config('app.url') . '/icon-192x192.png';
         }
         
-        // الحصول على اسم الموقع من الإعدادات
+        // الحصول على اسم الموقع وأيقونته من الإعدادات
         $siteName = \App\Models\SiteSetting::where('key', 'site_name')->value('value');
+        $siteIcon = \App\Models\SiteSetting::where('key', 'site_logo')->value('value');
+        
+        // استخدام أيقونة الموقع أو الأيقونة الافتراضية
+        $iconUrl = $siteIcon ? config('app.url') . '/storage/' . ltrim($siteIcon, '/') : config('app.url') . '/icon-192x192.png';
         
         $payload = [
             'title' => ($siteName ? $siteName . ' - ' : '') . 'فيديو جديد',
             'body' => $video->title,
-            'icon' => $imageUrl,
+            'icon' => $iconUrl,
             'image' => $imageUrl,
             'badge' => config('app.url') . '/badge-72x72.png',
             'tag' => 'video-' . $video->id,
@@ -207,13 +215,17 @@ class PushNotificationService
             $imageUrl = config('app.url') . '/icon-192x192.png';
         }
         
-        // الحصول على اسم الموقع من الإعدادات
+        // الحصول على اسم الموقع وأيقونته من الإعدادات
         $siteName = \App\Models\SiteSetting::where('key', 'site_name')->value('value');
+        $siteIcon = \App\Models\SiteSetting::where('key', 'site_logo')->value('value');
+        
+        // استخدام أيقونة الموقع أو الأيقونة الافتراضية
+        $iconUrl = $siteIcon ? config('app.url') . '/storage/' . ltrim($siteIcon, '/') : config('app.url') . '/icon-192x192.png';
         
         $payload = [
             'title' => ($siteName ? $siteName . ' - ' : '') . 'رأي جديد',
             'body' => $opinion->title,
-            'icon' => $imageUrl,
+            'icon' => $iconUrl,
             'image' => $imageUrl,
             'badge' => config('app.url') . '/badge-72x72.png',
             'tag' => 'opinion-' . $opinion->id,
