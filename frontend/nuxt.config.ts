@@ -81,11 +81,6 @@ export default defineNuxtConfig({
     viewer: true,
   },
 
-  // CSS Files
-  css: [
-    '@fortawesome/fontawesome-free/css/all.min.css'
-  ],
-
   // Runtime config للاتصال بالـ Backend
   runtimeConfig: {
     public: {
