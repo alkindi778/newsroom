@@ -112,7 +112,7 @@ class PushNotificationService
         }
         
         // الحصول على اسم الموقع من الإعدادات
-        $siteName = \App\Models\Setting::where('key', 'site_name')->value('value');
+        $siteName = \App\Models\SiteSetting::where('key', 'site_name')->value('value');
         
         $payload = [
             'title' => ($siteName ? $siteName . ' - ' : '') . 'خبر جديد',
@@ -160,7 +160,7 @@ class PushNotificationService
         }
         
         // الحصول على اسم الموقع من الإعدادات
-        $siteName = \App\Models\Setting::where('key', 'site_name')->value('value');
+        $siteName = \App\Models\SiteSetting::where('key', 'site_name')->value('value');
         
         $payload = [
             'title' => ($siteName ? $siteName . ' - ' : '') . 'فيديو جديد',
@@ -208,7 +208,7 @@ class PushNotificationService
         }
         
         // الحصول على اسم الموقع من الإعدادات
-        $siteName = \App\Models\Setting::where('key', 'site_name')->value('value');
+        $siteName = \App\Models\SiteSetting::where('key', 'site_name')->value('value');
         
         $payload = [
             'title' => ($siteName ? $siteName . ' - ' : '') . 'رأي جديد',
