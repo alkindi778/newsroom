@@ -111,8 +111,11 @@ class PushNotificationService
             $imageUrl = config('app.url') . '/icon-192x192.png';
         }
         
+        // الحصول على اسم الموقع من الإعدادات
+        $siteName = \App\Models\Setting::where('key', 'site_name')->value('value') ?? 'نبض الشارع';
+        
         $payload = [
-            'title' => 'خبر جديد',
+            'title' => $siteName . ' - خبر جديد',
             'body' => $article->title,
             'icon' => $imageUrl,
             'image' => $imageUrl, // إضافة image للصورة الكبيرة
@@ -156,8 +159,11 @@ class PushNotificationService
             $imageUrl = config('app.url') . '/icon-192x192.png';
         }
         
+        // الحصول على اسم الموقع من الإعدادات
+        $siteName = \App\Models\Setting::where('key', 'site_name')->value('value') ?? 'نبض الشارع';
+        
         $payload = [
-            'title' => 'فيديو جديد',
+            'title' => $siteName . ' - فيديو جديد',
             'body' => $video->title,
             'icon' => $imageUrl,
             'image' => $imageUrl,
@@ -201,8 +207,11 @@ class PushNotificationService
             $imageUrl = config('app.url') . '/icon-192x192.png';
         }
         
+        // الحصول على اسم الموقع من الإعدادات
+        $siteName = \App\Models\Setting::where('key', 'site_name')->value('value') ?? 'نبض الشارع';
+        
         $payload = [
-            'title' => 'رأي جديد',
+            'title' => $siteName . ' - رأي جديد',
             'body' => $opinion->title,
             'icon' => $imageUrl,
             'image' => $imageUrl,
