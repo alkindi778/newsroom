@@ -275,6 +275,7 @@ watch(slug, () => {
   text-align: justify;
   word-spacing: 0.05em;
   letter-spacing: 0.01em;
+  white-space: pre-line; /* للحفاظ على الفواصل في النصوص القديمة */
 }
 
 :deep(.prose p:first-of-type) {
