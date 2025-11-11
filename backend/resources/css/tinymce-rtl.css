@@ -1,0 +1,73 @@
+/* عكس واجهة TinyMCE لتكون RTL */
+
+/* عكس container المحرر */
+.tox.tox-tinymce {
+    direction: rtl;
+}
+
+/* عكس شريط الأدوات */
+.tox .tox-toolbar,
+.tox .tox-toolbar__primary,
+.tox .tox-toolbar__overflow {
+    direction: rtl;
+}
+
+/* عكس الأزرار */
+.tox .tox-toolbar__group {
+    direction: rtl;
+}
+
+/* عكس القوائم المنسدلة */
+.tox .tox-collection--list {
+    direction: rtl;
+}
+
+/* عكس menubar */
+.tox .tox-menubar {
+    direction: rtl;
+}
+
+/* عكس statusbar */
+.tox .tox-statusbar {
+    direction: rtl;
+    text-align: left;
+}
+
+/* تعديل مواضع الأيقونات */
+.tox .tox-tbtn__select-label {
+    margin: 0 4px 0 0;
+}
+
+/* عكس dialogs */
+.tox .tox-dialog {
+    direction: rtl;
+}
+
+.tox .tox-dialog__header {
+    direction: rtl;
+}
+
+.tox .tox-dialog__body {
+    direction: rtl;
+}
+
+.tox .tox-dialog__footer {
+    direction: rtl;
+    text-align: left;
+}
+
+/* عكس الأزرار في dialogs */
+.tox .tox-dialog__footer-start {
+    margin-right: auto;
+    margin-left: 0;
+}
+
+.tox .tox-dialog__footer-end {
+    margin-left: auto;
+    margin-right: 0;
+}
+
+/* تصحيح tooltips */
+.tox .tox-pop__dialog {
+    direction: rtl;
+}

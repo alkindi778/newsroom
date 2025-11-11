@@ -68,10 +68,8 @@
                     <label for="content" class="block text-sm font-medium text-gray-700 mb-2">محتوى الخبر *</label>
                     <textarea id="content" 
                               name="content" 
-                              rows="12" 
                               required
-                              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent {{ $errors->has('content') ? 'border-red-500' : '' }}"
-                              placeholder="اكتب محتوى الخبر هنا...">{{ old('content') }}</textarea>
+                              class="tinymce-editor">{{ old('content') }}</textarea>
                     @error('content')
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                     @enderror
@@ -259,8 +257,15 @@
 @endsection
 
 @push('scripts')
+@vite(['resources/css/app.css', 'resources/js/app.js'])
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // Initialize TinyMCE
+    if (typeof initTinyMCE === 'function') {
+        initTinyMCE('#content');
+    }
+    
+
     // Toggle switches functionality
     const sliderToggle = document.getElementById('show_in_slider_toggle');
     const breakingToggle = document.getElementById('is_breaking_news_toggle');

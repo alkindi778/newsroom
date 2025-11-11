@@ -79,10 +79,8 @@
                     <label for="content" class="block text-sm font-medium text-gray-700 mb-2">محتوى الخبر *</label>
                     <textarea id="content" 
                               name="content" 
-                              rows="12" 
                               required
-                              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent {{ $errors->has('content') ? 'border-red-500' : '' }}"
-                              placeholder="اكتب محتوى الخبر هنا...">{{ old('content', $article->content) }}</textarea>
+                              class="tinymce-editor">{{ old('content', $article->content) }}</textarea>
                     @error('content')
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                     @enderror
@@ -288,8 +286,53 @@
 @endsection
 
 @push('scripts')
+@vite(['resources/css/app.css', 'resources/js/app.js'])
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // معالجة المحتوى القديم - تحويله إلى فقرات قبل تحميل المحرر
+    const contentTextarea = document.getElementById('content');
+    if (contentTextarea && contentTextarea.value) {
+        let content = contentTextarea.value;
+        // إذا كان المحتوى لا يحتوي على HTML tags
+        if (!content.match(/<[^>]+>/)) {
+            // تقسيم على الجمل الطويلة (كل جملة تنتهي بنقطة أو سطر جديد)
+            let sentences = content.split(/\.\s+|\n+/);
+            let paragraphs = [];
+            let currentPara = '';
+            
+            sentences.forEach((sentence, index) => {
+                sentence = sentence.trim();
+                if (sentence.length > 0) {
+                    // إضافة النقطة إذا لم تكن موجودة
+                    if (!sentence.endsWith('.') && !sentence.endsWith('،') && !sentence.endsWith(':')) {
+                        sentence += '.';
+                    }
+                    currentPara += sentence + ' ';
+                    
+                    // كل 3-4 جمل، ننشئ فقرة جديدة
+                    if ((index + 1) % 3 === 0 || sentence.includes(':')) {
+                        paragraphs.push('<p>' + currentPara.trim() + '</p>');
+                        currentPara = '';
+                    }
+                }
+            });
+            
+            // إضافة أي محتوى متبقي
+            if (currentPara.trim().length > 0) {
+                paragraphs.push('<p>' + currentPara.trim() + '</p>');
+            }
+            
+            if (paragraphs.length > 0) {
+                contentTextarea.value = paragraphs.join('\n\n');
+            }
+        }
+    }
+    
+    // Initialize TinyMCE
+    if (typeof initTinyMCE === 'function') {
+        initTinyMCE('#content');
+    }
+    
     // Auto-generate slug from title
     const titleInput = document.getElementById('title');
     const slugInput = document.getElementById('slug');

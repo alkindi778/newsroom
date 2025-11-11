@@ -69,7 +69,7 @@ class ArticleController extends Controller
                     'subtitle' => $article->subtitle,
                     'source' => $article->source,
                     'slug' => $article->slug,
-                    'content' => $article->content,
+                    'content' => $this->fixContentImageUrls($article->content),
                     'excerpt' => $article->excerpt ?? ($article->content ? mb_substr(strip_tags($article->content), 0, 150) . '...' : ''),
                     'image' => $article->image_path,  // استخدام Media Library accessor
                     'thumbnail' => $article->thumbnail_path,  // استخدام Media Library accessor
@@ -145,7 +145,7 @@ class ArticleController extends Controller
                 'subtitle' => $article->subtitle,
                 'source' => $article->source,
                 'slug' => $article->slug,
-                'content' => $article->content,
+                'content' => $this->fixContentImageUrls($article->content),
                 'excerpt' => $article->excerpt ?? ($article->content ? mb_substr(strip_tags($article->content), 0, 150) . '...' : ''),
                 'image' => $article->image_path,
                 'thumbnail' => $article->thumbnail_path,
@@ -265,7 +265,7 @@ class ArticleController extends Controller
                     'subtitle' => $article->subtitle,
                     'source' => $article->source,
                     'slug' => $article->slug,
-                    'content' => $article->content,
+                    'content' => $this->fixContentImageUrls($article->content),
                     'excerpt' => $article->excerpt ?? ($article->content ? mb_substr(strip_tags($article->content), 0, 150) . '...' : ''),
                     'image' => $article->image_path,
                     'thumbnail' => $article->thumbnail_path,
@@ -629,5 +629,57 @@ class ArticleController extends Controller
                 'message' => 'حدث خطأ في تسجيل المشاهدة'
             ], 500);
         }
+    }
+    
+    /**
+     * تحويل مسارات الصور في المحتوى إلى مسارات كاملة
+     */
+    private function fixContentImageUrls($content)
+    {
+        if (empty($content)) {
+            return $content;
+        }
+        
+        // الحصول على base URL الكامل من config
+        $baseUrl = rtrim(config('app.url'), '/');
+        
+        // استبدال جميع مسارات الصور النسبية بمسارات كاملة
+        $content = preg_replace_callback(
+            '/<img([^>]*)src=["\']([^"\']+)["\']([^>]*)>/i',
+            function($matches) use ($baseUrl) {
+                $beforeSrc = $matches[1];
+                $srcValue = $matches[2];
+                $afterSrc = $matches[3];
+                
+                // إذا كان المسار يبدأ بـ http:// أو https:// لا نغيره
+                if (preg_match('/^https?:\/\//i', $srcValue)) {
+                    return $matches[0];
+                }
+                
+                // إزالة أي / من البداية وإزالة ../ 
+                $srcValue = ltrim($srcValue, '/');
+                // إزالة جميع ../ من المسار
+                $srcValue = preg_replace('/\.\.\//', '', $srcValue);
+                
+                // إذا كان المسار يحتوي على media/articles أو storage
+                if (strpos($srcValue, 'media/articles') !== false || strpos($srcValue, 'storage') === 0) {
+                    // التأكد من وجود storage/ في البداية
+                    if (!str_starts_with($srcValue, 'storage/')) {
+                        $srcValue = 'storage/' . $srcValue;
+                    }
+                    
+                    // بناء المسار الكامل
+                    $fullUrl = $baseUrl . '/' . $srcValue;
+                    
+                    return '<img' . $beforeSrc . 'src="' . $fullUrl . '"' . $afterSrc . '>';
+                }
+                
+                // إرجاع الصورة كما هي إذا لم تتطابق مع الشروط
+                return $matches[0];
+            },
+            $content
+        );
+        
+        return $content;
     }
 }
