@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\VideoController;
 use App\Http\Controllers\Api\AdvertisementController;
 use App\Http\Controllers\Api\PushSubscriptionController;
 use App\Http\Controllers\Api\ManifestController;
+use App\Http\Controllers\Api\ContactMessageController;
 
 /*
 |--------------------------------------------------------------------------
@@ -95,6 +96,9 @@ Route::prefix('v1')->group(function () {
     
     // PWA Manifest (Public)
     Route::get('/manifest', [ManifestController::class, 'getManifest']);
+    
+    // Contact Messages (Public)
+    Route::post('/contact-messages', [ContactMessageController::class, 'store']);
 });
 
 // CORS is handled automatically by config/cors.php

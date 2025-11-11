@@ -11,6 +11,7 @@ use App\Http\Controllers\Admin\MediaLibraryController;
 use App\Http\Controllers\Admin\SecurityController;
 use App\Http\Controllers\Admin\AdvertisementController;
 use App\Http\Controllers\Admin\NotificationController;
+use App\Http\Controllers\Admin\ContactMessageController;
 
 /*
 |--------------------------------------------------------------------------
@@ -354,5 +355,26 @@ Route::middleware(['auth', App\Http\Middleware\AdminMiddleware::class])->group(f
     
     Route::middleware(['permission:view_advertisements'])->group(function () {
         Route::get('advertisements/{advertisement}', [AdvertisementController::class, 'show'])->name('advertisements.show');
+    });
+    
+    // Contact Messages Management
+    Route::prefix('contact-messages')->name('contact-messages.')->group(function () {
+        Route::get('/', [ContactMessageController::class, 'index'])->name('index');
+        
+        // مراجعة الرسائل (للمدراء) - يجب أن تكون قبل /{id}
+        Route::prefix('review')->name('review.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Admin\ContactMessageReviewController::class, 'index'])->name('index');
+            Route::get('/{id}', [\App\Http\Controllers\Admin\ContactMessageReviewController::class, 'show'])->name('show');
+            Route::post('/{id}/approve', [\App\Http\Controllers\Admin\ContactMessageReviewController::class, 'approve'])->name('approve');
+            Route::post('/{id}/reject', [\App\Http\Controllers\Admin\ContactMessageReviewController::class, 'reject'])->name('reject');
+        });
+        
+        Route::post('/mark-as-read', [ContactMessageController::class, 'markAsRead'])->name('mark-as-read');
+        Route::get('/statistics/data', [ContactMessageController::class, 'statistics'])->name('statistics');
+        
+        // Dynamic routes يجب أن تكون في النهاية
+        Route::get('/{id}', [ContactMessageController::class, 'show'])->name('show');
+        Route::put('/{id}', [ContactMessageController::class, 'update'])->name('update');
+        Route::delete('/{id}', [ContactMessageController::class, 'destroy'])->name('destroy');
     });
 });

@@ -179,6 +179,59 @@
                 </li>
                 @endcan
                 
+                <!-- Contact Messages Section -->
+                <li class="pt-3 pb-2">
+                    <div class="flex items-center gap-2 px-4 py-2">
+                        <div class="h-px flex-1 bg-gradient-to-l from-cyan-500/30 to-transparent"></div>
+                        <span class="text-xs font-bold text-cyan-300/80 uppercase tracking-wider">التواصل</span>
+                        <div class="h-px flex-1 bg-gradient-to-r from-cyan-500/30 to-transparent"></div>
+                    </div>
+                </li>
+                <li>
+                    <a href="{{ route('admin.contact-messages.index') }}" 
+                       class="group flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 {{ request()->routeIs('admin.contact-messages.*') ? 'bg-gradient-to-l from-cyan-600 to-cyan-700 shadow-lg shadow-cyan-500/30' : 'hover:bg-white/5 hover:translate-x-[-4px]' }}">
+                        <div class="w-9 h-9 flex items-center justify-center rounded-lg {{ request()->routeIs('admin.contact-messages.*') ? 'bg-white/20' : 'bg-white/5 group-hover:bg-white/10' }} transition-colors">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                            </svg>
+                        </div>
+                        <span class="flex-1">رسائل التواصل</span>
+                        @php
+                            $newMessagesCount = \App\Models\ContactMessage::where('status', 'new')->count();
+                        @endphp
+                        @if($newMessagesCount > 0)
+                        <span class="px-2 py-0.5 bg-red-500 text-white text-xs font-bold rounded-full">{{ $newMessagesCount }}</span>
+                        @endif
+                        @if(request()->routeIs('admin.contact-messages.*'))
+                        <div class="w-1.5 h-1.5 bg-white rounded-full animate-pulse"></div>
+                        @endif
+                    </a>
+                </li>
+                
+                <!-- رسائلي للمراجعة (للمدراء فقط) -->
+                @can('assign_contact_messages')
+                <li>
+                    <a href="{{ route('admin.contact-messages.review.index') }}" 
+                       class="group flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 {{ request()->routeIs('admin.contact-messages.review.*') ? 'bg-gradient-to-l from-blue-600 to-blue-700 shadow-lg shadow-blue-500/30' : 'hover:bg-white/5 hover:translate-x-[-4px]' }}">
+                        <div class="w-9 h-9 flex items-center justify-center rounded-lg {{ request()->routeIs('admin.contact-messages.review.*') ? 'bg-white/20' : 'bg-white/5 group-hover:bg-white/10' }} transition-colors">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                        </div>
+                        <span class="flex-1">رسائل للمراجعة</span>
+                        @php
+                            $myPendingCount = \App\Models\ContactMessage::assignedTo(auth()->id())->where('approval_status', 'forwarded')->count();
+                        @endphp
+                        @if($myPendingCount > 0)
+                        <span class="px-2 py-0.5 bg-blue-500 text-white text-xs font-bold rounded-full">{{ $myPendingCount }}</span>
+                        @endif
+                        @if(request()->routeIs('admin.contact-messages.review.*'))
+                        <div class="w-1.5 h-1.5 bg-white rounded-full animate-pulse"></div>
+                        @endif
+                    </a>
+                </li>
+                @endcan
+                
                 @canany(['view_users', 'manage_roles', 'manage_permissions'])
                 <!-- System Management Section -->
                 <li class="pt-3 pb-2">
