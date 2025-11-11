@@ -100,7 +100,7 @@
 
           <div 
             class="prose prose-sm sm:prose-base md:prose-lg lg:prose-xl max-w-none text-right leading-loose article-content"
-            style="font-family: 'Azer', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; white-space: pre-line;"
+            style="font-family: 'Azer', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;"
             v-html="article.content"
           ></div>
 
