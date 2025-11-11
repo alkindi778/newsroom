@@ -39,11 +39,11 @@
                   v-for="(article, index) in articles"
                   :key="article.id"
                   v-show="index === activeIndex"
-                  class="absolute inset-0"
+                  class="absolute inset-0 flex flex-col justify-center"
                 >
                   <NuxtLink :to="`/news/${article.slug}`">
                     <!-- العنوان الفرعي -->
-                    <p v-if="article.subtitle" class="text-primary text-sm sm:text-base lg:text-lg font-semibold mb-1">
+                    <p v-if="article.subtitle" class="text-primary text-sm sm:text-base lg:text-lg font-semibold mb-0.5 lg:mb-1">
                       {{ article.subtitle }}
                     </p>
                     <h2 class="text-white text-lg sm:text-xl lg:text-2xl font-bold leading-snug lg:leading-tight hover:text-gray-200 transition-colors line-clamp-2 lg:line-clamp-none">
