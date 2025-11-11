@@ -640,6 +640,39 @@ class ArticleController extends Controller
             return $content;
         }
         
+        // إذا كان المحتوى لا يحتوي على HTML tags، نحوله إلى فقرات
+        if (!preg_match('/<[^>]+>/', $content)) {
+            // تقسيم النص على السطور المزدوجة
+            $paragraphs = preg_split('/\n\s*\n/', trim($content));
+            
+            // إذا لم يكن هناك فواصل سطور، نقسم كل 3-4 جمل
+            if (count($paragraphs) === 1 && strlen($content) > 500) {
+                $sentences = preg_split('/\.\s+/', $content, -1, PREG_SPLIT_NO_EMPTY);
+                $paragraphs = [];
+                $currentPara = '';
+                $sentenceCount = 0;
+                
+                foreach ($sentences as $sentence) {
+                    $currentPara .= $sentence . '. ';
+                    $sentenceCount++;
+                    
+                    // كل 3-4 جمل نعمل فقرة جديدة
+                    if ($sentenceCount >= 3) {
+                        $paragraphs[] = trim($currentPara);
+                        $currentPara = '';
+                        $sentenceCount = 0;
+                    }
+                }
+                
+                // إضافة أي محتوى متبقي
+                if (!empty($currentPara)) {
+                    $paragraphs[] = trim($currentPara);
+                }
+            }
+            
+            $content = '<p>' . implode('</p><p>', array_filter($paragraphs)) . '</p>';
+        }
+        
         // الحصول على base URL الكامل من config
         $baseUrl = rtrim(config('app.url'), '/');
         
