@@ -4,7 +4,7 @@
     class="group flex flex-col rounded-lg overflow-hidden"
   >
     <!-- الصورة في الأعلى -->
-    <div class="relative w-full h-64 overflow-hidden">
+    <div class="relative w-full h-80 overflow-hidden">
       <img 
         :src="getImageUrl(article.thumbnail || article.image)" 
         :alt="article.title"
@@ -14,13 +14,13 @@
     </div>
 
     <!-- المحتوى في الأسفل -->
-    <div class="flex-1 flex flex-col justify-between p-4">
+    <div class="flex-1 flex flex-col justify-between p-6">
       <!-- العنوان الفرعي -->
       <p v-if="article.subtitle" class="text-sm text-blue-600 font-semibold mb-2 line-clamp-1">
         {{ article.subtitle }}
       </p>
       <!-- العنوان -->
-      <h3 class="text-xl font-bold text-gray-900 line-clamp-3 leading-snug text-right mb-3">
+      <h3 class="text-2xl font-bold text-gray-900 line-clamp-3 leading-snug text-right mb-3">
         {{ article.title }}
       </h3>
 
