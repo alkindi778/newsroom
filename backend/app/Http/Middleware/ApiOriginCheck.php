@@ -12,15 +12,13 @@ class ApiOriginCheck
      */
     public function handle(Request $request, Closure $next)
     {
-        // في بيئة التطوير، السماح بـ localhost
-        // في الإنتاج، السماح فقط بالموقع الرسمي
+        // السماح فقط للطلبات من الموقع الخاص بنا
+        // في التطوير: localhost:3000 (الـ frontend)
+        // في الإنتاج: https://nabdaen.duckdns.org
         $allowedOrigins = config('app.env') === 'local' 
             ? [
-                'https://nabdaen.duckdns.org',
                 'http://localhost:3000',
-                'http://localhost',
                 'http://127.0.0.1:3000',
-                'http://127.0.0.1',
             ]
             : [
                 'https://nabdaen.duckdns.org',
@@ -39,11 +37,7 @@ class ApiOriginCheck
             }
         }
 
-        // إذا كان الطلب من نفس الموقع (same-origin) وبدون Origin header
-        if (!$origin && config('app.env') === 'local') {
-            $isAllowed = true;
-        }
-
+        // رفض الطلبات بدون Origin header (الوصول المباشر عبر المتصفح)
         if (!$isAllowed) {
             return response()->json([
                 'status' => 'error',
