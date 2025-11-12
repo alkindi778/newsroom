@@ -26,8 +26,8 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-// Public API routes
-Route::prefix('v1')->group(function () {
+// Protected API routes - only for the website
+Route::prefix('v1')->middleware('api.origin')->group(function () {
     // Articles
     Route::get('/articles', [ArticleController::class, 'index']);
     Route::get('/articles/featured', [ArticleController::class, 'featured']);
