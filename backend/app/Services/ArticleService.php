@@ -10,18 +10,23 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\UploadedFile;
 use App\Helpers\MediaHelper;
 use App\Services\NotificationService;
+use App\Services\EmbeddingService;
+use Illuminate\Support\Facades\Log;
 
 class ArticleService
 {
     protected $articleRepository;
     protected $notificationService;
+    protected $embeddingService;
 
     public function __construct(
         ArticleRepositoryInterface $articleRepository,
-        NotificationService $notificationService
+        NotificationService $notificationService,
+        EmbeddingService $embeddingService
     ) {
         $this->articleRepository = $articleRepository;
         $this->notificationService = $notificationService;
+        $this->embeddingService = $embeddingService;
     }
 
     /**
@@ -89,6 +94,9 @@ class ArticleService
         
         // Handle image upload after article creation
         $this->handleImageUpload($article, $request);
+        
+        // Generate embedding for the article
+        $this->generateArticleEmbedding($article);
         
         // إرسال إشعارات
         if ($isReporter && $processedData['approval_status'] === 'pending_approval') {
@@ -172,6 +180,9 @@ class ArticleService
         // Handle image upload after article update
         if ($result) {
             $this->handleImageUpload($article->fresh(), $request);
+            
+            // Update embedding for the article
+            $this->generateArticleEmbedding($article->fresh());
             
             // إطلاق Event إذا تم نشر المقال للمرة الأولى
             $article->refresh();
@@ -705,5 +716,49 @@ class ArticleService
 
         // يمكنه حذف مقالاته الخاصة إذا لم تكن منشورة
         return $article->user_id === $user->id;
+    }
+
+    /**
+     * Generate embedding for an article
+     */
+    private function generateArticleEmbedding(Article $article): void
+    {
+        try {
+            // Prepare text for embedding
+            $text = $this->embeddingService->prepareText(
+                $article->title,
+                $article->subtitle,
+                strip_tags($article->content)
+            );
+
+            // Generate embedding
+            $embedding = $this->embeddingService->generateEmbedding(
+                $text,
+                'RETRIEVAL_DOCUMENT'
+            );
+
+            // Delete existing embedding if exists
+            if ($article->embedding) {
+                $article->embedding->delete();
+            }
+
+            // Create new embedding
+            $article->embedding()->create([
+                'embedding' => $embedding,
+                'text_used' => $text,
+                'task_type' => 'RETRIEVAL_DOCUMENT',
+            ]);
+
+            Log::info('Article embedding generated successfully', [
+                'article_id' => $article->id,
+                'article_title' => $article->title
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Failed to generate article embedding', [
+                'article_id' => $article->id,
+                'error' => $e->getMessage()
+            ]);
+            // Don't throw - continue with article creation even if embedding fails
+        }
     }
 }

@@ -44,4 +44,8 @@ return [
         'private_key' => env('VAPID_PRIVATE_KEY'),
     ],
 
+    'gemini' => [
+        'api_key' => env('GEMINI_API_KEY'),
+    ],
+
 ];

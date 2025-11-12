@@ -37,6 +37,8 @@ Route::prefix('v1')->group(function () {
     Route::get('/articles/breaking-news', [ArticleController::class, 'breakingNews']);
     Route::get('/articles/search', [ArticleController::class, 'search']);
     Route::post('/articles/{id}/view', [ArticleController::class, 'incrementView'])->whereNumber('id');
+    Route::get('/articles/{article}/similar', [SearchController::class, 'similar']);
+    Route::get('/articles/{article}/check-duplicates', [SearchController::class, 'checkDuplicates']);
     Route::get('/articles/{slug}', [ArticleController::class, 'show']);
     
     // Categories

@@ -101,6 +101,14 @@ class Article extends Model implements HasMedia
     }
 
     /**
+     * Get the embedding for this article
+     */
+    public function embedding()
+    {
+        return $this->hasOne(ArticleEmbedding::class);
+    }
+
+    /**
      * Scope for pending approval articles
      */
     public function scopePendingApproval($query)
