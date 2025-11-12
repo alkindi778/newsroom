@@ -92,11 +92,11 @@ const isClient = ref(false)
 
 const { apiFetch } = useApi()
 
-// تكرار الأخبار مرتين للحصول على حلقة سلسة ومتواصلة
+// تكرار الأخبار ثلاث مرات للحصول على حلقة سلسة ومتواصلة بدون حدود
 const displayArticles = computed(() => {
   if (articles.value.length === 0) return []
-  // تكرار الأخبار مرتين - الأنيميشن سيتحرك 50% ويعيد بشكل سلس
-  return [...articles.value, ...articles.value]
+  // تكرار الأخبار ثلاث مرات - الأنيميشن سيتحرك بسلاسة بدون انقطاع
+  return [...articles.value, ...articles.value, ...articles.value]
 })
 
 // جلب آخر الأخبار
@@ -153,21 +153,21 @@ onUnmounted(() => {
 <style scoped>
 @keyframes ticker {
   0% {
-    transform: translateX(-50%);
+    transform: translateX(0);
   }
   100% {
-    transform: translateX(0%);
+    transform: translateX(-66.666%);
   }
 }
 
 .animate-ticker {
-  animation: ticker 15s linear infinite;
+  animation: ticker 30s linear infinite;
 }
 
 /* سرعة أسرع على الشاشات الصغيرة */
 @media (max-width: 768px) {
   .animate-ticker {
-    animation: ticker 10s linear infinite;
+    animation: ticker 20s linear infinite;
   }
 }
 
