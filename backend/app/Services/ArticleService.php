@@ -360,11 +360,36 @@ class ArticleService
     }
 
     /**
+     * توليد slug يدعم العربية (يحتفظ بالحروف العربية ويستبدل المسافات بشرطات)
+     */
+    protected function generateArabicSlug(string $text): string
+    {
+        $slug = trim($text);
+
+        // توحيد المسافات إلى مسافة واحدة
+        $slug = preg_replace('/\s+/u', ' ', $slug);
+
+        // استبدال المسافات والـ underscore بشرطة
+        $slug = str_replace([' ', '_'], '-', $slug);
+
+        // السماح بالحروف العربية + الأرقام + الحروف اللاتينية + الشرطة فقط
+        $slug = preg_replace('/[^\p{Arabic}0-9A-Za-z\-]+/u', '', $slug);
+
+        // دمج الشرطات المتتالية في شرطة واحدة
+        $slug = preg_replace('/-+/u', '-', $slug);
+
+        // إزالة الشرطات من البداية والنهاية
+        $slug = trim($slug, '-');
+
+        return $slug;
+    }
+
+    /**
      * Generate unique slug
      */
     protected function generateUniqueSlug(string $title, ?Article $existingArticle = null): string
     {
-        $baseSlug = Str::slug($title);
+        $baseSlug = $this->generateArabicSlug($title);
         $slug = $baseSlug;
         $counter = 1;
 
@@ -381,7 +406,7 @@ class ArticleService
      */
     protected function ensureUniqueSlug(string $slug, ?Article $existingArticle = null): string
     {
-        $baseSlug = Str::slug($slug);
+        $baseSlug = $this->generateArabicSlug($slug);
         $finalSlug = $baseSlug;
         $counter = 1;
 
