@@ -116,17 +116,24 @@ class ArticleController extends Controller
     }
 
     /**
-     * Display the specified article by slug
+     * Display the specified article by slug or ID
      */
     public function show(string $slug): JsonResponse
     {
         try {
-            $article = Article::with(['user:id,name', 'category:id,name,slug'])
-                ->where('slug', $slug)
+            $query = Article::with(['user:id,name', 'category:id,name,slug'])
                 ->where('is_published', true)
                 ->whereNotNull('published_at')
-                ->where('published_at', '<=', now())
-                ->first();
+                ->where('published_at', '<=', now());
+
+            // Allow accessing articles either by slug or numeric ID (for legacy/ID-based links)
+            if (is_numeric($slug)) {
+                $query->where('id', (int) $slug);
+            } else {
+                $query->where('slug', $slug);
+            }
+
+            $article = $query->first();
             
             if (!$article) {
                 return response()->json([

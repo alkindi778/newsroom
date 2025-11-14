@@ -43,7 +43,7 @@
       <NuxtLink
         v-for="(article, index) in articles"
         :key="article.id"
-        :to="`/news/${article.slug}`"
+        :to="getArticleLink(article)"
         class="flex items-start gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors group border border-gray-100"
       >
         <!-- Number Badge -->
@@ -124,6 +124,7 @@ const loading = ref(false)
 const { apiFetch } = useApi()
 const { getImageUrl } = useImageUrl()
 const settingsStore = useSettingsStore()
+const { getArticleLink } = useArticleLink()
 
 // Get site name from settings
 const siteName = computed(() => settingsStore.getSetting('site_name', 'غرفة الأخبار'))

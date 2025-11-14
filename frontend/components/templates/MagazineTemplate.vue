@@ -32,7 +32,7 @@
       <!-- Left Column: Main + Secondary -->
       <div class="lg:col-span-8 space-y-6">
         <!-- Main Article -->
-        <NuxtLink v-if="mainArticle" :to="`/news/${mainArticle.slug}`" class="group block">
+        <NuxtLink v-if="mainArticle" :to="getArticleLink(mainArticle)" class="group block">
           <div class="relative h-96 rounded-lg overflow-hidden">
             <img 
               :src="getImageUrl(mainArticle.image, 'large')" 
@@ -70,7 +70,7 @@
           <NuxtLink 
             v-for="article in secondaryArticles" 
             :key="article.id"
-            :to="`/news/${article.slug}`"
+            :to="getArticleLink(article)"
             class="group"
           >
             <div class="relative h-48 rounded-lg overflow-hidden mb-3">
@@ -105,7 +105,7 @@
           :key="article.id"
           class="group"
         >
-          <NuxtLink :to="`/news/${article.slug}`" class="flex gap-3">
+          <NuxtLink :to="getArticleLink(article)" class="flex gap-3">
             <!-- Number Badge -->
             <div class="flex-shrink-0 w-10 h-10 bg-blue-600 text-white font-bold text-xl flex items-center justify-center rounded">
               {{ index + 1 }}
@@ -173,16 +173,19 @@ const props = withDefaults(defineProps<Props>(), {
   type: 'latest'
 })
 
+import type { Article } from '~/types'
+
 const { apiFetch } = useApi()
 const { getImageUrl } = useImageUrl()
-const articles = ref<any[]>([])
+const { getArticleLink } = useArticleLink()
+const articles = ref<Article[]>([])
 const loading = ref(true)
 
 const mainArticle = computed(() => articles.value[0])
 const secondaryArticles = computed(() => articles.value.slice(1, 3))
 const sideArticles = computed(() => articles.value.slice(3, 9))
 
-const formatDate = (date: string) => {
+const formatDate = (date?: string) => {
   if (!date) return ''
   return new Date(date).toLocaleDateString('ar-SA', { 
     year: 'numeric', 

@@ -1,6 +1,6 @@
 <template>
   <NuxtLink 
-    :to="`/news/${article.slug}`"
+    :to="getArticleLink(article)"
     class="group flex flex-col rounded-lg overflow-hidden"
   >
     <!-- الصورة في الأعلى -->
@@ -42,6 +42,7 @@ const props = defineProps<{
 
 const { getImageUrl } = useImageUrl()
 const { formatDate } = useDateFormat()
+const { getArticleLink } = useArticleLink()
 </script>
 
 <style scoped>

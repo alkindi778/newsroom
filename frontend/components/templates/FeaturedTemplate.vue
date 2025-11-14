@@ -25,7 +25,7 @@
     <div v-else-if="articles.length > 0" class="grid grid-cols-1 lg:grid-cols-3 gap-6">
       <!-- خبر رئيسي كبير -->
       <div v-if="mainArticle" class="lg:col-span-2">
-        <NuxtLink :to="`/news/${mainArticle.slug}`" class="group block">
+        <NuxtLink :to="getArticleLink(mainArticle)" class="group block">
           <div class="relative h-96 rounded-lg overflow-hidden mb-4">
             <img 
               :src="getImageUrl(mainArticle.image, 'large')" 
@@ -74,7 +74,7 @@
         <NuxtLink 
           v-for="article in sideArticles" 
           :key="article.id"
-          :to="`/news/${article.slug}`"
+          :to="getArticleLink(article)"
           class="group flex gap-3 bg-white hover:bg-gray-50 rounded-lg overflow-hidden border border-gray-200 transition-all"
         >
           <img 
@@ -119,6 +119,7 @@
 </template>
 
 <script setup lang="ts">
+import type { Article } from '~/types'
 interface Props {
   title?: string
   categorySlug?: string
@@ -134,13 +135,14 @@ const props = withDefaults(defineProps<Props>(), {
 
 const { apiFetch } = useApi()
 const { getImageUrl } = useImageUrl()
-const articles = ref<any[]>([])
+const { getArticleLink } = useArticleLink()
+const articles = ref<Article[]>([])
 const loading = ref(true)
 
 const mainArticle = computed(() => articles.value[0])
 const sideArticles = computed(() => articles.value.slice(1, 7))
 
-const formatDate = (date: string) => {
+const formatDate = (date?: string) => {
   if (!date) return ''
   return new Date(date).toLocaleDateString('ar-SA', { 
     year: 'numeric', 

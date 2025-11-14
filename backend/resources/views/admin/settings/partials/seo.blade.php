@@ -84,6 +84,39 @@
         <p class="mt-1 text-xs text-gray-500">الحرف الذي يفصل بين عنوان الصفحة واسم الموقع (مثال: عنوان - اسم الموقع)</p>
     </div>
 
+    <!-- Article Permalink Style -->
+    <div>
+        <label for="article_permalink_style" class="block text-sm font-medium text-gray-700 mb-2">
+            <span class="flex items-center">
+                <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M4.5 6H7.5M10.5 18h9.75M10.5 18a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M4.5 18H7.5M4.5 12h15" />
+                </svg>
+                نمط روابط الأخبار (Permalink)
+            </span>
+        </label>
+        <select
+            id="article_permalink_style"
+            name="settings[article_permalink_style]"
+            class="w-full md:w-1/2 px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+        >
+            @php
+                $permalinkStyle = $settings['seo']['article_permalink_style'] ?? 'arabic';
+            @endphp
+            <option value="arabic" {{ $permalinkStyle === 'arabic' ? 'selected' : '' }}>
+                عربي (العنوان بالعربية مع شرطات)
+            </option>
+            <option value="english" {{ $permalinkStyle === 'english' ? 'selected' : '' }}>
+                إنجليزي (Str::slug بالعربية إلى حروف لاتينية)
+            </option>
+            <option value="id" {{ $permalinkStyle === 'id' ? 'selected' : '' }}>
+                بالرقم فقط (مثال: /news/123)
+            </option>
+        </select>
+        <p class="mt-1 text-xs text-gray-500">
+            هذا الإعداد يتحكم في شكل رابط الخبر الجديد فقط. تغيير النمط لن يغيّر الأخبار القديمة تلقائياً.
+        </p>
+    </div>
+
     <!-- Default OG Image -->
     <div>
         <label for="default_og_image" class="block text-sm font-medium text-gray-700 mb-2">

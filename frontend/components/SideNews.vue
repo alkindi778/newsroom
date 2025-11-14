@@ -3,7 +3,7 @@
     <NuxtLink
       v-for="article in articles"
       :key="article.id"
-      :to="`/news/${article.slug}`"
+      :to="getArticleLink(article)"
       class="flex flex-row items-start gap-2 lg:gap-3 p-2 lg:p-3 hover:bg-gray-50 transition-colors rounded-lg lg:min-h-[120px]"
     >
       <!-- الصورة على اليمين -->
@@ -45,6 +45,7 @@ const props = defineProps<{
 
 const { getImageUrl } = useImageUrl()
 const { formatDate } = useDateFormat()
+const { getArticleLink } = useArticleLink()
 </script>
 
 <style scoped>

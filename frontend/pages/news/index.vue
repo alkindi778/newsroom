@@ -16,7 +16,7 @@
           <article 
             class="bg-white border-b border-gray-200 hover:bg-gray-50 transition-colors"
           >
-            <NuxtLink :to="`/news/${article.slug}`" class="block p-4">
+            <NuxtLink :to="getArticleLink(article)" class="block p-4">
             <div class="flex gap-4">
               <!-- Image -->
               <div v-if="article.image || article.thumbnail" class="flex-shrink-0">
@@ -113,6 +113,7 @@ import AdvertisementZone from '~/components/AdvertisementZone.vue'
 const articlesStore = useArticlesStore()
 const { getImageUrl } = useImageUrl()
 const { formatDate } = useDateFormat()
+const { getArticleLink } = useArticleLink()
 
 const articles = computed(() => articlesStore.articles)
 const loading = computed(() => articlesStore.loading)

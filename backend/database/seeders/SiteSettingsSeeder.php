@@ -136,6 +136,14 @@ class SiteSettingsSeeder extends Seeder
                 'description' => 'Google Site Verification',
                 'order' => 7
             ],
+            [
+                'key' => 'article_permalink_style',
+                'value' => 'arabic',
+                'type' => 'text',
+                'group' => 'seo',
+                'description' => 'نمط روابط الأخبار (عربي أو إنجليزي)',
+                'order' => 8
+            ],
 
             // Organization Info (Schema.org)
             [

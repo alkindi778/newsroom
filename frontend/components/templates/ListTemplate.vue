@@ -48,7 +48,7 @@
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <!-- Large Featured Card (Right Side in RTL) -->
         <article v-if="articles[2]" class="lg:col-span-2 group">
-          <NuxtLink :to="`/news/${articles[2].slug}`" class="block">
+          <NuxtLink :to="getArticleLink(articles[2])" class="block">
             <div class="relative h-96 rounded-lg overflow-hidden mb-4">
               <img 
                 :src="getImageUrl(articles[2].image, 'large')" 
@@ -81,7 +81,7 @@
             :key="article.id"
             class="group"
           >
-            <NuxtLink :to="`/news/${article.slug}`" class="block">
+            <NuxtLink :to="getArticleLink(article)" class="block">
               <div class="relative h-48 rounded-lg overflow-hidden mb-3">
                 <img 
                   :src="getImageUrl(article.image, 'medium')" 
@@ -111,7 +111,7 @@
           :key="article.id"
           class="group"
         >
-          <NuxtLink :to="`/news/${article.slug}`" class="block">
+          <NuxtLink :to="getArticleLink(article)" class="block">
             <div class="relative h-48 rounded-lg overflow-hidden mb-3">
               <img 
                 :src="getImageUrl(article.image, 'medium')" 
@@ -158,6 +158,8 @@
 </template>
 
 <script setup lang="ts">
+import type { Article } from '~/types'
+
 interface Props {
   title?: string
   categorySlug?: string
@@ -173,7 +175,8 @@ const props = withDefaults(defineProps<Props>(), {
 
 const { apiFetch } = useApi()
 const { getImageUrl } = useImageUrl()
-const articles = ref<any[]>([])
+const { getArticleLink } = useArticleLink()
+const articles = ref<Article[]>([])
 const loading = ref(true)
 
 const formatDate = (date: string) => {

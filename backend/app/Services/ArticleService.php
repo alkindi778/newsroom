@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Article;
+use App\Models\SiteSetting;
 use App\Repositories\Interfaces\ArticleRepositoryInterface;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -91,6 +92,13 @@ class ArticleService
         }
 
         $article = $this->articleRepository->create($processedData);
+
+        // If permalink style is ID-based, set slug to article ID after creation
+        $permalinkStyle = \App\Models\SiteSetting::get('article_permalink_style', 'arabic');
+        if ($permalinkStyle === 'id' && empty($article->slug)) {
+            $article->slug = (string) $article->id;
+            $article->save();
+        }
         
         // Handle image upload after article creation
         $this->handleImageUpload($article, $request);
@@ -321,12 +329,16 @@ class ArticleService
      */
     protected function processArticleData(array $data, Request $request, ?Article $existingArticle = null): array
     {
-        // Generate slug if not provided
-        if (empty($data['slug'])) {
-            $data['slug'] = $this->generateUniqueSlug($data['title'], $existingArticle);
-        } else {
-            // Ensure slug is unique
-            $data['slug'] = $this->ensureUniqueSlug($data['slug'], $existingArticle);
+        $permalinkStyle = SiteSetting::get('article_permalink_style', 'arabic');
+
+        // Generate slug if not provided (except for ID style which uses article ID)
+        if ($permalinkStyle !== 'id') {
+            if (empty($data['slug'])) {
+                $data['slug'] = $this->generateUniqueSlug($data['title'], $existingArticle);
+            } else {
+                // Ensure slug is unique
+                $data['slug'] = $this->ensureUniqueSlug($data['slug'], $existingArticle);
+            }
         }
 
         // Handle image field
@@ -359,29 +371,26 @@ class ArticleService
         return $data;
     }
 
-    /**
-     * توليد slug يدعم العربية (يحتفظ بالحروف العربية ويستبدل المسافات بشرطات)
-     */
     protected function generateArabicSlug(string $text): string
     {
         $slug = trim($text);
-
-        // توحيد المسافات إلى مسافة واحدة
         $slug = preg_replace('/\s+/u', ' ', $slug);
-
-        // استبدال المسافات والـ underscore بشرطة
         $slug = str_replace([' ', '_'], '-', $slug);
-
-        // السماح بالحروف العربية + الأرقام + الحروف اللاتينية + الشرطة فقط
         $slug = preg_replace('/[^\p{Arabic}0-9A-Za-z\-]+/u', '', $slug);
-
-        // دمج الشرطات المتتالية في شرطة واحدة
         $slug = preg_replace('/-+/u', '-', $slug);
-
-        // إزالة الشرطات من البداية والنهاية
         $slug = trim($slug, '-');
-
         return $slug;
+    }
+
+    protected function generateSlugBase(string $text): string
+    {
+        $style = SiteSetting::get('article_permalink_style', 'arabic');
+
+        if ($style === 'english') {
+            return Str::slug($text);
+        }
+
+        return $this->generateArabicSlug($text);
     }
 
     /**
@@ -389,7 +398,7 @@ class ArticleService
      */
     protected function generateUniqueSlug(string $title, ?Article $existingArticle = null): string
     {
-        $baseSlug = $this->generateArabicSlug($title);
+        $baseSlug = $this->generateSlugBase($title);
         $slug = $baseSlug;
         $counter = 1;
 
@@ -406,7 +415,7 @@ class ArticleService
      */
     protected function ensureUniqueSlug(string $slug, ?Article $existingArticle = null): string
     {
-        $baseSlug = $this->generateArabicSlug($slug);
+        $baseSlug = $this->generateSlugBase($slug);
         $finalSlug = $baseSlug;
         $counter = 1;
 

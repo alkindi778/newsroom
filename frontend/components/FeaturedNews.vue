@@ -28,7 +28,7 @@
       </p>
 
       <!-- العنوان -->
-      <NuxtLink :to="`/news/${article.slug}`">
+      <NuxtLink :to="getArticleLink(article)">
         <h2 class="text-3xl md:text-4xl font-bold mb-4 line-clamp-3 hover:text-primary transition-colors cursor-pointer">
           {{ article.title }}
         </h2>
@@ -74,7 +74,7 @@
 
     <!-- زر القراءة -->
     <NuxtLink 
-      :to="`/news/${article.slug}`"
+      :to="getArticleLink(article)"
       class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white/20 backdrop-blur-md hover:bg-white/30 text-white px-8 py-4 rounded-full font-bold text-lg opacity-0 group-hover:opacity-100 transition-all duration-300"
     >
       اقرأ المزيد ←
@@ -91,6 +91,7 @@ const props = defineProps<{
 
 const { getImageUrl } = useImageUrl()
 const { formatDate } = useDateFormat()
+const { getArticleLink } = useArticleLink()
 
 const formatNumber = (num: number): string => {
   if (num >= 1000000) return (num / 1000000).toFixed(1) + 'م'

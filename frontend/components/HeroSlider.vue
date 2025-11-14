@@ -41,7 +41,7 @@
                   v-show="index === activeIndex"
                   class="absolute inset-0 flex flex-col justify-center"
                 >
-                  <NuxtLink :to="`/news/${article.slug}`">
+                  <NuxtLink :to="getArticleLink(article)">
                     <!-- العنوان الفرعي -->
                     <p v-if="article.subtitle" class="text-primary text-sm sm:text-base lg:text-lg font-semibold mb-0.5 lg:mb-1">
                       {{ article.subtitle }}
@@ -114,6 +114,7 @@ const props = defineProps<{
 }>()
 
 const { getImageUrl } = useImageUrl()
+const { getArticleLink } = useArticleLink()
 
 const activeIndex = ref(0)
 let autoPlayInterval: NodeJS.Timeout | null = null
