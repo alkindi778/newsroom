@@ -50,11 +50,16 @@
                 >
                   <i class="fas fa-newspaper"></i>
                 </div>
+                <!-- Actual Image with lazy loading -->
                 <img
                   v-else
-                  :src="issue.cover_image"
+                  :src="'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'"
+                  :data-src="issue.cover_image"
                   :alt="issue.newspaper_name"
-                  class="w-full object-contain bg-slate-100"
+                  loading="lazy"
+                  class="lazy-image issue-cover w-full object-contain bg-slate-100"
+                  :class="{ 'opacity-0': !imageLoadedIssues[issue.id], 'opacity-100': imageLoadedIssues[issue.id] }"
+                  @load="onIssueImageLoad(issue.id)"
                 />
               </div>
 
@@ -144,6 +149,8 @@ const { apiFetch } = useApi()
 const issues = ref<NewspaperIssue[]>([])
 const loading = ref(true)
 
+const imageLoadedIssues = ref<Record<number, boolean>>({})
+
 const formatDate = (date?: string) => {
   if (!date) return ''
   return new Date(date).toLocaleDateString('ar-SA', {
@@ -157,6 +164,35 @@ const formatNumber = (num: number) => {
   return num.toLocaleString('ar-EG')
 }
 
+const onIssueImageLoad = (issueId: number) => {
+  imageLoadedIssues.value[issueId] = true
+}
+
+const lazyLoadIssueImages = () => {
+  if (process.client) {
+    const imageObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const img = entry.target as HTMLImageElement
+          const src = img.getAttribute('data-src')
+          if (src) {
+            img.src = src
+            imageObserver.unobserve(img)
+          }
+        }
+      })
+    }, {
+      rootMargin: '50px'
+    })
+
+    nextTick(() => {
+      document.querySelectorAll<HTMLImageElement>('.issue-cover.lazy-image').forEach(img => {
+        imageObserver.observe(img)
+      })
+    })
+  }
+}
+
 const fetchIssues = async () => {
   loading.value = true
   try {
@@ -168,6 +204,14 @@ const fetchIssues = async () => {
 
     if (response?.data) {
       issues.value = response.data
+      imageLoadedIssues.value = {}
+      issues.value.forEach(issue => {
+        imageLoadedIssues.value[issue.id] = false
+      })
+
+      nextTick(() => {
+        lazyLoadIssueImages()
+      })
     }
   } catch (error) {
     console.error('Error fetching newspaper issues:', error)
