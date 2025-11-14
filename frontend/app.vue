@@ -8,6 +8,7 @@
 <script setup lang="ts">
 const settingsStore = useSettingsStore()
 const config = useRuntimeConfig()
+const route = useRoute()
 
 // جلب الإعدادات قبل render الصفحة (SSR)
 await settingsStore.fetchSettings()
@@ -37,7 +38,30 @@ watchEffect(() => {
 
   // استخدام useHead للإعدادات الأخرى
   useHead({
-    titleTemplate: siteName.value ? `%s - ${siteName.value}` : '%s',
+    titleTemplate: siteName.value
+      ? (title?: string) => {
+          const path = route.path
+          const isContentDetail = path.startsWith('/news/') || path.startsWith('/opinions/')
+
+          // لا عنوان: استخدم اسم الموقع
+          if (!title) {
+            return siteName.value
+          }
+
+          // الصفحة الرئيسية: العنوان هو اسم الموقع فقط
+          if (title === siteName.value) {
+            return siteName.value
+          }
+
+          // صفحات الأخبار/مقالات الرأي: استخدم عنوان المحتوى فقط بدون اسم الموقع
+          if (isContentDetail) {
+            return title
+          }
+
+          // باقي الصفحات: عنوان الصفحة - اسم الموقع
+          return `${title} - ${siteName.value}`
+        }
+      : '%s',
     htmlAttrs: {
       lang: 'ar',
       dir: 'rtl'

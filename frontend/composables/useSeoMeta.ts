@@ -123,13 +123,14 @@ export const useAppSeoMeta = () => {
    * SEO للصفحة الرئيسية
    */
   const setHomeSeoMeta = () => {
-    const siteSlogan = settingsStore.getSetting('site_slogan')
     const siteDescription = settingsStore.getSetting('site_description')
+    const siteName = settingsStore.getSetting('site_name')
 
-    // استخدام "الرئيسية" للصفحة الرئيسية
-    // سيتم إضافة اسم الموقع تلقائياً من titleTemplate: "الرئيسية - نبض الشارع"
+    // استخدام اسم الموقع فقط كعنوان للصفحة الرئيسية بدون أي إضافات
+    const homeTitle = siteName || ''
+
     setSeoMeta({
-      title: 'الرئيسية',
+      title: homeTitle,
       description: siteDescription,
       url: '/',
       type: 'website'
@@ -141,7 +142,27 @@ export const useAppSeoMeta = () => {
    */
   const setArticleSeoMeta = (article: any) => {
     const siteName = settingsStore.getSetting('site_name')
-    
+    const siteLogo = settingsStore.getSetting('site_logo')
+    const siteUrl = (config as any).public.siteUrl
+    const baseApiUrl = (config as any).public.apiBase.replace('/api/v1', '')
+    const articleUrl = `${siteUrl}/news/${article.slug}`
+
+    const imagePath = article.image || article.image_url
+    let articleImage = ''
+
+    if (imagePath) {
+      articleImage = imagePath.startsWith('http')
+        ? imagePath
+        : `${baseApiUrl}/storage/${imagePath}`
+    }
+
+    let publisherLogo = ''
+    if (siteLogo) {
+      publisherLogo = siteLogo.startsWith('http')
+        ? siteLogo
+        : `${baseApiUrl}/storage/${siteLogo}`
+    }
+
     setSeoMeta({
       title: article.title,
       description: article.meta_description || article.excerpt,
@@ -156,23 +177,211 @@ export const useAppSeoMeta = () => {
         : article.keywords,
       section: article.category?.name
     })
+
+    // Structured Data (JSON-LD) لمقالات الأخبار
+    const newsArticleSchema: any = {
+      '@context': 'https://schema.org',
+      '@type': 'NewsArticle',
+      mainEntityOfPage: {
+        '@type': 'WebPage',
+        '@id': articleUrl
+      },
+      headline: article.title,
+      datePublished: article.published_at,
+      dateModified: article.updated_at || article.published_at,
+      author: {
+        '@type': 'Person',
+        name: article.author?.name || siteName
+      },
+      publisher: {
+        '@type': 'Organization',
+        name: siteName
+      }
+    }
+
+    if (articleImage) {
+      newsArticleSchema.image = {
+        '@type': 'ImageObject',
+        url: articleImage
+      }
+    }
+
+    if (publisherLogo) {
+      newsArticleSchema.publisher.logo = {
+        '@type': 'ImageObject',
+        url: publisherLogo
+      }
+    }
+
+    const breadcrumbItems: any[] = [
+      {
+        '@type': 'ListItem',
+        position: 1,
+        item: {
+          '@id': siteUrl,
+          name: siteName
+        }
+      }
+    ]
+
+    if (article.category) {
+      breadcrumbItems.push({
+        '@type': 'ListItem',
+        position: 2,
+        item: {
+          '@id': `${siteUrl}/category/${article.category.slug}`,
+          name: article.category.name
+        }
+      })
+    }
+
+    breadcrumbItems.push({
+      '@type': 'ListItem',
+      position: breadcrumbItems.length + 1,
+      item: {
+        '@id': articleUrl,
+        name: article.title
+      }
+    })
+
+    const breadcrumbSchema = {
+      '@context': 'https://schema.org',
+      '@type': 'BreadcrumbList',
+      itemListElement: breadcrumbItems
+    }
+
+    useHead({
+      script: [
+        {
+          type: 'application/ld+json',
+          // استخدام children لتمرير JSON-LD، مع cast لتجاوز قيود النوع في TS
+          children: JSON.stringify(newsArticleSchema)
+        } as any,
+        {
+          type: 'application/ld+json',
+          children: JSON.stringify(breadcrumbSchema)
+        } as any
+      ]
+    })
   }
 
   /**
    * SEO لصفحة مقال الرأي
    */
   const setOpinionSeoMeta = (opinion: any) => {
+    const siteName = settingsStore.getSetting('site_name')
+    const siteLogo = settingsStore.getSetting('site_logo')
+    const siteUrl = (config as any).public.siteUrl
+    const baseApiUrl = (config as any).public.apiBase.replace('/api/v1', '')
+    const opinionUrl = `${siteUrl}/opinions/${opinion.slug}`
+
+    const imagePath = opinion.image || opinion.image_url
+    let opinionImage = ''
+
+    if (imagePath) {
+      opinionImage = imagePath.startsWith('http')
+        ? imagePath
+        : `${baseApiUrl}/storage/${imagePath}`
+    }
+
+    let publisherLogo = ''
+    if (siteLogo) {
+      publisherLogo = siteLogo.startsWith('http')
+        ? siteLogo
+        : `${baseApiUrl}/storage/${siteLogo}`
+    }
+
     setSeoMeta({
       title: opinion.title,
       description: opinion.meta_description || opinion.excerpt,
       image: opinion.image,
       url: `/opinions/${opinion.slug}`,
       type: 'article',
-      author: opinion.writer?.name,
+      author: opinion.writer?.name || siteName,
       publishedTime: opinion.published_at,
       modifiedTime: opinion.updated_at,
       keywords: opinion.keywords,
       section: 'مقالات الرأي'
+    })
+
+    const opinionArticleSchema: any = {
+      '@context': 'https://schema.org',
+      '@type': 'NewsArticle',
+      mainEntityOfPage: {
+        '@type': 'WebPage',
+        '@id': opinionUrl
+      },
+      headline: opinion.title,
+      datePublished: opinion.published_at,
+      dateModified: opinion.updated_at || opinion.published_at,
+      author: {
+        '@type': 'Person',
+        name: opinion.writer?.name || siteName
+      },
+      publisher: {
+        '@type': 'Organization',
+        name: siteName
+      }
+    }
+
+    if (opinionImage) {
+      opinionArticleSchema.image = {
+        '@type': 'ImageObject',
+        url: opinionImage
+      }
+    }
+
+    if (publisherLogo) {
+      opinionArticleSchema.publisher.logo = {
+        '@type': 'ImageObject',
+        url: publisherLogo
+      }
+    }
+
+    const breadcrumbItems: any[] = [
+      {
+        '@type': 'ListItem',
+        position: 1,
+        item: {
+          '@id': siteUrl,
+          name: siteName
+        }
+      },
+      {
+        '@type': 'ListItem',
+        position: 2,
+        item: {
+          '@id': `${siteUrl}/opinions`,
+          name: 'مقالات الرأي'
+        }
+      },
+      {
+        '@type': 'ListItem',
+        position: 3,
+        item: {
+          '@id': opinionUrl,
+          name: opinion.title
+        }
+      }
+    ]
+
+    const breadcrumbSchema = {
+      '@context': 'https://schema.org',
+      '@type': 'BreadcrumbList',
+      itemListElement: breadcrumbItems
+    }
+
+    useHead({
+      script: [
+        {
+          type: 'application/ld+json',
+          children: JSON.stringify(opinionArticleSchema)
+        } as any,
+        {
+          type: 'application/ld+json',
+          children: JSON.stringify(breadcrumbSchema)
+        } as any
+      ]
     })
   }
 
