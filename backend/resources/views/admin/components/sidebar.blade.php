@@ -43,6 +43,22 @@
                         @endif
                     </a>
                 </li>
+                @can('view_newspaper_issues')
+                <li>
+                    <a href="{{ route('admin.newspaper-issues.index') }}" 
+                       class="group flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 {{ request()->routeIs('admin.newspaper-issues.*') ? 'bg-gradient-to-l from-blue-600 to-blue-700 shadow-lg shadow-blue-500/30' : 'hover:bg-white/5 hover:translate-x-[-4px]' }}">
+                        <div class="w-9 h-9 flex items-center justify-center rounded-lg {{ request()->routeIs('admin.newspaper-issues.*') ? 'bg-white/20' : 'bg-white/5 group-hover:bg-white/10' }} transition-colors">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h11a1 1 0 011 1v13a1 1 0 01-1 1H6a2 2 0 01-2-2V6zm3 1h8M7 10h8M7 13h4" />
+                            </svg>
+                        </div>
+                        <span class="flex-1">إصدارات الصحف</span>
+                        @if(request()->routeIs('admin.newspaper-issues.*'))
+                        <div class="w-1.5 h-1.5 bg-white rounded-full animate-pulse"></div>
+                        @endif
+                    </a>
+                </li>
+                @endcan
                 <li>
                     <a href="{{ route('admin.articles.index') }}" 
                        class="group flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 {{ request()->routeIs('admin.articles.*') ? 'bg-gradient-to-l from-blue-600 to-blue-700 shadow-lg shadow-blue-500/30' : 'hover:bg-white/5 hover:translate-x-[-4px]' }}">

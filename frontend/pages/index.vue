@@ -27,8 +27,8 @@
     <!-- Dynamic Sections -->
     <template v-else>
       <template v-for="section in sectionsStore.activeSections" :key="section.id">
-        <!-- Videos Only: Full Width -->
-        <div v-if="section.type === 'videos'" class="mb-8">
+        <!-- Videos & Newspaper Issues: Full Width -->
+        <div v-if="section.type === 'videos' || section.type === 'newspaper_issues'" class="mb-8">
           <DynamicSection :section="section" />
         </div>
         

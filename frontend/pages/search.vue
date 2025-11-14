@@ -19,17 +19,72 @@
     <LoadingSpinner v-if="loading" type="dots" size="lg" text="جاري البحث..." />
 
     <!-- النتائج -->
-    <div v-else-if="articles.length > 0">
+    <div v-else-if="articles.length > 0 || videos.length > 0">
       <p class="text-sm sm:text-base text-gray-600 mb-6">
         تم العثور على <span class="font-bold text-gray-900">{{ totalResults }}</span> نتيجة
       </p>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+      <!-- Tabs -->
+      <div class="flex gap-4 mb-6 border-b">
+        <button
+          @click="activeTab = 'articles'"
+          :class="[
+            'pb-3 px-4 font-semibold transition-colors',
+            activeTab === 'articles'
+              ? 'text-blue-600 border-b-2 border-blue-600'
+              : 'text-gray-600 hover:text-gray-900'
+          ]"
+        >
+          المقالات ({{ articles.length }})
+        </button>
+        <button
+          v-if="videos.length > 0"
+          @click="activeTab = 'videos'"
+          :class="[
+            'pb-3 px-4 font-semibold transition-colors',
+            activeTab === 'videos'
+              ? 'text-blue-600 border-b-2 border-blue-600'
+              : 'text-gray-600 hover:text-gray-900'
+          ]"
+        >
+          الفيديوهات ({{ videos.length }})
+        </button>
+      </div>
+
+      <!-- نتائج المقالات -->
+      <div v-if="activeTab === 'articles'" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
         <SearchResultCard 
           v-for="article in articles" 
           :key="article.id" 
           :article="article"
         />
+      </div>
+
+      <!-- نتائج الفيديوهات -->
+      <div v-else-if="activeTab === 'videos'" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+        <NuxtLink 
+          v-for="video in videos" 
+          :key="video.id"
+          :to="`/videos/${video.slug}`"
+          class="group flex flex-col rounded-lg overflow-hidden"
+        >
+          <div class="relative w-full h-80 overflow-hidden bg-gray-200">
+            <img 
+              :src="video.thumbnail" 
+              :alt="video.title"
+              class="w-full h-full object-cover group-hover:scale-105 transition-transform"
+            />
+          </div>
+          <div class="flex-1 flex flex-col justify-between p-6">
+            <h3 class="text-2xl font-bold text-gray-900 line-clamp-3 leading-snug text-right mb-3">
+              {{ video.title }}
+            </h3>
+            <div class="flex items-center justify-between text-sm text-gray-600">
+              <span class="font-semibold">{{ video.category?.name }}</span>
+              <time class="text-gray-500">{{ formatDate(video.published_at, 'relative') }}</time>
+            </div>
+          </div>
+        </NuxtLink>
       </div>
 
       <!-- Pagination -->
@@ -86,11 +141,13 @@ const settingsStore = useSettingsStore()
 
 const searchQuery = ref('')
 const articles = ref<Article[]>([])
+const videos = ref<any[]>([])
 const loading = ref(false)
 const totalResults = ref(0)
 const currentPage = ref(1)
 const totalPages = ref(1)
 const perPage = 12
+const activeTab = ref<'articles' | 'videos'>('articles')
 
 // جلب نتائج البحث
 const fetchSearchResults = async () => {
@@ -98,6 +155,7 @@ const fetchSearchResults = async () => {
   if (!query) {
     searchQuery.value = ''
     articles.value = []
+    videos.value = []
     return
   }
 
@@ -105,28 +163,40 @@ const fetchSearchResults = async () => {
   loading.value = true
 
   try {
-    const response = await apiFetch<any>(
+    // البحث في المقالات
+    const articlesResponse = await apiFetch<any>(
       `/articles/search?q=${encodeURIComponent(query)}&page=${currentPage.value}&per_page=${perPage}`
     )
     
-    if (response) {
-      // إذا كانت الاستجابة array مباشرة
-      if (Array.isArray(response)) {
-        articles.value = response
-        totalResults.value = response.length
-        totalPages.value = 1
-      } 
-      // إذا كانت object مع pagination
-      else if (response.data) {
-        articles.value = response.data
-        totalResults.value = response.total || response.data.length
-        totalPages.value = response.last_page || 1
-        currentPage.value = response.current_page || 1
+    // البحث في الفيديوهات
+    const videosResponse = await apiFetch<any>(
+      `/videos/search?q=${encodeURIComponent(query)}&page=${currentPage.value}&per_page=${perPage}`
+    )
+    
+    if (articlesResponse) {
+      if (Array.isArray(articlesResponse)) {
+        articles.value = articlesResponse
+      } else if (articlesResponse.data) {
+        articles.value = articlesResponse.data
+        totalResults.value = (articlesResponse.total || articlesResponse.data.length)
+        totalPages.value = articlesResponse.last_page || 1
       }
     }
+
+    if (videosResponse) {
+      if (Array.isArray(videosResponse)) {
+        videos.value = videosResponse
+      } else if (videosResponse.data) {
+        videos.value = videosResponse.data
+        totalResults.value = (totalResults.value || 0) + (videosResponse.total || videosResponse.data.length)
+      }
+    }
+
+    totalResults.value = articles.value.length + videos.value.length
   } catch (error) {
     console.error('Search error:', error)
     articles.value = []
+    videos.value = []
     totalResults.value = 0
   } finally {
     loading.value = false

@@ -313,4 +313,47 @@ class VideoController extends Controller
             ], 500);
         }
     }
+
+    /**
+     * Search videos (Frontend)
+     */
+    public function search(Request $request)
+    {
+        try {
+            $query = $request->get('query') ?? $request->get('q');
+            $page = (int)($request->get('page') ?? 1);
+            $perPage = (int)($request->get('per_page') ?? 12);
+
+            if (empty($query)) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'يرجى إدخال كلمة للبحث'
+                ], 400);
+            }
+
+            // Search in videos
+            $videos = \App\Models\Video::with(['user', 'category'])
+                ->where('is_published', true)
+                ->where(function ($q) use ($query) {
+                    $q->where('title', 'LIKE', "%{$query}%")
+                      ->orWhere('description', 'LIKE', "%{$query}%");
+                })
+                ->orderBy('published_at', 'desc')
+                ->paginate($perPage, ['*'], 'page', $page);
+
+            return response()->json([
+                'status' => 'success',
+                'data' => VideoResource::collection($videos->items()),
+                'total' => $videos->total(),
+                'current_page' => $videos->currentPage(),
+                'last_page' => $videos->lastPage(),
+                'per_page' => $videos->perPage()
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'حدث خطأ في البحث'
+            ], 500);
+        }
+    }
 }

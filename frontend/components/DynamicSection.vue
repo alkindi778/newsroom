@@ -15,6 +15,7 @@ import SectionsCategoryNewsSection from '~/components/sections/CategoryNewsSecti
 import SectionsOpinionsSection from '~/components/sections/OpinionsSection.vue'
 import TrendingArticles from '~/components/TrendingArticles.vue'
 import TrendingVideos from '~/components/TrendingVideos.vue'
+import SectionsNewspaperIssuesSection from '~/components/sections/NewspaperIssuesSection.vue'
 // Templates
 import TemplatesGridTemplate from '~/components/templates/GridTemplate.vue'
 import TemplatesFeaturedTemplate from '~/components/templates/FeaturedTemplate.vue'
@@ -43,6 +44,7 @@ const componentMap: Record<string, Component> = {
   'trending': TrendingArticles,
   'opinions': SectionsOpinionsSection,
   'videos': TrendingVideos,
+  'newspaper_issues': SectionsNewspaperIssuesSection,
 }
 
 const sectionComponent = computed(() => {

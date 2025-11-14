@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\WriterController;
 use App\Http\Controllers\Admin\OpinionController;
 use App\Http\Controllers\Admin\VideoController;
+use App\Http\Controllers\Admin\NewspaperIssueController;
 use App\Http\Controllers\Admin\MediaLibraryController;
 use App\Http\Controllers\Admin\SecurityController;
 use App\Http\Controllers\Admin\AdvertisementController;
@@ -277,6 +278,27 @@ Route::middleware(['auth', App\Http\Middleware\AdminMiddleware::class])->group(f
         
         // Bulk actions
         Route::post('/bulk-action', [VideoController::class, 'bulkAction'])->name('bulk-action');
+    });
+
+    // Newspaper Issues Management
+    Route::prefix('newspaper-issues')->name('newspaper-issues.')->group(function () {
+        // List and create
+        Route::get('/', [NewspaperIssueController::class, 'index'])->name('index');
+        Route::get('/create', [NewspaperIssueController::class, 'create'])->name('create');
+        Route::post('/', [NewspaperIssueController::class, 'store'])->name('store');
+
+        // Show single issue
+        Route::get('/{issue}', [NewspaperIssueController::class, 'show'])->name('show');
+
+        // Edit & update
+        Route::get('/{issue}/edit', [NewspaperIssueController::class, 'edit'])->name('edit');
+        Route::put('/{issue}', [NewspaperIssueController::class, 'update'])->name('update');
+
+        // Toggle featured
+        Route::put('/{issue}/toggle-featured', [NewspaperIssueController::class, 'toggleFeatured'])->name('toggle-featured');
+
+        // Delete
+        Route::delete('/{issue}', [NewspaperIssueController::class, 'destroy'])->name('destroy');
     });
     
     // Security Settings (2FA, Password, etc.)

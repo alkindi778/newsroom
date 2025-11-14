@@ -4,7 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'المصادقة') - غرفة الأخبار</title>
+    @php
+        $settingsGeneral = \App\Models\SiteSetting::where('group', 'general')->pluck('value', 'key');
+        $siteName = $settingsGeneral['site_name'] ?? '';
+    @endphp
+    <title>@yield('title', 'المصادقة') - {{ $siteName }}</title>
     
     <!-- Cairo Font (Local) -->
     <link rel="stylesheet" href="{{ asset('assets/fonts/cairo/cairo.css') }}">
@@ -33,7 +37,7 @@
                 <div class="inline-flex items-center justify-center w-16 h-16 bg-white bg-opacity-20 rounded-full mb-4">
                     <span class="text-3xl">📰</span>
                 </div>
-                <h1 class="text-3xl font-bold text-white mb-2">غرفة الأخبار</h1>
+                <h1 class="text-3xl font-bold text-white mb-2">{{ $siteName }}</h1>
                 <p class="text-blue-100">@yield('subtitle', 'نظام إدارة المحتوى')</p>
             </div>
             
@@ -45,7 +49,7 @@
             <!-- Footer -->
             <div class="text-center mt-8">
                 <p class="text-blue-100 text-sm">
-                    © {{ date('Y') }} غرفة الأخبار. جميع الحقوق محفوظة.
+                    © {{ date('Y') }} {{ $siteName }}. جميع الحقوق محفوظة.
                 </p>
             </div>
         </div>

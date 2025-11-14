@@ -8,6 +8,8 @@ use App\Jobs\OptimizeMediaImage;
 use Illuminate\Support\Facades\Log;
 use App\Support\CustomPathGenerator;
 use Spatie\MediaLibrary\Support\PathGenerator\PathGenerator;
+use App\Repositories\Interfaces\NewspaperIssueRepositoryInterface;
+use App\Repositories\NewspaperIssueRepository;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -18,6 +20,9 @@ class AppServiceProvider extends ServiceProvider
     {
         // تسجيل Custom Path Generator للصور
         $this->app->bind(PathGenerator::class, CustomPathGenerator::class);
+        
+        // تسجيل Newspaper Issue Repository
+        $this->app->bind(NewspaperIssueRepositoryInterface::class, NewspaperIssueRepository::class);
     }
 
     /**

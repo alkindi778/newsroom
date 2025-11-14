@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\ArticleController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\SearchController;
 use App\Http\Controllers\Api\VideoController;
+use App\Http\Controllers\Api\NewspaperIssueController;
 use App\Http\Controllers\Api\AdvertisementController;
 use App\Http\Controllers\Api\PushSubscriptionController;
 use App\Http\Controllers\Api\ManifestController;
@@ -69,9 +70,16 @@ Route::prefix('v1')->group(function () {
     // Videos (Public)
     Route::get('/videos', [VideoController::class, 'index']);
     Route::get('/videos/featured', [VideoController::class, 'featured']);
+    Route::get('/videos/search', [VideoController::class, 'search']);
     Route::post('/videos/{id}/view', [VideoController::class, 'incrementView'])->whereNumber('id');
     Route::post('/videos/{id}/like', [VideoController::class, 'like'])->whereNumber('id');
     Route::get('/videos/{slug}', [VideoController::class, 'show']);
+
+    // Newspaper Issues (Public)
+    Route::get('/newspaper-issues', [NewspaperIssueController::class, 'index']);
+    Route::get('/newspaper-issues/featured', [NewspaperIssueController::class, 'featured']);
+    Route::post('/newspaper-issues/{id}/download', [NewspaperIssueController::class, 'incrementDownload'])->whereNumber('id');
+    Route::get('/newspaper-issues/{slug}', [NewspaperIssueController::class, 'show']);
 
     // Site Settings (Public)
     Route::get('/settings', [\App\Http\Controllers\Api\SiteSettingsController::class, 'index']);
@@ -101,6 +109,15 @@ Route::prefix('v1')->group(function () {
     
     // Contact Messages (Public)
     Route::post('/contact-messages', [ContactMessageController::class, 'store']);
+
+    // Admin Routes (Protected)
+    Route::middleware('auth:sanctum')->group(function () {
+        // Newspaper Issues (Admin)
+        Route::post('/newspaper-issues', [NewspaperIssueController::class, 'store']);
+        Route::put('/newspaper-issues/{id}', [NewspaperIssueController::class, 'update'])->whereNumber('id');
+        Route::delete('/newspaper-issues/{id}', [NewspaperIssueController::class, 'destroy'])->whereNumber('id');
+        Route::patch('/newspaper-issues/{id}/toggle-featured', [NewspaperIssueController::class, 'toggleFeatured'])->whereNumber('id');
+    });
 });
 
 // CORS is handled automatically by config/cors.php

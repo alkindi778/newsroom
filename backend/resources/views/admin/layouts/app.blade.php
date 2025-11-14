@@ -5,7 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="base-url" content="{{ url('/') }}">
-    <title>@yield('title', 'لوحة التحكم') - غرفة الأخبار</title>
+    @php
+        $settingsGeneral = \App\Models\SiteSetting::where('group', 'general')->pluck('value', 'key');
+        $siteName = $settingsGeneral['site_name'] ?? ' ';
+    @endphp
+    <title>@yield('title', 'لوحة التحكم') - {{ $siteName }}</title>
     
     <!-- Cairo Font (Local) -->
     <link rel="stylesheet" href="{{ asset('assets/fonts/cairo/cairo.css') }}">

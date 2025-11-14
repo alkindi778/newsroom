@@ -67,6 +67,7 @@ class HomepageSection extends Model
             'trending' => 'الأكثر قراءة',
             'opinions' => 'مقالات الرأي',
             'videos' => 'الفيديوهات',
+            'newspaper_issues' => 'إصدارات الصحف',
         ];
     }
 

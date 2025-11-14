@@ -3,7 +3,7 @@
     <!-- Background Image with Blur - Full Width -->
     <div class="absolute inset-0 left-0 right-0 z-0">
       <img 
-        src="https://images.unsplash.com/photo-1478737270239-2f02b77fc618?w=1920&h=600&fit=crop" 
+        src="/background.jpg" 
         alt="background" 
         class="w-full min-w-full h-full object-cover"
       />
