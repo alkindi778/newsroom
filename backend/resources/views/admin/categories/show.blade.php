@@ -216,6 +216,10 @@
                             {{ ($category->is_active ?? 1) ? 'نشط' : 'غير نشط' }}
                         </span>
                     </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">القسم الأب:</span>
+                        <span class="font-medium">{{ $category->parent ? $category->parent->name : 'قسم رئيسي' }}</span>
+                    </div>
                     
                     <div class="flex justify-between">
                         <span class="text-gray-600">عدد الأخبار:</span>

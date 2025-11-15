@@ -36,7 +36,9 @@ class CategoryController extends Controller
      */
     public function create()
     {
-        return view('admin.categories.create');
+        $categories = $this->categoryRepository->getAll();
+
+        return view('admin.categories.create', compact('categories'));
     }
 
     /**
@@ -74,7 +76,9 @@ class CategoryController extends Controller
      */
     public function edit(Category $category)
     {
-        return view('admin.categories.edit', compact('category'));
+        $categories = $this->categoryRepository->getAll()->where('id', '!=', $category->id);
+
+        return view('admin.categories.edit', compact('category', 'categories'));
     }
 
     /**
@@ -247,6 +251,31 @@ class CategoryController extends Controller
         } catch (\Exception $e) {
             return redirect()->back()
                            ->with('error', 'حدث خطأ أثناء تنفيذ العملية: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Update categories order (AJAX endpoint)
+     */
+    public function updateOrder(Request $request)
+    {
+        try {
+            $categories = $request->input('categories', []);
+            
+            foreach ($categories as $category) {
+                Category::where('id', $category['id'])
+                    ->update(['order' => $category['order']]);
+            }
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'تم تحديث الترتيب بنجاح'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'حدث خطأ أثناء تحديث الترتيب: ' . $e->getMessage()
+            ], 500);
         }
     }
 

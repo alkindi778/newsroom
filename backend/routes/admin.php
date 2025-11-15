@@ -116,6 +116,7 @@ Route::middleware(['auth', App\Http\Middleware\AdminMiddleware::class])->group(f
         Route::prefix('categories')->name('categories.')->group(function () {
             Route::patch('{category}/toggle-status', [CategoryController::class, 'toggleStatus'])->name('toggle-status');
             Route::post('bulk-action', [CategoryController::class, 'bulkAction'])->name('bulk-action');
+            Route::post('update-order', [CategoryController::class, 'updateOrder'])->name('update-order');
             Route::get('search', [CategoryController::class, 'search'])->name('search');
             Route::get('statistics', [CategoryController::class, 'getStatistics'])->name('statistics');
             Route::get('{category}/insights', [CategoryController::class, 'getInsights'])->name('insights');

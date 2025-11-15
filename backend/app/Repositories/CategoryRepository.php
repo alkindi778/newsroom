@@ -23,7 +23,7 @@ class CategoryRepository implements CategoryRepositoryInterface
      */
     public function getAll(): Collection
     {
-        return $this->model->orderBy('created_at', 'desc')->get();
+        return $this->model->orderBy('order', 'asc')->orderBy('created_at', 'desc')->get();
     }
 
     /**
@@ -31,7 +31,7 @@ class CategoryRepository implements CategoryRepositoryInterface
      */
     public function getAllWithFilters(Request $request): LengthAwarePaginator
     {
-        $query = $this->model->withCount('articles');
+        $query = $this->model->with(['parent'])->withCount('articles');
 
         // Search functionality
         if ($request->filled('search')) {
@@ -42,10 +42,10 @@ class CategoryRepository implements CategoryRepositoryInterface
         // Note: is_active column not implemented yet
 
         // Sorting options
-        $sortField = $request->get('sort', 'created_at');
-        $sortDirection = $request->get('direction', 'desc');
+        $sortField = $request->get('sort', 'order');
+        $sortDirection = $request->get('direction', 'asc');
         
-        $allowedSortFields = ['created_at', 'updated_at', 'name', 'articles_count'];
+        $allowedSortFields = ['order', 'created_at', 'updated_at', 'name', 'articles_count'];
         if (in_array($sortField, $allowedSortFields)) {
             $query->orderBy($sortField, $sortDirection);
         } else {

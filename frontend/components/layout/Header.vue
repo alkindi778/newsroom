@@ -61,10 +61,7 @@
           </button>
 
           <!-- زر مباشر -->
-          <button class="hidden md:flex items-center gap-2 bg-accent hover:bg-accent-700 text-white px-4 py-2 rounded text-sm font-semibold transition-colors">
-            <span class="w-2 h-2 bg-white rounded-full animate-pulse"></span>
-            مباشر
-          </button>
+          
         </div>
       </div>
     </div>
@@ -89,9 +86,9 @@
     </Transition>
 
     <!-- قائمة التصنيفات -->
-    <nav class="hidden md:block bg-white border-t border-gray-100">
+    <nav class="hidden md:block bg-white border-t border-gray-100 relative overflow-visible">
       <div class="container mx-auto px-2 sm:px-4">
-        <ul class="flex items-center gap-2 md:gap-0 md:justify-between py-0 overflow-x-auto scrollbar-hide">
+        <ul class="flex items-center gap-2 md:gap-0 md:justify-between py-0 overflow-visible scrollbar-hide">
           <li>
             <NuxtLink 
               to="/" 
@@ -101,8 +98,37 @@
               الرئيسية
             </NuxtLink>
           </li>
-          <li v-for="category in categories" :key="category.id">
+          <li v-for="category in mainCategories" :key="category.id" class="relative group">
+            <!-- إذا كان للقسم أطفال: عرض dropdown بدل الرابط -->
+            <template v-if="hasChildren(category.id)">
+              <button 
+                class="nav-link flex gap-1"
+                style="display: flex; align-items: center; justify-content: center;"
+                :class="{ 'active': isActive(`/category/${category.slug}`) }"
+              >
+                <span>{{ category.name }}</span>
+                <svg class="w-4 h-4 transition-transform group-hover:rotate-180" style="flex-shrink: 0; margin-top: 0;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"/>
+                </svg>
+              </button>
+              
+              <!-- Dropdown menu - positioned below navbar item -->
+              <div class="absolute right-0 top-full mt-0 w-48 bg-white border border-gray-200 rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                <NuxtLink 
+                  v-for="child in getChildren(category.id)" 
+                  :key="child.id"
+                  :to="`/category/${child.slug}`"
+                  class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 first:rounded-t-lg last:rounded-b-lg transition-colors"
+                  :class="{ 'bg-blue-50 text-blue-600': isActive(`/category/${child.slug}`) }"
+                >
+                  {{ child.name }}
+                </NuxtLink>
+              </div>
+            </template>
+            
+            <!-- إذا لم يكن للقسم أطفال: رابط عادي -->
             <NuxtLink 
+              v-else
               :to="`/category/${category.slug}`" 
               class="nav-link"
               :class="{ 'active': isActive(`/category/${category.slug}`) }"
@@ -139,8 +165,46 @@
                   الرئيسية
                 </NuxtLink>
               </li>
-              <li v-for="category in categories" :key="category.id">
+              <li v-for="category in mainCategories" :key="category.id">
+                <!-- إذا كان للقسم أطفال: عرض dropdown -->
+                <template v-if="hasChildren(category.id)">
+                  <button 
+                    class="mobile-nav-link w-full text-right flex items-center justify-between"
+                    :class="{ 'active': isActive(`/category/${category.slug}`) }"
+                    @click="toggleMobileSubmenu(category.id)"
+                  >
+                    <span>{{ category.name }}</span>
+                    <svg 
+                      class="w-4 h-4 transition-transform" 
+                      :class="{ 'rotate-180': expandedMobileCategories.includes(category.id) }"
+                      fill="none" 
+                      stroke="currentColor" 
+                      viewBox="0 0 24 24"
+                    >
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"/>
+                    </svg>
+                  </button>
+                  
+                  <!-- Submenu -->
+                  <Transition name="slide-down">
+                    <ul v-if="expandedMobileCategories.includes(category.id)" class="space-y-1 mt-1 pr-4 border-r-2 border-gray-300">
+                      <li v-for="child in getChildren(category.id)" :key="child.id">
+                        <NuxtLink 
+                          :to="`/category/${child.slug}`"
+                          class="mobile-nav-link text-sm"
+                          :class="{ 'active': isActive(`/category/${child.slug}`) }"
+                          @click="closeMobileMenu"
+                        >
+                          {{ child.name }}
+                        </NuxtLink>
+                      </li>
+                    </ul>
+                  </Transition>
+                </template>
+                
+                <!-- إذا لم يكن للقسم أطفال: رابط عادي -->
                 <NuxtLink 
+                  v-else
                   :to="`/category/${category.slug}`" 
                   class="mobile-nav-link"
                   :class="{ 'active': isActive(`/category/${category.slug}`) }"
@@ -183,7 +247,29 @@ const config = useRuntimeConfig()
 
 const showMobileMenu = ref(false)
 const showSearch = ref(false)
+const expandedMobileCategories = ref<number[]>([])
 const categories = computed(() => categoriesStore.categories)
+const mainCategories = computed(() => categoriesStore.getMainCategories)
+
+// Check if a category has children
+const hasChildren = (categoryId: number) => {
+  return categoriesStore.getChildrenOf(categoryId).length > 0
+}
+
+// Get children of a category
+const getChildren = (categoryId: number) => {
+  return categoriesStore.getChildrenOf(categoryId)
+}
+
+// Toggle mobile submenu
+const toggleMobileSubmenu = (categoryId: number) => {
+  const index = expandedMobileCategories.value.indexOf(categoryId)
+  if (index > -1) {
+    expandedMobileCategories.value.splice(index, 1)
+  } else {
+    expandedMobileCategories.value.push(categoryId)
+  }
+}
 
 // Site Settings
 const siteName = computed(() => settingsStore.getSetting('site_name', 'غرفة الأخبار'))
@@ -228,6 +314,7 @@ const toggleSearch = () => {
 
 const closeMobileMenu = () => {
   showMobileMenu.value = false
+  expandedMobileCategories.value = []
 }
 
 // جلب الأقسام عند التحميل

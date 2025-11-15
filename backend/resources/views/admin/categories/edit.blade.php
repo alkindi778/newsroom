@@ -97,6 +97,27 @@
                 <p class="mt-1 text-xs text-gray-500">سيُستخدم لتمييز هذا القسم في الواجهات المختلفة</p>
             </div>
 
+            <!-- Parent Category -->
+            <div>
+                <label for="parent_id" class="block text-sm font-medium text-gray-700 mb-2">القسم الأب</label>
+                <select
+                    id="parent_id"
+                    name="parent_id"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('parent_id') border-red-300 @enderror"
+                >
+                    <option value="">قسم رئيسي (بدون أب)</option>
+                    @foreach($categories as $parentCategory)
+                        <option value="{{ $parentCategory->id }}" {{ old('parent_id', $category->parent_id) == $parentCategory->id ? 'selected' : '' }}>
+                            {{ $parentCategory->name }}
+                        </option>
+                    @endforeach
+                </select>
+                @error('parent_id')
+                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                @enderror
+                <p class="mt-1 text-xs text-gray-500">يمكنك تغيير القسم الأب أو جعله قسم رئيسي بدون أب</p>
+            </div>
+
             <!-- Category Status -->
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">حالة القسم</label>

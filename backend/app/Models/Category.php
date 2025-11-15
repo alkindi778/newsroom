@@ -10,6 +10,8 @@ class Category extends Model
     protected $fillable = [
         'name',
         'slug',
+        'parent_id',
+        'order',
     ];
 
     /**
@@ -32,5 +34,21 @@ class Category extends Model
     public function articles()
     {
         return $this->hasMany(Article::class);
+    }
+
+    /**
+     * Get parent category
+     */
+    public function parent()
+    {
+        return $this->belongsTo(Category::class, 'parent_id');
+    }
+
+    /**
+     * Get child categories
+     */
+    public function children()
+    {
+        return $this->hasMany(Category::class, 'parent_id');
     }
 }

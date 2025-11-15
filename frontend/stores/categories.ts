@@ -48,6 +48,16 @@ export const useCategoriesStore = defineStore('categories', {
   getters: {
     getCategoryBySlug: (state) => (slug: string) => {
       return state.categories.find(cat => cat.slug === slug)
+    },
+
+    // Get only main categories (without parent)
+    getMainCategories: (state) => {
+      return state.categories.filter(cat => !cat.parent_id)
+    },
+
+    // Get children of a specific category
+    getChildrenOf: (state) => (parentId: number) => {
+      return state.categories.filter(cat => cat.parent_id === parentId)
     }
   }
 })

@@ -137,21 +137,47 @@
             @endforelse
         </div>
 
+        <!-- Info Alert -->
+        <div class="bg-blue-50 border-r-4 border-blue-400 p-4 rounded-lg mb-6">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <svg class="h-5 w-5 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
+                    </svg>
+                </div>
+                <div class="mr-3">
+                    <p class="text-sm text-blue-700">
+                        يمكنك سحب وإفلات الأقسام لإعادة ترتيبها. التغييرات ستظهر مباشرة.
+                    </p>
+                </div>
+            </div>
+        </div>
+
         <!-- Desktop Table View -->
         <div class="hidden md:block overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200">
                 <thead class="bg-gray-50">
                     <tr>
+                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">الترتيب</th>
                         <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">القسم</th>
+                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">القسم الأب</th>
                         <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">الوصف</th>
                         <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">عدد الأخبار</th>
                         <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">تاريخ الإنشاء</th>
                         <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">إجراءات</th>
                     </tr>
                 </thead>
-                <tbody class="bg-white divide-y divide-gray-200">
+                <tbody class="bg-white divide-y divide-gray-200" id="categories-tbody">
                     @forelse($categories as $category)
-                    <tr class="hover:bg-gray-50">
+                    <tr class="hover:bg-gray-50 transition-colors duration-200" data-category-id="{{ $category->id }}">
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            <div class="flex items-center cursor-move">
+                                <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16"></path>
+                                </svg>
+                                <span class="mr-2">{{ $category->order }}</span>
+                            </div>
+                        </td>
                         <td class="px-6 py-4 whitespace-nowrap">
                             <div class="flex items-center">
                                 <div class="flex-shrink-0 h-8 w-8 ml-3">
@@ -166,6 +192,9 @@
                                     <div class="text-sm text-gray-500">{{ $category->slug }}</div>
                                 </div>
                             </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {{ $category->parent ? $category->parent->name : 'قسم رئيسي' }}
                         </td>
                         <td class="px-6 py-4">
                             <div class="text-sm text-gray-900 max-w-xs truncate">
@@ -246,7 +275,76 @@
 @endsection
 
 @push('scripts')
+<script src="{{ asset('assets/admin/js/sortable.min.js') }}"></script>
 <script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Sortable for drag & drop
+    const tbody = document.getElementById('categories-tbody');
+    if (tbody && tbody.children.length > 0) {
+        new Sortable(tbody, {
+            animation: 150,
+            handle: '.cursor-move',
+            onEnd: function(evt) {
+                updateOrder();
+            }
+        });
+    }
+
+    function updateOrder() {
+        const rows = document.querySelectorAll('#categories-tbody tr[data-category-id]');
+        const categories = [];
+        
+        rows.forEach((row, index) => {
+            const id = row.getAttribute('data-category-id');
+            const newOrder = index + 1; // الترتيب الجديد بناءً على الموقع الحالي
+            
+            categories.push({ 
+                id: parseInt(id), 
+                order: newOrder 
+            });
+            
+            // Update order display
+            const orderCell = row.querySelector('span');
+            if (orderCell) {
+                orderCell.textContent = newOrder;
+            }
+        });
+
+        // Send AJAX request
+        fetch('{{ route("admin.categories.update-order") }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+            },
+            body: JSON.stringify({ categories: categories })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showNotification('تم تحديث الترتيب بنجاح', 'success');
+            } else {
+                showNotification(data.message || 'حدث خطأ أثناء تحديث الترتيب', 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showNotification('حدث خطأ أثناء تحديث الترتيب', 'error');
+        });
+    }
+
+    function showNotification(message, type) {
+        const notification = document.createElement('div');
+        notification.className = `fixed top-4 left-4 px-6 py-3 rounded-lg shadow-lg text-white ${type === 'success' ? 'bg-green-500' : 'bg-red-500'} z-50`;
+        notification.textContent = message;
+        document.body.appendChild(notification);
+        
+        setTimeout(() => {
+            notification.remove();
+        }, 3000);
+    }
+});
+
 function deleteCategory(categoryId) {
     if (confirm('هل أنت متأكد من حذف هذا القسم؟ سيتم حذف جميع الأخبار المرتبطة به أيضاً!')) {
         document.getElementById('delete-form-' + categoryId).submit();
