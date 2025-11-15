@@ -11,7 +11,7 @@
             <p class="text-sm sm:text-base text-gray-600">إدارة المحتوى المحذوف - يمكن استعادته أو حذفه نهائياً</p>
         </div>
         
-        @if((isset($articles) && $articles->count() > 0) || (isset($videos) && $videos->count() > 0))
+        @if((isset($articles) && $articles->count() > 0) || (isset($videos) && $videos->count() > 0) || (isset($opinions) && $opinions->count() > 0))
         <div class="flex flex-col sm:flex-row gap-2 w-full lg:w-auto">
             <button onclick="bulkAction('restore')" 
                     class="px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 shadow-md">
@@ -66,6 +66,20 @@
                 @endif
                 @if($type === 'videos')
                     <div class="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-1/2 w-2 h-2 bg-purple-600 rounded-full"></div>
+                @endif
+            </a>
+            
+            <a href="{{ route('admin.trash.index', ['type' => 'opinions']) }}" 
+               class="group relative flex items-center gap-3 px-6 py-3 rounded-md text-sm font-medium transition-all duration-200 @if($type === 'opinions') bg-gradient-to-r from-amber-600 to-amber-700 text-white shadow-md @else text-gray-600 hover:bg-gray-50 hover:text-gray-900 @endif">
+                <i class="fas fa-pen-fancy text-lg transition-transform duration-200 @if($type === 'opinions') @else group-hover:scale-110 @endif"></i>
+                <span>مقالات الرأي</span>
+                @if(isset($opinions))
+                    <span class="@if($type === 'opinions') bg-white/20 text-white border border-white/30 @else bg-gray-100 text-gray-700 border border-gray-200 @endif inline-flex items-center justify-center min-w-[24px] h-6 px-2 rounded-full text-xs font-bold transition-all duration-200">
+                        {{ $opinions->total() }}
+                    </span>
+                @endif
+                @if($type === 'opinions')
+                    <div class="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-1/2 w-2 h-2 bg-amber-600 rounded-full"></div>
                 @endif
             </a>
         </div>
@@ -454,6 +468,92 @@
                 @endif
             </div>
         </div>
+
+        @elseif($type === 'opinions' && isset($opinions) && $opinions->count() > 0)
+        <!-- Opinions List -->
+        <div class="divide-y divide-gray-200">
+            @foreach($opinions as $opinion)
+            <div class="p-4 hover:bg-gray-50 transition-colors">
+                <div class="flex items-start gap-4">
+                    <!-- صورة -->
+                    @if($opinion->image)
+                    <img class="h-20 w-20 rounded-lg object-cover flex-shrink-0" 
+                         src="{{ asset('storage/' . $opinion->image) }}" 
+                         alt="{{ $opinion->title }}">
+                    @elseif($opinion->writer && $opinion->writer->image)
+                    <img class="h-20 w-20 rounded-lg object-cover flex-shrink-0" 
+                         src="{{ asset('storage/' . $opinion->writer->image) }}" 
+                         alt="{{ $opinion->writer->name }}">
+                    @else
+                    <div class="h-20 w-20 rounded-lg bg-amber-100 flex items-center justify-center flex-shrink-0">
+                        <i class="fas fa-pen-fancy text-2xl text-amber-600"></i>
+                    </div>
+                    @endif
+                    
+                    <!-- المحتوى -->
+                    <div class="flex-1 min-w-0">
+                        <h3 class="text-sm font-medium text-gray-900 mb-1">{{ $opinion->title }}</h3>
+                        @if($opinion->writer)
+                        <p class="text-xs text-amber-600 mb-2">
+                            <i class="fas fa-user-edit ml-1"></i>
+                            {{ $opinion->writer->name }}
+                        </p>
+                        @endif
+                        <div class="flex items-center gap-4 text-xs text-gray-500">
+                            <span>
+                                <i class="far fa-clock ml-1"></i>
+                                حُذف: {{ $opinion->deleted_at->format('Y/m/d H:i') }}
+                            </span>
+                            @if($opinion->user)
+                            <span>
+                                <i class="far fa-user ml-1"></i>
+                                {{ $opinion->user->name }}
+                            </span>
+                            @endif
+                        </div>
+                    </div>
+                    
+                    <!-- الإجراءات -->
+                    <div class="flex flex-col gap-2 flex-shrink-0">
+                        <a href="{{ route('admin.trash.opinion.restore', $opinion->id) }}" 
+                           onclick="return confirm('هل تريد استعادة هذا المقال؟')"
+                           class="inline-flex items-center justify-center px-3 py-1.5 border border-green-300 rounded-md text-xs font-medium text-green-700 bg-green-50 hover:bg-green-100 whitespace-nowrap">
+                            <i class="fas fa-undo ml-1"></i>
+                            استعادة
+                        </a>
+                        <a href="{{ route('admin.trash.opinion.force-delete', $opinion->id) }}" 
+                           onclick="return confirm('تحذير: سيتم حذف المقال نهائياً ولن يمكن استعادته. هل تريد المتابعة؟')"
+                           class="inline-flex items-center justify-center px-3 py-1.5 border border-red-300 rounded-md text-xs font-medium text-red-700 bg-red-50 hover:bg-red-100 whitespace-nowrap">
+                            <i class="fas fa-trash-alt ml-1"></i>
+                            حذف نهائي
+                        </a>
+                    </div>
+                </div>
+            </div>
+            @endforeach
+            
+            <!-- Pagination -->
+            @if($opinions->hasPages())
+            <div class="px-4 py-4 border-t border-gray-200">
+                {{ $opinions->links() }}
+            </div>
+            @endif
+        </div>
+
+        @elseif($type === 'opinions')
+        <!-- Empty State - Opinions -->
+        <div class="text-center py-12">
+            <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-amber-100 mb-4">
+                <i class="fas fa-pen-fancy text-3xl text-amber-600"></i>
+            </div>
+            <h3 class="text-lg font-medium text-gray-900 mb-2">لا توجد مقالات رأي محذوفة</h3>
+            <p class="text-gray-500 mb-4">سلة المهملات فارغة من مقالات الرأي</p>
+            <a href="{{ route('admin.opinions.index') }}" 
+               class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-amber-600 hover:bg-amber-700">
+                العودة لمقالات الرأي
+            </a>
+        </div>
+
         @endif
     </div>
 </div>
@@ -500,15 +600,30 @@ document.getElementById('select-all-mobile')?.addEventListener('change', functio
 
 // Bulk Actions
 function bulkAction(action) {
-    const checkboxClass = currentType === 'videos' ? '.video-checkbox' : '.article-checkbox';
+    let checkboxClass;
+    let itemType;
+    
+    switch(currentType) {
+        case 'videos':
+            checkboxClass = '.video-checkbox';
+            itemType = 'فيديو';
+            break;
+        case 'opinions':
+            checkboxClass = '.opinion-checkbox';
+            itemType = 'مقال';
+            break;
+        default:
+            checkboxClass = '.article-checkbox';
+            itemType = 'خبر';
+    }
+    
     const checkedBoxes = document.querySelectorAll(checkboxClass + ':checked');
     
     if (checkedBoxes.length === 0) {
-        alert(currentType === 'videos' ? 'يرجى اختيار فيديو واحد على الأقل' : 'يرجى اختيار خبر واحد على الأقل');
+        alert(`يرجى اختيار ${itemType} واحد على الأقل`);
         return;
     }
 
-    const itemType = currentType === 'videos' ? 'فيديو' : 'خبر';
     let confirmMessage = '';
     let actionUrl = '';
     
@@ -529,7 +644,19 @@ function bulkAction(action) {
 
 // Empty Trash
 function emptyTrash() {
-    const itemType = currentType === 'videos' ? 'الفيديوهات' : 'الأخبار';
+    let itemType;
+    
+    switch(currentType) {
+        case 'videos':
+            itemType = 'الفيديوهات';
+            break;
+        case 'opinions':
+            itemType = 'مقالات الرأي';
+            break;
+        default:
+            itemType = 'الأخبار';
+    }
+    
     if (confirm(`⚠️ تحذير خطير!\n\nسيتم حذف جميع ${itemType} في سلة المهملات نهائياً ولن يمكن استعادتها أبداً.\n\nهل أنت متأكد من أنك تريد إفراغ سلة المهملات بالكامل؟`)) {
         const form = document.createElement('form');
         form.method = 'POST';
