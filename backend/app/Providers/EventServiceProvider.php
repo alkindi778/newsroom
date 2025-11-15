@@ -26,9 +26,11 @@ class EventServiceProvider extends ServiceProvider
         ],
         \App\Events\VideoPublished::class => [
             \App\Listeners\SendVideoNotification::class,
+            \App\Listeners\PublishVideoToSocialMedia::class,
         ],
         \App\Events\OpinionPublished::class => [
             \App\Listeners\SendOpinionNotification::class,
+            \App\Listeners\PublishOpinionToSocialMedia::class,
         ],
     ];
 

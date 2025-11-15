@@ -9,11 +9,14 @@ class SocialMediaPost extends Model
 {
     protected $fillable = [
         'article_id',
+        'video_id',
+        'opinion_id',
         'platform',
         'external_id',
         'message',
         'status',
         'error_message',
+        'response',
         'published_at',
         'scheduled_for',
         'likes',
@@ -32,6 +35,22 @@ class SocialMediaPost extends Model
     public function article(): BelongsTo
     {
         return $this->belongsTo(Article::class);
+    }
+
+    /**
+     * العلاقة مع الفيديو
+     */
+    public function video(): BelongsTo
+    {
+        return $this->belongsTo(Video::class);
+    }
+
+    /**
+     * العلاقة مع مقال الرأي
+     */
+    public function opinion(): BelongsTo
+    {
+        return $this->belongsTo(Opinion::class);
     }
 
     /**
