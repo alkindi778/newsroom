@@ -54,6 +54,16 @@ class ShareToAllPlatforms implements ShouldQueue
                 ]);
                 return false;
             }
+            
+            // تحقق من حالة النشر
+            if (isset($content->is_published) && !$content->is_published) {
+                Log::warning('Content is not published - skipping social media share', [
+                    'type' => $this->contentType,
+                    'id' => $this->contentId,
+                    'title' => $content->title ?? 'N/A'
+                ]);
+                return false;
+            }
 
             // بناء الرسالة والصورة
             [$message, $imagePath] = $this->prepareContent($content);
@@ -87,7 +97,7 @@ class ShareToAllPlatforms implements ShouldQueue
         return match($this->contentType) {
             'article' => Article::find($this->contentId),
             'video' => Video::find($this->contentId),
-            'opinion' => Opinion::find($this->contentId),
+            'opinion' => Opinion::with('writer')->find($this->contentId),
             'newspaper_issue' => NewspaperIssue::find($this->contentId),
             default => null
         };
@@ -128,8 +138,27 @@ class ShareToAllPlatforms implements ShouldQueue
                 // استخدم URL مباشر من YouTube/Vimeo
                 $imagePath = $content->thumbnail_url;
             }
-        } elseif ($this->contentType === 'opinion' && $content->image) {
-            $imagePath = Storage::disk('public')->path($content->image);
+        } elseif ($this->contentType === 'opinion') {
+            // أولاً: جرب صورة المقال نفسه
+            if ($content->image) {
+                $imagePath = Storage::disk('public')->path($content->image);
+                Log::info('Using opinion image', ['image' => $content->image]);
+            } 
+            // ثانياً: استخدم صورة الكاتب كبديل
+            elseif ($content->writer && $content->writer->image) {
+                $imagePath = Storage::disk('public')->path($content->writer->image);
+                Log::info('Using writer image as fallback', [
+                    'writer' => $content->writer->name,
+                    'image' => $content->writer->image
+                ]);
+            } else {
+                Log::warning('No image found for opinion', [
+                    'opinion_id' => $content->id,
+                    'has_opinion_image' => !empty($content->image),
+                    'has_writer' => !empty($content->writer),
+                    'has_writer_image' => $content->writer ? !empty($content->writer->image) : false
+                ]);
+            }
         } elseif ($this->contentType === 'newspaper_issue' && $content->cover_image) {
             $imagePath = Storage::disk('public')->path($content->cover_image);
         }
