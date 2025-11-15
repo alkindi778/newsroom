@@ -44,17 +44,45 @@ class PostToTelegram implements ShouldQueue
                 'parse_mode' => 'HTML',
             ];
 
+            // التحقق من نوع المسار (URL أو مسار محلي)
+            $isUrl = filter_var($this->imagePath, FILTER_VALIDATE_URL);
+            
             // Log للتحقق من مسار الصورة
             if ($this->imagePath) {
                 Log::info('Telegram image check', [
                     'image_path' => $this->imagePath,
-                    'file_exists' => file_exists($this->imagePath),
-                    'is_readable' => is_readable($this->imagePath ?? '')
+                    'is_url' => $isUrl,
+                    'file_exists' => !$isUrl && file_exists($this->imagePath),
+                    'is_readable' => !$isUrl && is_readable($this->imagePath ?? '')
                 ]);
             }
 
-            // إذا كانت هناك صورة
-            if ($this->imagePath && file_exists($this->imagePath)) {
+            // إذا كانت هناك صورة (URL)
+            if ($this->imagePath && $isUrl) {
+                $url = "https://api.telegram.org/bot{$botToken}/sendPhoto";
+                $response = Http::post($url, [
+                    'chat_id' => $this->channelId,
+                    'photo' => $this->imagePath,
+                    'caption' => $this->message,
+                    'parse_mode' => 'HTML'
+                ]);
+                
+                if ($response->successful()) {
+                    Log::info('Telegram message with photo URL sent successfully', [
+                        'channel_id' => $this->channelId,
+                        'image_url' => $this->imagePath
+                    ]);
+                    return true;
+                } else {
+                    Log::error('Failed to send photo via URL', [
+                        'url' => $this->imagePath,
+                        'response' => $response->body()
+                    ]);
+                    throw new \Exception('Telegram API error: ' . $response->body());
+                }
+            }
+            // إذا كانت هناك صورة (ملف محلي)
+            elseif ($this->imagePath && file_exists($this->imagePath)) {
                 // استخدام المسار المحلي
                 $url = "https://api.telegram.org/bot{$botToken}/sendPhoto";
                 $payload['photo'] = new \CURLFile($this->imagePath);

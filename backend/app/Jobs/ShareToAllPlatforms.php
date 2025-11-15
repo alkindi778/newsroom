@@ -120,8 +120,14 @@ class ShareToAllPlatforms implements ShouldQueue
         $imagePath = null;
         if ($this->contentType === 'article' && $content->image) {
             $imagePath = Storage::disk('public')->path($content->image);
-        } elseif ($this->contentType === 'video' && $content->thumbnail) {
-            $imagePath = Storage::disk('public')->path($content->thumbnail);
+        } elseif ($this->contentType === 'video') {
+            // للفيديو: أولاً جرب المسار المحلي، ثم استخدم thumbnail_url من YouTube/Vimeo
+            if ($content->thumbnail) {
+                $imagePath = Storage::disk('public')->path($content->thumbnail);
+            } else {
+                // استخدم URL مباشر من YouTube/Vimeo
+                $imagePath = $content->thumbnail_url;
+            }
         } elseif ($this->contentType === 'opinion' && $content->image) {
             $imagePath = Storage::disk('public')->path($content->image);
         } elseif ($this->contentType === 'newspaper_issue' && $content->cover_image) {
@@ -145,6 +151,7 @@ class ShareToAllPlatforms implements ShouldQueue
     protected function publishToPlatforms($content, string $message, ?string $imagePath)
     {
         $platforms = config('social-media.platforms');
+        $contentUrl = $this->getContentUrl($content);
 
         // Telegram
         if ($platforms['telegram']['enabled'] && $platforms['telegram']['auto_publish']) {
@@ -157,19 +164,40 @@ class ShareToAllPlatforms implements ShouldQueue
                 $includeImage ? $imagePath : null
             );
             
-            Log::info('Dispatched to Telegram', ['channel_id' => $channelId]);
+            Log::info('Dispatched to Telegram', [
+                'channel_id' => $channelId,
+                'has_image' => !is_null($imagePath)
+            ]);
         }
 
         // Twitter
         if ($platforms['twitter']['enabled'] && $platforms['twitter']['auto_publish']) {
-            PostToTwitter::dispatch($message, $imagePath);
-            Log::info('Dispatched to Twitter');
+            $includeImage = $platforms['twitter']['include_image'] ?? true;
+            
+            PostToTwitter::dispatch(
+                $message,
+                $includeImage ? $imagePath : null
+            );
+            
+            Log::info('Dispatched to Twitter', [
+                'has_image' => !is_null($imagePath)
+            ]);
         }
 
         // Facebook
         if ($platforms['facebook']['enabled'] && $platforms['facebook']['auto_publish']) {
-            PostToFacebook::dispatch($content);
-            Log::info('Dispatched to Facebook');
+            $includeImage = $platforms['facebook']['include_image'] ?? true;
+            
+            PostToFacebook::dispatch(
+                $message,
+                $contentUrl,
+                $includeImage ? $imagePath : null
+            );
+            
+            Log::info('Dispatched to Facebook', [
+                'has_link' => !is_null($contentUrl),
+                'has_image' => !is_null($imagePath)
+            ]);
         }
     }
 }
