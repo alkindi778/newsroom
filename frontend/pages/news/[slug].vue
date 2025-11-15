@@ -82,12 +82,12 @@
         </div>
 
         <!-- الصورة الرئيسية -->
-        <div class="h-[300px] sm:h-[400px] md:h-[500px] lg:h-[600px]">
+        <div class="w-full">
           <img 
             :src="getImageUrl(article.image)" 
             :alt="article.title"
             loading="eager"
-            class="w-full h-full object-cover"
+            class="w-full h-auto object-contain"
           />
         </div>
 
