@@ -307,6 +307,43 @@
                 @endcan
                 @endcanany
                 
+                <!-- Social Media Section -->
+                <li class="pt-3 pb-2">
+                    <div class="flex items-center gap-2 px-4 py-2">
+                        <div class="h-px flex-1 bg-gradient-to-l from-pink-500/30 to-transparent"></div>
+                        <span class="text-xs font-bold text-pink-300/80 uppercase tracking-wider">التواصل الاجتماعي</span>
+                        <div class="h-px flex-1 bg-gradient-to-r from-pink-500/30 to-transparent"></div>
+                    </div>
+                </li>
+                <li>
+                    <a href="{{ route('admin.social-media.settings') }}" 
+                       class="group flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 {{ request()->routeIs('admin.social-media.settings') ? 'bg-gradient-to-l from-pink-600 to-pink-700 shadow-lg shadow-pink-500/30' : 'hover:bg-white/5 hover:translate-x-[-4px]' }}">
+                        <div class="w-9 h-9 flex items-center justify-center rounded-lg {{ request()->routeIs('admin.social-media.settings') ? 'bg-white/20' : 'bg-white/5 group-hover:bg-white/10' }} transition-colors">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm3.5-9c.83 0 1.5-.67 1.5-1.5S16.33 8 15.5 8 14 8.67 14 9.5s.67 1.5 1.5 1.5zm-7 0c.83 0 1.5-.67 1.5-1.5S9.33 8 8.5 8 7 8.67 7 9.5 7.67 11 8.5 11zm3.5 6.5c2.33 0 4.31-1.46 5.11-3.5H6.89c.8 2.04 2.78 3.5 5.11 3.5z"/>
+                            </svg>
+                        </div>
+                        <span class="flex-1">إعدادات المنصات</span>
+                        @if(request()->routeIs('admin.social-media.settings'))
+                        <div class="w-1.5 h-1.5 bg-white rounded-full animate-pulse"></div>
+                        @endif
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ route('admin.social-media.posts') }}" 
+                       class="group flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 {{ request()->routeIs('admin.social-media.posts') ? 'bg-gradient-to-l from-pink-600 to-pink-700 shadow-lg shadow-pink-500/30' : 'hover:bg-white/5 hover:translate-x-[-4px]' }}">
+                        <div class="w-9 h-9 flex items-center justify-center rounded-lg {{ request()->routeIs('admin.social-media.posts') ? 'bg-white/20' : 'bg-white/5 group-hover:bg-white/10' }} transition-colors">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"></path>
+                            </svg>
+                        </div>
+                        <span class="flex-1">المنشورات</span>
+                        @if(request()->routeIs('admin.social-media.posts'))
+                        <div class="w-1.5 h-1.5 bg-white rounded-full animate-pulse"></div>
+                        @endif
+                    </a>
+                </li>
+
                 <!-- Settings Section -->
                 <li class="pt-3 pb-2">
                     <div class="flex items-center gap-2 px-4 py-2">

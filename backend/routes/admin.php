@@ -13,6 +13,7 @@ use App\Http\Controllers\Admin\SecurityController;
 use App\Http\Controllers\Admin\AdvertisementController;
 use App\Http\Controllers\Admin\NotificationController;
 use App\Http\Controllers\Admin\ContactMessageController;
+use App\Http\Controllers\Admin\SocialMediaController;
 
 /*
 |--------------------------------------------------------------------------
@@ -399,5 +400,15 @@ Route::middleware(['auth', App\Http\Middleware\AdminMiddleware::class])->group(f
         Route::get('/{id}', [ContactMessageController::class, 'show'])->name('show');
         Route::put('/{id}', [ContactMessageController::class, 'update'])->name('update');
         Route::delete('/{id}', [ContactMessageController::class, 'destroy'])->name('destroy');
+    });
+
+    // Social Media Management
+    Route::prefix('social-media')->name('social-media.')->group(function () {
+        Route::get('/settings', [SocialMediaController::class, 'settings'])->name('settings');
+        Route::post('/settings', [SocialMediaController::class, 'updateSettings'])->name('update-settings');
+        Route::get('/posts', [SocialMediaController::class, 'posts'])->name('posts');
+        Route::post('/articles/{article}/publish', [SocialMediaController::class, 'publishArticle'])->name('publish-article');
+        Route::post('/posts/{post}/retry', [SocialMediaController::class, 'retryPost'])->name('retry-post');
+        Route::delete('/posts/{post}', [SocialMediaController::class, 'deletePost'])->name('delete-post');
     });
 });

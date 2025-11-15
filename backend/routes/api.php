@@ -11,6 +11,7 @@ use App\Http\Controllers\Api\AdvertisementController;
 use App\Http\Controllers\Api\PushSubscriptionController;
 use App\Http\Controllers\Api\ManifestController;
 use App\Http\Controllers\Api\ContactMessageController;
+use App\Http\Controllers\Api\SocialMediaController;
 
 /*
 |--------------------------------------------------------------------------
@@ -109,6 +110,11 @@ Route::prefix('v1')->group(function () {
     
     // Contact Messages (Public)
     Route::post('/contact-messages', [ContactMessageController::class, 'store']);
+
+    // Social Media (Public)
+    Route::get('/social-media/statistics', [SocialMediaController::class, 'getStatistics']);
+    Route::get('/social-media/posts', [SocialMediaController::class, 'listPosts']);
+    Route::get('/articles/{article}/social-media-status', [SocialMediaController::class, 'getPostStatus']);
 
     // Admin Routes (Protected)
     Route::middleware('auth:sanctum')->group(function () {

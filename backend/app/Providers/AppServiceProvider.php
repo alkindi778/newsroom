@@ -32,5 +32,13 @@ class AppServiceProvider extends ServiceProvider
     {
         // الضغط يتم الآن في MediaLibraryController مباشرة بعد الرفع
         // لا حاجة لـ Event Listener هنا
+
+        // جدولة نشر المنشورات المجدولة على وسائل التواصل الاجتماعي
+        $this->app->booted(function () {
+            $schedule = app(\Illuminate\Console\Scheduling\Schedule::class);
+            $schedule->command('social-media:publish-scheduled')
+                ->everyMinute()
+                ->withoutOverlapping();
+        });
     }
 }
