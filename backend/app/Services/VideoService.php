@@ -112,6 +112,9 @@ class VideoService
             // إطلاق Event لإرسال Push Notifications عند النشر
             if ($video && $video->is_published) {
                 event(new \App\Events\VideoPublished($video));
+                
+                // نشر على السوشيال ميديا
+                \App\Jobs\ShareToAllPlatforms::dispatch('video', $video->id);
             }
             
             return $video;

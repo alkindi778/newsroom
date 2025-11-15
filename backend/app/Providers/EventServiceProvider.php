@@ -22,15 +22,12 @@ class EventServiceProvider extends ServiceProvider
         // إشعارات المحتوى الجديد
         \App\Events\ArticlePublished::class => [
             \App\Listeners\SendArticleNotification::class,
-            \App\Listeners\PublishArticleToSocialMedia::class,
         ],
         \App\Events\VideoPublished::class => [
             \App\Listeners\SendVideoNotification::class,
-            \App\Listeners\PublishVideoToSocialMedia::class,
         ],
         \App\Events\OpinionPublished::class => [
             \App\Listeners\SendOpinionNotification::class,
-            \App\Listeners\PublishOpinionToSocialMedia::class,
         ],
     ];
 

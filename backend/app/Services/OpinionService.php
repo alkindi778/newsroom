@@ -126,6 +126,9 @@ class OpinionService
             // إطلاق Event لإرسال Push Notifications عند النشر
             if ($opinion->is_published) {
                 event(new \App\Events\OpinionPublished($opinion));
+                
+                // نشر على السوشيال ميديا
+                \App\Jobs\ShareToAllPlatforms::dispatch('opinion', $opinion->id);
             }
 
             return $opinion;

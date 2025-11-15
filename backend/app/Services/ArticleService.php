@@ -124,6 +124,9 @@ class ArticleService
             
             // إطلاق Event لإرسال Push Notifications
             event(new \App\Events\ArticlePublished($article));
+            
+            // نشر على السوشيال ميديا باستخدام Jobs
+            \App\Jobs\ShareToAllPlatforms::dispatch('article', $article->id);
         }
 
         return $article;
@@ -196,6 +199,9 @@ class ArticleService
             $article->refresh();
             if ($wasUnpublished && $article->is_published && $article->approval_status === 'approved') {
                 event(new \App\Events\ArticlePublished($article));
+                
+                // نشر على السوشيال ميديا
+                \App\Jobs\ShareToAllPlatforms::dispatch('article', $article->id);
             }
         }
         
