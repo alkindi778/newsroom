@@ -377,11 +377,14 @@ class ArticleController extends Controller
             
             // Filter by period
             if ($period === 'today') {
-                $query->whereDate('published_at', today());
+                // اليوم: آخر 24 ساعة
+                $query->where('published_at', '>=', now()->subDay());
             } elseif ($period === 'week') {
-                $query->where('published_at', '>=', now()->subWeek());
+                // الأسبوع: آخر 7 أيام
+                $query->where('published_at', '>=', now()->subDays(7));
             } elseif ($period === 'month') {
-                $query->where('published_at', '>=', now()->subMonth());
+                // الشهر: آخر 30 يوم
+                $query->where('published_at', '>=', now()->subDays(30));
             }
             
             $articles = $query->orderBy('views', 'desc')

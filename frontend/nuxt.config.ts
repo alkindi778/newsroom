@@ -84,9 +84,9 @@ export default defineNuxtConfig({
   // Runtime config للاتصال بالـ Backend
   runtimeConfig: {
     public: {
-      // استخدام IP الجهاز للوصول من الهاتف
-      apiBase: process.env.NUXT_PUBLIC_API_BASE || 'http://192.168.1.107/newsroom/backend/public/api/v1',
-      siteUrl: process.env.NUXT_PUBLIC_SITE_URL || 'http://192.168.1.107:3000',
+      // استخدام IP الجهاز للوصول من الهاتف أو localhost للتطوير
+      apiBase: process.env.NUXT_PUBLIC_API_BASE || 'http://localhost/newsroom/backend/public/api/v1',
+      siteUrl: process.env.NUXT_PUBLIC_SITE_URL || 'http://localhost:3000',
       // Google Tag Manager ID
       gtmId: process.env.NUXT_PUBLIC_GTM_ID || 'GTM-XXXXXXX'
     }

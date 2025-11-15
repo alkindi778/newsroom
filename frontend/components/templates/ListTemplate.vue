@@ -44,12 +44,12 @@
 
     <!-- Magazine Layout - Titles Below Images -->
     <div v-else-if="articles.length > 0" class="space-y-6">
-      <!-- First Row: 1 Large (Right) + 2 Small (Left) -->
+      <!-- First Row: 1 Large (Full width on mobile, Right + 2 Small on desktop) -->
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <!-- Large Featured Card (Right Side in RTL) -->
+        <!-- Large Featured Card (Full width on mobile, Right Side in RTL on desktop) -->
         <article v-if="articles[2]" class="lg:col-span-2 group">
           <NuxtLink :to="getArticleLink(articles[2])" class="block">
-            <div class="relative h-96 rounded-lg overflow-hidden mb-4">
+            <div class="relative h-64 md:h-96 rounded-lg overflow-hidden mb-4">
               <img 
                 :src="getImageUrl(articles[2].image, 'large')" 
                 :alt="articles[2].title"
@@ -61,21 +61,21 @@
               </div>
             </div>
             <div class="space-y-3">
-              <p v-if="articles[2].subtitle" class="text-base text-blue-600 font-semibold">
+              <p v-if="articles[2].subtitle" class="text-sm md:text-base text-blue-600 font-semibold">
                 {{ articles[2].subtitle }}
               </p>
-              <h2 class="text-2xl font-bold text-gray-900 line-clamp-2">
+              <h2 class="text-lg md:text-2xl font-bold text-gray-900 line-clamp-2">
                 {{ articles[2].title }}
               </h2>
-              <p class="text-base text-gray-600 leading-relaxed line-clamp-5">
+              <p class="hidden md:block text-base text-gray-600 leading-relaxed line-clamp-5">
                 {{ getExcerpt(articles[2]) }}
               </p>
             </div>
           </NuxtLink>
         </article>
 
-        <!-- Two Small Cards (Left Side in RTL) -->
-        <div class="grid grid-cols-1 gap-6">
+        <!-- Two Small Cards (Hidden on mobile, Left Side in RTL on desktop) -->
+        <div class="hidden lg:grid grid-cols-1 gap-6">
           <article 
             v-for="article in articles.slice(0, 2)" 
             :key="article.id"
@@ -104,29 +104,29 @@
         </div>
       </div>
 
-      <!-- Second Row: 4 Equal Cards -->
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <!-- Second Row: 2 Equal Cards on Mobile, 4 on Desktop -->
+      <div class="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
         <article 
           v-for="article in articles.slice(3, 7)" 
           :key="article.id"
           class="group"
         >
           <NuxtLink :to="getArticleLink(article)" class="block">
-            <div class="relative h-48 rounded-lg overflow-hidden mb-3">
+            <div class="relative w-full aspect-square rounded-lg overflow-hidden mb-2 md:mb-3">
               <img 
                 :src="getImageUrl(article.image, 'medium')" 
                 :alt="article.title"
                 class="w-full h-full object-cover"
               />
               <div v-if="article.category" 
-                   class="absolute top-3 right-3 px-2 py-1 bg-red-600 text-white text-xs font-bold rounded">
+                   class="absolute top-2 right-2 px-2 py-1 bg-red-600 text-white text-xs font-bold rounded">
                 {{ article.category.name }}
               </div>
             </div>
-            <p v-if="article.subtitle" class="text-xs text-blue-600 font-semibold mb-1">
+            <p v-if="article.subtitle" class="text-xs text-blue-600 font-semibold mb-1 line-clamp-1">
               {{ article.subtitle }}
             </p>
-            <h3 class="text-base font-bold text-gray-900 line-clamp-2">
+            <h3 class="text-sm md:text-base font-bold text-gray-900 line-clamp-2">
               {{ article.title }}
             </h3>
           </NuxtLink>

@@ -4,10 +4,10 @@
       v-for="article in articles"
       :key="article.id"
       :to="getArticleLink(article)"
-      class="flex flex-row items-start gap-2 lg:gap-3 p-2 lg:p-3 hover:bg-gray-50 transition-colors rounded-lg lg:min-h-[120px]"
+      class="flex flex-col lg:flex-row lg:items-start gap-2 lg:gap-3 p-2 lg:p-3 hover:bg-gray-50 transition-colors rounded-lg lg:min-h-[120px]"
     >
-      <!-- الصورة على اليمين -->
-      <div class="w-20 h-20 lg:w-24 lg:h-24 flex-shrink-0 rounded overflow-hidden bg-gray-900">
+      <!-- الصورة على الأعلى في الموبايل، على اليمين في الديسكتوب -->
+      <div class="w-full lg:w-32 lg:h-32 h-32 flex-shrink-0 rounded overflow-hidden bg-gray-900">
         <img
           :src="getImageUrl(article.thumbnail || article.image)"
           :alt="article.title"
@@ -16,13 +16,13 @@
         />
       </div>
 
-      <!-- العنوان على اليسار -->
+      <!-- العنوان تحت الصورة في الموبايل، على اليسار في الديسكتوب -->
       <div class="flex-1 text-right">
         <!-- العنوان الفرعي -->
         <p v-if="article.subtitle" class="text-xs lg:text-sm text-blue-600 font-semibold mb-1 line-clamp-1">
           {{ article.subtitle }}
         </p>
-        <h3 class="text-gray-900 text-lg lg:text-xl font-bold leading-tight line-clamp-3">
+        <h3 class="text-gray-900 text-sm lg:text-xl font-bold leading-tight line-clamp-2 lg:line-clamp-3">
           {{ article.title }}
         </h3>
         
