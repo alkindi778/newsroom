@@ -23,7 +23,7 @@ class TrashController extends Controller
         if ($type === 'opinions') {
             // Opinions query
             $query = Opinion::onlyTrashed()
-                ->with(['user:id,name', 'writer:id,name'])
+                ->with(['writer:id,name'])
                 ->orderBy('deleted_at', 'desc');
 
             // Search functionality

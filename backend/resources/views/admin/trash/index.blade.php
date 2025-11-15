@@ -504,12 +504,6 @@
                                 <i class="far fa-clock ml-1"></i>
                                 حُذف: {{ $opinion->deleted_at->format('Y/m/d H:i') }}
                             </span>
-                            @if($opinion->user)
-                            <span>
-                                <i class="far fa-user ml-1"></i>
-                                {{ $opinion->user->name }}
-                            </span>
-                            @endif
                         </div>
                     </div>
                     
