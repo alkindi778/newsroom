@@ -220,6 +220,15 @@ class OpinionService
                     'opinion_title' => $data['title'] ?? $opinion->title,
                     'user_id' => auth()->id()
                 ]);
+                
+                // إطلاق Event والنشر على السوشيال ميديا عند النشر لأول مرة
+                $opinion->refresh();
+                $wasUnpublished = !$opinion->getOriginal('is_published');
+                
+                if ($wasUnpublished && $opinion->is_published) {
+                    event(new \App\Events\OpinionPublished($opinion));
+                    \App\Jobs\ShareToAllPlatforms::dispatch('opinion', $opinion->id);
+                }
             }
 
             return $success;

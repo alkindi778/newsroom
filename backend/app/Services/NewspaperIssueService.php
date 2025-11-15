@@ -95,6 +95,13 @@ class NewspaperIssueService
             }
 
             $issue = $this->repository->create($data);
+            
+            // النشر على السوشيال ميديا إذا كان منشوراً
+            if ($issue && $issue->is_published) {
+                \App\Jobs\ShareToAllPlatforms::dispatch('newspaper_issue', $issue->id);
+                Log::info('Newspaper issue published to social media', ['issue_id' => $issue->id]);
+            }
+            
             return $issue;
         } catch (\Exception $e) {
             Log::error('Error creating newspaper issue: ' . $e->getMessage());
@@ -109,6 +116,7 @@ class NewspaperIssueService
     {
         try {
             $issue = $this->repository->find($id);
+            $wasUnpublished = !$issue->is_published;
 
             // Handle cover image upload
             if (isset($data['cover_image']) && is_file($data['cover_image'])) {
@@ -119,7 +127,18 @@ class NewspaperIssueService
                 $data['cover_image'] = $this->handleCoverImageUpload($data['cover_image']);
             }
 
-            return $this->repository->update($id, $data);
+            $result = $this->repository->update($id, $data);
+            
+            // النشر على السوشيال ميديا عند النشر لأول مرة
+            if ($result) {
+                $issue->refresh();
+                if ($wasUnpublished && $issue->is_published) {
+                    \App\Jobs\ShareToAllPlatforms::dispatch('newspaper_issue', $issue->id);
+                    Log::info('Newspaper issue published to social media', ['issue_id' => $issue->id]);
+                }
+            }
+            
+            return $result;
         } catch (\Exception $e) {
             Log::error('Error updating newspaper issue: ' . $e->getMessage());
             throw $e;

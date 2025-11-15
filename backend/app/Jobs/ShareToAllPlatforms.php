@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Storage;
 use App\Models\Article;
 use App\Models\Video;
 use App\Models\Opinion;
+use App\Models\NewspaperIssue;
 
 class ShareToAllPlatforms implements ShouldQueue
 {
@@ -87,6 +88,7 @@ class ShareToAllPlatforms implements ShouldQueue
             'article' => Article::find($this->contentId),
             'video' => Video::find($this->contentId),
             'opinion' => Opinion::find($this->contentId),
+            'newspaper_issue' => NewspaperIssue::find($this->contentId),
             default => null
         };
     }
@@ -94,14 +96,25 @@ class ShareToAllPlatforms implements ShouldQueue
     protected function prepareContent($content): array
     {
         // بناء الرسالة
-        $url = $this->getContentUrl($content);
-        $template = config('social-media.templates.' . $this->contentType);
-        
-        $message = str_replace(
-            ['{title}', '{link}'],
-            [$content->title, $url],
-            $template
-        );
+        if ($this->contentType === 'newspaper_issue') {
+            // رسالة خاصة لإصدارات الصحف
+            $message = "📰 {$content->newspaper_name} - العدد رقم {$content->issue_number}\n\n";
+            if ($content->description) {
+                $message .= "{$content->description}\n\n";
+            }
+            if ($content->pdf_url) {
+                $message .= "📖 لتصفح العدد: {$content->pdf_url}";
+            }
+        } else {
+            $url = $this->getContentUrl($content);
+            $template = config('social-media.templates.' . $this->contentType);
+            
+            $message = str_replace(
+                ['{title}', '{link}'],
+                [$content->title, $url],
+                $template
+            );
+        }
 
         // تحديد الصورة
         $imagePath = null;
@@ -111,6 +124,8 @@ class ShareToAllPlatforms implements ShouldQueue
             $imagePath = Storage::disk('public')->path($content->thumbnail);
         } elseif ($this->contentType === 'opinion' && $content->image) {
             $imagePath = Storage::disk('public')->path($content->image);
+        } elseif ($this->contentType === 'newspaper_issue' && $content->cover_image) {
+            $imagePath = Storage::disk('public')->path($content->cover_image);
         }
 
         return [$message, $imagePath];
@@ -122,6 +137,7 @@ class ShareToAllPlatforms implements ShouldQueue
             'article' => url('/news/' . $content->slug),
             'video' => url('/videos/' . $content->slug),
             'opinion' => url('/opinions/' . $content->slug),
+            'newspaper_issue' => url('/newspaper-issues/' . $content->slug),
             default => url('/')
         };
     }
