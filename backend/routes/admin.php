@@ -125,7 +125,7 @@ Route::middleware(['auth', App\Http\Middleware\AdminMiddleware::class])->group(f
         });
     });
     
-    // Trash Management (Soft Deleted Articles & Videos)
+    // Trash Management (Soft Deleted Articles, Videos & Opinions)
     Route::middleware(['permission:manage_trash|delete_articles'])->group(function () {
         Route::prefix('trash')->name('trash.')->group(function () {
             Route::get('/', [\App\Http\Controllers\Admin\TrashController::class, 'index'])->name('index');
@@ -133,6 +133,8 @@ Route::middleware(['auth', App\Http\Middleware\AdminMiddleware::class])->group(f
             Route::post('/bulk-restore', [\App\Http\Controllers\Admin\TrashController::class, 'bulkRestore'])->name('bulk-restore');
             // Video restore
             Route::get('/video/{id}/restore', [\App\Http\Controllers\Admin\TrashController::class, 'restoreVideo'])->name('video.restore');
+            // Opinion restore
+            Route::get('/opinion/{id}/restore', [\App\Http\Controllers\Admin\TrashController::class, 'restoreOpinion'])->name('opinion.restore');
         });
     });
     
@@ -144,6 +146,8 @@ Route::middleware(['auth', App\Http\Middleware\AdminMiddleware::class])->group(f
             Route::post('/empty', [\App\Http\Controllers\Admin\TrashController::class, 'emptyTrash'])->name('empty');
             // Video force delete
             Route::get('/video/{id}/force-delete', [\App\Http\Controllers\Admin\TrashController::class, 'forceDeleteVideo'])->name('video.force-delete');
+            // Opinion force delete
+            Route::get('/opinion/{id}/force-delete', [\App\Http\Controllers\Admin\TrashController::class, 'forceDeleteOpinion'])->name('opinion.force-delete');
         });
     });
     

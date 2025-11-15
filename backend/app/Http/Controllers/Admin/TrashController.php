@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Article;
 use App\Models\Video;
+use App\Models\Opinion;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
@@ -12,14 +13,44 @@ use Illuminate\View\View;
 class TrashController extends Controller
 {
     /**
-     * Display the trash page with deleted articles and videos
+     * Display the trash page with deleted articles, videos, and opinions
      */
     public function index(Request $request): View
     {
-        // Get type filter (articles or videos)
+        // Get type filter (articles, videos, or opinions)
         $type = $request->get('type', 'articles');
         
-        if ($type === 'videos') {
+        if ($type === 'opinions') {
+            // Opinions query
+            $query = Opinion::onlyTrashed()
+                ->with(['user:id,name', 'writer:id,name'])
+                ->orderBy('deleted_at', 'desc');
+
+            // Search functionality
+            if ($request->filled('search')) {
+                $searchTerm = $request->search;
+                $query->where(function($q) use ($searchTerm) {
+                    $q->where('title', 'LIKE', "%{$searchTerm}%")
+                      ->orWhere('excerpt', 'LIKE', "%{$searchTerm}%")
+                      ->orWhereHas('writer', function($writerQuery) use ($searchTerm) {
+                          $writerQuery->where('name', 'LIKE', "%{$searchTerm}%");
+                      });
+                });
+            }
+
+            // Filter by date range
+            if ($request->filled('date_from')) {
+                $query->whereDate('deleted_at', '>=', $request->date_from);
+            }
+            if ($request->filled('date_to')) {
+                $query->whereDate('deleted_at', '<=', $request->date_to);
+            }
+
+            $opinions = $query->paginate(10);
+            $categories = null;
+            
+            return view('admin.trash.index', compact('opinions', 'categories', 'type'));
+        } elseif ($type === 'videos') {
             // Videos query
             $query = Video::onlyTrashed()
                 ->with(['user:id,name'])
@@ -230,7 +261,21 @@ class TrashController extends Controller
                     ->with('error', 'ليس لديك صلاحية لإفراغ سلة المهملات');
             }
 
-            if ($type === 'videos') {
+            if ($type === 'opinions') {
+                $opinions = Opinion::onlyTrashed()->get();
+                
+                // Delete all associated images
+                foreach ($opinions as $opinion) {
+                    if ($opinion->image && \Storage::disk('public')->exists($opinion->image)) {
+                        \Storage::disk('public')->delete($opinion->image);
+                    }
+                }
+
+                $deletedCount = Opinion::onlyTrashed()->forceDelete();
+
+                return redirect()->route('admin.trash.index', ['type' => 'opinions'])
+                    ->with('success', "تم إفراغ سلة المهملات - حُذف {$deletedCount} مقال رأي نهائياً");
+            } elseif ($type === 'videos') {
                 $videos = Video::onlyTrashed()->get();
                 
                 // Delete all associated thumbnails
@@ -308,6 +353,50 @@ class TrashController extends Controller
             \Log::error('Error force deleting video: ' . $e->getMessage());
             return redirect()->route('admin.trash.index', ['type' => 'videos'])
                 ->with('error', 'حدث خطأ أثناء حذف الفيديو نهائياً');
+        }
+    }
+
+    /**
+     * Restore an opinion from trash
+     */
+    public function restoreOpinion(string $id): RedirectResponse
+    {
+        try {
+            $opinion = Opinion::onlyTrashed()->findOrFail($id);
+            $opinion->restore();
+
+            return redirect()->route('admin.trash.index', ['type' => 'opinions'])
+                ->with('success', 'تم استعادة المقال بنجاح');
+
+        } catch (\Exception $e) {
+            \Log::error('Error restoring opinion: ' . $e->getMessage());
+            return redirect()->route('admin.trash.index', ['type' => 'opinions'])
+                ->with('error', 'حدث خطأ أثناء استعادة المقال');
+        }
+    }
+
+    /**
+     * Permanently delete an opinion
+     */
+    public function forceDeleteOpinion(string $id): RedirectResponse
+    {
+        try {
+            $opinion = Opinion::onlyTrashed()->findOrFail($id);
+            
+            // Delete associated image if exists
+            if ($opinion->image && \Storage::disk('public')->exists($opinion->image)) {
+                \Storage::disk('public')->delete($opinion->image);
+            }
+
+            $opinion->forceDelete();
+
+            return redirect()->route('admin.trash.index', ['type' => 'opinions'])
+                ->with('success', 'تم حذف المقال نهائياً');
+
+        } catch (\Exception $e) {
+            \Log::error('Error force deleting opinion: ' . $e->getMessage());
+            return redirect()->route('admin.trash.index', ['type' => 'opinions'])
+                ->with('error', 'حدث خطأ أثناء حذف المقال نهائياً');
         }
     }
 }
