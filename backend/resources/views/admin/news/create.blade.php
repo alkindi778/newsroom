@@ -68,7 +68,6 @@
                     <label for="content" class="block text-sm font-medium text-gray-700 mb-2">محتوى الخبر *</label>
                     <textarea id="content" 
                               name="content" 
-                              required
                               class="tinymce-editor">{{ old('content') }}</textarea>
                     @error('content')
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -263,6 +262,23 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initialize TinyMCE
     if (typeof initTinyMCE === 'function') {
         initTinyMCE('#content');
+    }
+    
+    // Form validation before submit
+    const form = document.querySelector('form');
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            // Get TinyMCE content
+            const content = tinymce.get('content')?.getContent() || '';
+            
+            // Check if content is empty
+            if (!content || content.trim() === '' || content === '<p></p>' || content === '<p><br></p>') {
+                e.preventDefault();
+                alert('يرجى إدخال محتوى الخبر');
+                tinymce.get('content')?.focus();
+                return false;
+            }
+        });
     }
     
 

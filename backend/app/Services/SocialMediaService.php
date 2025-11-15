@@ -413,18 +413,36 @@ class SocialMediaService
      */
     private function publishVideoToTelegram(Video $video, string $message, array $config): array
     {
-        $url = "https://api.telegram.org/bot{$config['bot_token']}/sendMessage";
+        $botToken = $config['bot_token'];
+        $channelId = $config['channel_id'];
+        
+        $url = "https://api.telegram.org/bot{$botToken}/sendMessage";
 
         $payload = [
-            'chat_id' => $config['channel_id'],
+            'chat_id' => $channelId,
             'text' => $message,
             'parse_mode' => 'HTML',
         ];
 
+        // إضافة الصورة إذا كانت مفعّلة
+        if ($config['include_image'] && $video->thumbnail_path) {
+            $url = "https://api.telegram.org/bot{$botToken}/sendPhoto";
+            $payload['photo'] = url('storage/' . $video->thumbnail_path);
+            $payload['caption'] = $message;
+            unset($payload['text']);
+        }
+
         $response = Http::post($url, $payload);
 
         if ($response->successful()) {
-            $this->recordPost($video->id, 'telegram', $message, 'published', $response->json());
+            SocialMediaPost::create([
+                'video_id' => $video->id,
+                'platform' => 'telegram',
+                'message' => $message,
+                'status' => 'published',
+                'response' => $response->json(),
+                'published_at' => now(),
+            ]);
             return ['success' => true, 'response' => $response->json()];
         }
 
@@ -436,18 +454,36 @@ class SocialMediaService
      */
     private function publishOpinionToTelegram(Opinion $opinion, string $message, array $config): array
     {
-        $url = "https://api.telegram.org/bot{$config['bot_token']}/sendMessage";
+        $botToken = $config['bot_token'];
+        $channelId = $config['channel_id'];
+        
+        $url = "https://api.telegram.org/bot{$botToken}/sendMessage";
 
         $payload = [
-            'chat_id' => $config['channel_id'],
+            'chat_id' => $channelId,
             'text' => $message,
             'parse_mode' => 'HTML',
         ];
 
+        // إضافة الصورة إذا كانت مفعّلة
+        if ($config['include_image'] && $opinion->image_path) {
+            $url = "https://api.telegram.org/bot{$botToken}/sendPhoto";
+            $payload['photo'] = url('storage/' . $opinion->image_path);
+            $payload['caption'] = $message;
+            unset($payload['text']);
+        }
+
         $response = Http::post($url, $payload);
 
         if ($response->successful()) {
-            $this->recordOpinionPost($opinion->id, 'telegram', $message, 'published', $response->json());
+            SocialMediaPost::create([
+                'opinion_id' => $opinion->id,
+                'platform' => 'telegram',
+                'message' => $message,
+                'status' => 'published',
+                'response' => $response->json(),
+                'published_at' => now(),
+            ]);
             return ['success' => true, 'response' => $response->json()];
         }
 
@@ -490,35 +526,6 @@ class SocialMediaService
         return ['success' => false, 'error' => 'Twitter publishing not implemented yet'];
     }
 
-    /**
-     * تسجيل منشور الفيديو في قاعدة البيانات
-     */
-    private function recordPost(?int $videoId, string $platform, string $message, string $status, ?array $response): void
-    {
-        SocialMediaPost::create([
-            'video_id' => $videoId,
-            'platform' => $platform,
-            'message' => $message,
-            'status' => $status,
-            'response' => $response,
-            'published_at' => now(),
-        ]);
-    }
-
-    /**
-     * تسجيل منشور مقال الرأي في قاعدة البيانات
-     */
-    private function recordOpinionPost(?int $opinionId, string $platform, string $message, string $status, ?array $response): void
-    {
-        SocialMediaPost::create([
-            'opinion_id' => $opinionId,
-            'platform' => $platform,
-            'message' => $message,
-            'status' => $status,
-            'response' => $response,
-            'published_at' => now(),
-        ]);
-    }
 
     /**
      * جدولة منشور فيديو
