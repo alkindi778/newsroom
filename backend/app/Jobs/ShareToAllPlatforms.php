@@ -67,6 +67,16 @@ class ShareToAllPlatforms implements ShouldQueue
 
             // بناء الرسالة والصورة
             [$message, $imagePath] = $this->prepareContent($content);
+            
+            // Log تفصيلي للمحتوى
+            Log::info('Content prepared for social media', [
+                'type' => $this->contentType,
+                'id' => $this->contentId,
+                'title' => $content->title ?? 'N/A',
+                'message' => $message,
+                'has_image' => !is_null($imagePath),
+                'image_path' => $imagePath ? (strlen($imagePath) > 100 ? substr($imagePath, 0, 100) . '...' : $imagePath) : null
+            ]);
 
             // النشر على المنصات المفعلة
             $this->publishToPlatforms($content, $message, $imagePath);
@@ -119,9 +129,15 @@ class ShareToAllPlatforms implements ShouldQueue
             $url = $this->getContentUrl($content);
             $template = config('social-media.templates.' . $this->contentType);
             
+            // الحصول على اسم الكاتب لمقالات الرأي
+            $authorName = '';
+            if ($this->contentType === 'opinion' && $content->writer) {
+                $authorName = $content->writer->name;
+            }
+            
             $message = str_replace(
-                ['{title}', '{link}'],
-                [$content->title, $url],
+                ['{title}', '{link}', '{author}'],
+                [$content->title, $url, $authorName],
                 $template
             );
         }

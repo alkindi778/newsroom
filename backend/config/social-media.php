@@ -61,6 +61,14 @@ return [
         'video' => '🎥 {title}
 
 {link}',
+        'opinion' => '✍️ {title}
+
+بقلم: {author}
+
+{link}',
+        'newspaper_issue' => '📰 {title}
+
+{link}',
         'breaking_news' => '🔴 عاجل: {title}
 
 {link}',
