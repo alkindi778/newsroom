@@ -228,9 +228,9 @@ class SocialMediaService
         ];
 
         // إضافة الصورة إذا كانت مفعّلة
-        if ($config['include_image'] && $article->image_path) {
+        if ($config['include_image'] && $article->image) {
             $url = "https://api.telegram.org/bot{$botToken}/sendPhoto";
-            $payload['photo'] = asset('storage/' . $article->image_path);
+            $payload['photo'] = url('storage/' . $article->image);
             $payload['caption'] = $message;
             unset($payload['text']);
         }
@@ -425,9 +425,9 @@ class SocialMediaService
         ];
 
         // إضافة الصورة إذا كانت مفعّلة
-        if ($config['include_image'] && $video->thumbnail_path) {
+        if ($config['include_image'] && $video->thumbnail) {
             $url = "https://api.telegram.org/bot{$botToken}/sendPhoto";
-            $payload['photo'] = url('storage/' . $video->thumbnail_path);
+            $payload['photo'] = url('storage/' . $video->thumbnail);
             $payload['caption'] = $message;
             unset($payload['text']);
         }
@@ -466,9 +466,9 @@ class SocialMediaService
         ];
 
         // إضافة الصورة إذا كانت مفعّلة
-        if ($config['include_image'] && $opinion->image_path) {
+        if ($config['include_image'] && $opinion->image) {
             $url = "https://api.telegram.org/bot{$botToken}/sendPhoto";
-            $payload['photo'] = url('storage/' . $opinion->image_path);
+            $payload['photo'] = url('storage/' . $opinion->image);
             $payload['caption'] = $message;
             unset($payload['text']);
         }
