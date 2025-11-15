@@ -113,7 +113,7 @@ Route::middleware(['auth', App\Http\Middleware\AdminMiddleware::class])->group(f
     });
     
     // Additional Category Routes
-    Route::middleware(['permission:manage_categories'])->group(function () {
+    Route::middleware(['permission:edit_categories'])->group(function () {
         Route::prefix('categories')->name('categories.')->group(function () {
             Route::patch('{category}/toggle-status', [CategoryController::class, 'toggleStatus'])->name('toggle-status');
             Route::post('bulk-action', [CategoryController::class, 'bulkAction'])->name('bulk-action');
