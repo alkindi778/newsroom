@@ -10,4 +10,16 @@ export default defineConfig({
         }),
         tailwindcss(),
     ],
+    build: {
+        rollupOptions: {
+            output: {
+                manualChunks: {
+                    // Split vendor libraries
+                    'vendor': ['alpinejs'],
+                    // Add more chunks as needed
+                }
+            }
+        },
+        chunkSizeWarningLimit: 1000, // Increase limit to 1000 KB
+    },
 });
