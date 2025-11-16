@@ -11,10 +11,12 @@ use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 use App\Helpers\MediaHelper;
+use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Activitylog\LogOptions;
 
 class Article extends Model implements HasMedia
 {
-    use SoftDeletes, InteractsWithMedia;
+    use SoftDeletes, InteractsWithMedia, LogsActivity;
     protected $fillable = [
         'title',
         'subtitle',
@@ -343,5 +345,19 @@ class Article extends Model implements HasMedia
         }
 
         return null;
+    }
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logOnly(['title', 'is_published', 'approval_status', 'is_breaking_news'])
+            ->logOnlyDirty()
+            ->dontSubmitEmptyLogs()
+            ->setDescriptionForEvent(fn(string $eventName) => match($eventName) {
+                'created' => 'تم إنشاء خبر جديد',
+                'updated' => 'تم تحديث الخبر',
+                'deleted' => 'تم حذف الخبر',
+                default => $eventName
+            });
     }
 }

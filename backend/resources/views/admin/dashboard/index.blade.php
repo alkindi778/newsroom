@@ -8,15 +8,35 @@
     <!-- Quick Stats -->
     @include('admin.dashboard.stats')
     
-    <!-- Charts Row -->
+    <!-- Activity Chart -->
+    @include('admin.dashboard.activity-chart')
+    
+    <!-- Charts & Breaking News Row -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
-        @include('admin.dashboard.charts')
+        <div>
+            @include('admin.dashboard.charts')
+        </div>
+        <div>
+            @include('admin.dashboard.breaking-news')
+        </div>
     </div>
     
-    <!-- Recent Activity -->
-    <div class="grid grid-cols-1 xl:grid-cols-3 gap-4 lg:gap-6">
-        @include('admin.dashboard.recent-articles')
-        @include('admin.dashboard.recent-activity')
+    <!-- Recent Content Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 lg:gap-6">
+        <!-- Recent Articles -->
+        <div>
+            @include('admin.dashboard.recent-articles')
+        </div>
+        
+        <!-- Top Articles -->
+        <div>
+            @include('admin.dashboard.top-articles')
+        </div>
+        
+        <!-- Recent Activity -->
+        <div>
+            @include('admin.dashboard.recent-activity')
+        </div>
     </div>
 </div>
 @endsection
@@ -25,11 +45,11 @@
 <script>
     // Dashboard specific JavaScript
     document.addEventListener('DOMContentLoaded', function() {
-        // Auto-refresh stats every 30 seconds
+        // Auto-refresh stats every 60 seconds
         setInterval(() => {
             // You can implement AJAX refresh here
-            console.log('Refreshing dashboard stats...');
-        }, 30000);
+            console.log('Dashboard refreshed at', new Date().toLocaleString('ar-EG'));
+        }, 60000);
     });
 </script>
 @endpush

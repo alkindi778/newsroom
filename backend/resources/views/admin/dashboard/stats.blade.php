@@ -1,48 +1,133 @@
 <!-- Statistics Cards -->
-<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6 mb-6">
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 mb-6">
     <!-- Total Articles -->
-    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 lg:p-6 hover:shadow-md transition-shadow duration-200">
-        <div class="flex items-center">
-            <div class="p-2 lg:p-3 rounded-full bg-blue-100 text-blue-600 flex-shrink-0">
-                <svg class="w-5 h-5 lg:w-6 lg:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                </svg>
+    <div class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl shadow-lg p-4 lg:p-6 hover:shadow-xl transition-all duration-200 transform hover:-translate-y-1">
+        <div class="flex items-center justify-between">
+            <div class="text-white">
+                <p class="text-xs lg:text-sm font-medium opacity-90 mb-1">إجمالي الأخبار</p>
+                <p class="text-2xl lg:text-3xl font-bold">{{ $stats['articles_count'] ?? 0 }}</p>
+                <p class="text-xs mt-2 opacity-75">
+                    <span class="inline-flex items-center">
+                        <i class="fas fa-check-circle ml-1"></i>
+                        {{ $stats['articles_published'] ?? 0 }} منشور
+                    </span>
+                </p>
             </div>
-            <div class="mr-3 lg:mr-4 min-w-0 flex-1">
-                <p class="text-xs lg:text-sm font-medium text-gray-600 truncate">إجمالي الأخبار</p>
-                <p class="text-xl lg:text-2xl font-semibold text-gray-900">{{ $stats['articles_count'] ?? 0 }}</p>
-            </div>
-        </div>
-    </div>
-
-    <!-- Total Categories -->
-    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 lg:p-6 hover:shadow-md transition-shadow duration-200">
-        <div class="flex items-center">
-            <div class="p-2 lg:p-3 rounded-full bg-green-100 text-green-600 flex-shrink-0">
-                <svg class="w-5 h-5 lg:w-6 lg:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
-                </svg>
-            </div>
-            <div class="mr-3 lg:mr-4 min-w-0 flex-1">
-                <p class="text-xs lg:text-sm font-medium text-gray-600 truncate">الأقسام</p>
-                <p class="text-xl lg:text-2xl font-semibold text-gray-900">{{ $stats['categories_count'] ?? 0 }}</p>
+            <div class="p-3 lg:p-4 rounded-full bg-white bg-opacity-20">
+                <i class="fas fa-newspaper text-2xl lg:text-3xl text-white"></i>
             </div>
         </div>
     </div>
 
-    <!-- Total Users -->
-    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 lg:p-6 hover:shadow-md transition-shadow duration-200">
-        <div class="flex items-center">
-            <div class="p-2 lg:p-3 rounded-full bg-purple-100 text-purple-600 flex-shrink-0">
-                <svg class="w-5 h-5 lg:w-6 lg:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path>
-                </svg>
+    <!-- Videos -->
+    <div class="bg-gradient-to-br from-red-500 to-red-600 rounded-xl shadow-lg p-4 lg:p-6 hover:shadow-xl transition-all duration-200 transform hover:-translate-y-1">
+        <div class="flex items-center justify-between">
+            <div class="text-white">
+                <p class="text-xs lg:text-sm font-medium opacity-90 mb-1">الفيديوهات</p>
+                <p class="text-2xl lg:text-3xl font-bold">{{ $stats['videos_count'] ?? 0 }}</p>
+                <p class="text-xs mt-2 opacity-75">
+                    <span class="inline-flex items-center">
+                        <i class="fas fa-play-circle ml-1"></i>
+                        محتوى مرئي
+                    </span>
+                </p>
             </div>
-            <div class="mr-3 lg:mr-4 min-w-0 flex-1">
-                <p class="text-xs lg:text-sm font-medium text-gray-600 truncate">المستخدمين</p>
-                <p class="text-xl lg:text-2xl font-semibold text-gray-900">{{ $stats['users_count'] ?? 0 }}</p>
+            <div class="p-3 lg:p-4 rounded-full bg-white bg-opacity-20">
+                <i class="fas fa-video text-2xl lg:text-3xl text-white"></i>
             </div>
         </div>
     </div>
 
+    <!-- Opinions -->
+    <div class="bg-gradient-to-br from-amber-500 to-amber-600 rounded-xl shadow-lg p-4 lg:p-6 hover:shadow-xl transition-all duration-200 transform hover:-translate-y-1">
+        <div class="flex items-center justify-between">
+            <div class="text-white">
+                <p class="text-xs lg:text-sm font-medium opacity-90 mb-1">مقالات الرأي</p>
+                <p class="text-2xl lg:text-3xl font-bold">{{ $stats['opinions_count'] ?? 0 }}</p>
+                <p class="text-xs mt-2 opacity-75">
+                    <span class="inline-flex items-center">
+                        <i class="fas fa-pen-fancy ml-1"></i>
+                        مقالات
+                    </span>
+                </p>
+            </div>
+            <div class="p-3 lg:p-4 rounded-full bg-white bg-opacity-20">
+                <i class="fas fa-pen-nib text-2xl lg:text-3xl text-white"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- Newspaper Issues -->
+    <div class="bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl shadow-lg p-4 lg:p-6 hover:shadow-xl transition-all duration-200 transform hover:-translate-y-1">
+        <div class="flex items-center justify-between">
+            <div class="text-white">
+                <p class="text-xs lg:text-sm font-medium opacity-90 mb-1">إصدارات الصحيفة</p>
+                <p class="text-2xl lg:text-3xl font-bold">{{ $stats['newspaper_issues_count'] ?? 0 }}</p>
+                <p class="text-xs mt-2 opacity-75">
+                    <span class="inline-flex items-center">
+                        <i class="fas fa-book-open ml-1"></i>
+                        عدد
+                    </span>
+                </p>
+            </div>
+            <div class="p-3 lg:p-4 rounded-full bg-white bg-opacity-20">
+                <i class="fas fa-newspaper text-2xl lg:text-3xl text-white"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Secondary Stats -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 mb-6">
+    <!-- Total Views -->
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 hover:shadow-md transition-shadow duration-200">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-xs font-medium text-gray-600 mb-1">إجمالي المشاهدات</p>
+                <p class="text-xl font-bold text-gray-900">{{ number_format($stats['total_views'] ?? 0) }}</p>
+            </div>
+            <div class="p-3 rounded-full bg-green-100">
+                <i class="fas fa-eye text-xl text-green-600"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- Breaking News -->
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 hover:shadow-md transition-shadow duration-200">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-xs font-medium text-gray-600 mb-1">أخبار عاجلة</p>
+                <p class="text-xl font-bold text-gray-900">{{ $stats['breaking_news_count'] ?? 0 }}</p>
+            </div>
+            <div class="p-3 rounded-full bg-red-100">
+                <i class="fas fa-bolt text-xl text-red-600"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pending Articles -->
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 hover:shadow-md transition-shadow duration-200">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-xs font-medium text-gray-600 mb-1">بانتظار الموافقة</p>
+                <p class="text-xl font-bold text-gray-900">{{ $stats['articles_pending'] ?? 0 }}</p>
+            </div>
+            <div class="p-3 rounded-full bg-yellow-100">
+                <i class="fas fa-clock text-xl text-yellow-600"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- Users -->
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 hover:shadow-md transition-shadow duration-200">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-xs font-medium text-gray-600 mb-1">المستخدمين</p>
+                <p class="text-xl font-bold text-gray-900">{{ $stats['users_count'] ?? 0 }}</p>
+            </div>
+            <div class="p-3 rounded-full bg-indigo-100">
+                <i class="fas fa-users text-xl text-indigo-600"></i>
+            </div>
+        </div>
+    </div>
 </div>
