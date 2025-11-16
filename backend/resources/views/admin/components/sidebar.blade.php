@@ -248,6 +248,31 @@
                 </li>
                 @endcan
                 
+                <!-- RSS Feeds Section -->
+                @can('view_rss_feeds')
+                <li class="pt-3 pb-2">
+                    <div class="flex items-center gap-2 px-4 py-2">
+                        <div class="h-px flex-1 bg-gradient-to-l from-orange-500/30 to-transparent"></div>
+                        <span class="text-xs font-bold text-orange-300/80 uppercase tracking-wider">RSS</span>
+                        <div class="h-px flex-1 bg-gradient-to-r from-orange-500/30 to-transparent"></div>
+                    </div>
+                </li>
+                <li>
+                    <a href="{{ route('admin.rss.index') }}" 
+                       class="group flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 {{ request()->routeIs('admin.rss.*') ? 'bg-gradient-to-l from-orange-600 to-orange-700 shadow-lg shadow-orange-500/30' : 'hover:bg-white/5 hover:translate-x-[-4px]' }}">
+                        <div class="w-9 h-9 flex items-center justify-center rounded-lg {{ request()->routeIs('admin.rss.*') ? 'bg-white/20' : 'bg-white/5 group-hover:bg-white/10' }} transition-colors">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 5c7.18 0 13 5.82 13 13M6 11a7 7 0 017 7m-6 0a1 1 0 11-2 0 1 1 0 012 0z"></path>
+                            </svg>
+                        </div>
+                        <span class="flex-1">تغذيات RSS</span>
+                        @if(request()->routeIs('admin.rss.*'))
+                        <div class="w-1.5 h-1.5 bg-white rounded-full animate-pulse"></div>
+                        @endif
+                    </a>
+                </li>
+                @endcan
+                
                 @canany(['view_users', 'manage_roles', 'manage_permissions'])
                 <!-- System Management Section -->
                 <li class="pt-3 pb-2">

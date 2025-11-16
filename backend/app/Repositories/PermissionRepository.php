@@ -93,11 +93,17 @@ class PermissionRepository implements PermissionRepositoryInterface
             'المستخدمين' => ['عرض المستخدمين', 'إنشاء المستخدمين', 'تعديل المستخدمين', 'حذف المستخدمين', 'إدارة المستخدمين', 'view_users', 'create_users', 'edit_users', 'delete_users', 'manage_users'],
             'الأدوار والصلاحيات' => ['إدارة الأدوار', 'إنشاء الأدوار', 'تعديل الأدوار', 'حذف الأدوار', 'إدارة الصلاحيات', 'إنشاء الصلاحيات', 'تعديل الصلاحيات', 'حذف الصلاحيات', 'manage_roles', 'create_roles', 'edit_roles', 'delete_roles', 'manage_permissions', 'create_permissions', 'edit_permissions', 'delete_permissions'],
             'الأخبار' => ['إدارة الأخبار', 'إنشاء الأخبار', 'تعديل الأخبار', 'نشر الأخبار', 'حذف الأخبار', 'عرض الأخبار', 'manage_articles', 'create_articles', 'edit_articles', 'publish_articles', 'delete_articles', 'view_articles'],
+            'الموافقة على الأخبار' => ['تقديم المقالات للموافقة', 'الموافقة على المقالات', 'رفض المقالات', 'عرض المقالات المعلقة', 'تعديل المقالات الخاصة المعلقة'],
             'سلة المهملات' => ['إدارة سلة المهملات', 'استعادة الأخبار', 'حذف نهائي للأخبار', 'manage_trash', 'restore_articles', 'force_delete_articles'],
             'الأخبار الشخصية' => ['تعديل الأخبار الشخصية', 'حذف الأخبار الشخصية', 'edit_own_articles', 'delete_own_articles'],
             'الأقسام' => ['عرض الأقسام', 'إنشاء الأقسام', 'تعديل الأقسام', 'حذف الأقسام', 'إدارة الأقسام', 'view_categories', 'create_categories', 'edit_categories', 'delete_categories', 'manage_categories'],
             'كُتاب الرأي' => ['عرض كُتاب الرأي', 'إنشاء كُتاب الرأي', 'تعديل كُتاب الرأي', 'حذف كُتاب الرأي', 'إدارة كُتاب الرأي'],
             'مقالات الرأي' => ['عرض مقالات الرأي', 'إنشاء مقالات الرأي', 'تعديل مقالات الرأي', 'حذف مقالات الرأي', 'نشر مقالات الرأي', 'إدارة مقالات الرأي'],
+            'إصدارات الصحف' => ['عرض إصدارات الصحف', 'إنشاء إصدارات الصحف', 'تعديل إصدارات الصحف', 'حذف إصدارات الصحف', 'نشر إصدارات الصحف', 'إبراز إصدارات الصحف', 'تحميل إصدارات الصحف', 'view_newspaper_issues'],
+            'قوالب الصفحة الرئيسية' => ['عرض قوالب الصفحة الرئيسية', 'إنشاء قوالب الصفحة الرئيسية', 'تعديل قوالب الصفحة الرئيسية', 'حذف قوالب الصفحة الرئيسية', 'إدارة قوالب الصفحة الرئيسية', 'view_homepage_sections', 'create_homepage_sections', 'edit_homepage_sections', 'delete_homepage_sections', 'manage_homepage_sections'],
+            'الإعلانات' => ['view_advertisements', 'create_advertisements', 'edit_advertisements', 'delete_advertisements', 'manage_advertisements'],
+            'رسائل التواصل' => ['view_contact_messages', 'manage_contact_messages', 'assign_contact_messages', 'delete_contact_messages', 'update_contact_message_status'],
+            'تغذيات RSS' => ['view_rss_feeds', 'create_rss_feeds', 'edit_rss_feeds', 'delete_rss_feeds', 'manage_rss_feeds'],
             'النظام' => ['manage_media', 'view_reports', 'manage_settings']
         ];
         

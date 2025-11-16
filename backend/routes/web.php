@@ -15,6 +15,9 @@ Route::get('/login', function () {
 Route::get('/sitemap.xml', [App\Http\Controllers\SitemapController::class, 'index'])->name('sitemap');
 Route::get('/sitemap-refresh', [App\Http\Controllers\SitemapController::class, 'refresh'])->name('sitemap.refresh');
 
+// RSS Feeds Routes
+Route::get('/rss/{slug}', [App\Http\Controllers\RssController::class, 'show'])->name('rss.show');
+
 // Admin Routes
 Route::prefix('admin')->name('admin.')->group(function () {
     require __DIR__.'/admin.php';

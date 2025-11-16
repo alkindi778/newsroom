@@ -415,4 +415,23 @@ Route::middleware(['auth', App\Http\Middleware\AdminMiddleware::class])->group(f
         Route::post('/posts/{post}/retry', [SocialMediaController::class, 'retryPost'])->name('retry-post');
         Route::delete('/posts/{post}', [SocialMediaController::class, 'deletePost'])->name('delete-post');
     });
+
+    // RSS Feeds Management
+    Route::middleware(['permission:view_rss_feeds'])->group(function () {
+        Route::get('rss', [App\Http\Controllers\Admin\RssFeedController::class, 'index'])->name('rss.index');
+    });
+    
+    Route::middleware(['permission:create_rss_feeds'])->group(function () {
+        Route::get('rss/create', [App\Http\Controllers\Admin\RssFeedController::class, 'create'])->name('rss.create');
+        Route::post('rss', [App\Http\Controllers\Admin\RssFeedController::class, 'store'])->name('rss.store');
+    });
+    
+    Route::middleware(['permission:edit_rss_feeds'])->group(function () {
+        Route::get('rss/{rssFeed}/edit', [App\Http\Controllers\Admin\RssFeedController::class, 'edit'])->name('rss.edit');
+        Route::put('rss/{rssFeed}', [App\Http\Controllers\Admin\RssFeedController::class, 'update'])->name('rss.update');
+    });
+    
+    Route::middleware(['permission:delete_rss_feeds'])->group(function () {
+        Route::delete('rss/{rssFeed}', [App\Http\Controllers\Admin\RssFeedController::class, 'destroy'])->name('rss.destroy');
+    });
 });
