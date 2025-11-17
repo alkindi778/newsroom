@@ -27,16 +27,48 @@
 
             {{-- Pagination Elements --}}
             <div class="hidden md:-mt-px md:flex">
-                @foreach ($paginator->getUrlRange(1, $paginator->lastPage()) as $page => $url)
-                    @if ($page == $paginator->currentPage())
+                @php
+                    $currentPage = $paginator->currentPage();
+                    $lastPage = $paginator->lastPage();
+                    $onEachSide = 2; // عدد الأرقام على كل جانب من الصفحة الحالية
+                    
+                    $start = max(1, $currentPage - $onEachSide);
+                    $end = min($lastPage, $currentPage + $onEachSide);
+                @endphp
+                
+                {{-- First Page --}}
+                @if($start > 1)
+                    <a href="{{ $paginator->url(1) }}" 
+                       class="relative inline-flex items-center border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-500 hover:bg-gray-50 focus:z-10 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500">
+                        1
+                    </a>
+                    @if($start > 2)
+                        <span class="relative inline-flex items-center border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-500">...</span>
+                    @endif
+                @endif
+                
+                {{-- Page Numbers --}}
+                @for($page = $start; $page <= $end; $page++)
+                    @if ($page == $currentPage)
                         <span class="relative z-10 inline-flex items-center border border-blue-500 bg-blue-50 px-4 py-2 text-sm font-medium text-blue-600 focus:z-20" aria-current="page">{{ $page }}</span>
                     @else
-                        <a href="{{ $url }}" 
+                        <a href="{{ $paginator->url($page) }}" 
                            class="relative inline-flex items-center border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-500 hover:bg-gray-50 focus:z-10 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500">
                             {{ $page }}
                         </a>
                     @endif
-                @endforeach
+                @endfor
+                
+                {{-- Last Page --}}
+                @if($end < $lastPage)
+                    @if($end < $lastPage - 1)
+                        <span class="relative inline-flex items-center border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-500">...</span>
+                    @endif
+                    <a href="{{ $paginator->url($lastPage) }}" 
+                       class="relative inline-flex items-center border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-500 hover:bg-gray-50 focus:z-10 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500">
+                        {{ $lastPage }}
+                    </a>
+                @endif
             </div>
 
             {{-- Next Page Link --}}

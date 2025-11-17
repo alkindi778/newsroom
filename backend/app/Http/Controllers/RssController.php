@@ -8,11 +8,18 @@ use Illuminate\Http\Response;
 
 class RssController extends Controller
 {
-    public function show($slug)
+    public function show($slug = null)
     {
-        $feed = RssFeed::where('slug', $slug)
-            ->where('is_active', true)
-            ->firstOrFail();
+        $query = RssFeed::where('is_active', true);
+
+        if ($slug) {
+            $query->where(function($builder) use ($slug) {
+                $builder->where('slug', $slug)
+                    ->orWhere('id', $slug);
+            });
+        }
+
+        $feed = $query->orderBy('title')->firstOrFail();
 
         // Get articles based on category filter
         $query = Article::where('is_published', true)

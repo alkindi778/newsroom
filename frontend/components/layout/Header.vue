@@ -15,6 +15,12 @@
           <div class="hidden md:flex items-center gap-6">
             <NuxtLink to="/about" class="hover:text-gray-300 transition-colors">من نحن</NuxtLink>
             <NuxtLink to="/contact" class="hover:text-gray-300 transition-colors">اتصل بنا</NuxtLink>
+            <a href="/rss" target="_blank" rel="noopener" class="flex items-center gap-1 hover:text-primary-200 transition-colors">
+              <span>RSS</span>
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4 4a16 16 0 0116 16M4 11a9 9 0 019 9M6 18a2 2 0 11-4 0 2 2 0 014 0z" />
+              </svg>
+            </a>
           </div>
         </div>
       </div>
@@ -98,7 +104,8 @@
               الرئيسية
             </NuxtLink>
           </li>
-          <li v-for="category in mainCategories" :key="category.id" class="relative group">
+          <!-- عرض أول 9 أقسام -->
+          <li v-for="category in visibleCategories" :key="category.id" class="relative group">
             <!-- إذا كان للقسم أطفال: عرض dropdown بدل الرابط -->
             <template v-if="hasChildren(category.id)">
               <button 
@@ -136,6 +143,7 @@
               {{ category.name }}
             </NuxtLink>
           </li>
+          
           <li>
             <NuxtLink 
               to="/opinions" 
@@ -144,6 +152,32 @@
             >
               مقالات الرأي
             </NuxtLink>
+          </li>
+          
+          <!-- قائمة "المزيد" للأقسام الإضافية -->
+          <li v-if="hasMoreCategories" class="relative group">
+            <button 
+              class="nav-link flex gap-1"
+              style="display: flex; align-items: center; justify-content: center;"
+            >
+              <span>المزيد</span>
+              <svg class="w-4 h-4 transition-transform group-hover:rotate-180" style="flex-shrink: 0; margin-top: 0;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"/>
+              </svg>
+            </button>
+            
+            <!-- Dropdown للأقسام الإضافية -->
+            <div class="absolute right-0 top-full mt-0 w-56 bg-white border border-gray-200 rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 max-h-96 overflow-y-auto">
+              <NuxtLink 
+                v-for="category in moreCategories" 
+                :key="category.id"
+                :to="`/category/${category.slug}`"
+                class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 first:rounded-t-lg last:rounded-b-lg transition-colors"
+                :class="{ 'bg-blue-50 text-blue-600': isActive(`/category/${category.slug}`) }"
+              >
+                {{ category.name }}
+              </NuxtLink>
+            </div>
           </li>
         </ul>
       </div>
@@ -165,7 +199,8 @@
                   الرئيسية
                 </NuxtLink>
               </li>
-              <li v-for="category in mainCategories" :key="category.id">
+              <!-- عرض أول 9 أقسام -->
+              <li v-for="category in visibleCategories" :key="category.id">
                 <!-- إذا كان للقسم أطفال: عرض dropdown -->
                 <template v-if="hasChildren(category.id)">
                   <button 
@@ -176,7 +211,7 @@
                     <span>{{ category.name }}</span>
                     <svg 
                       class="w-4 h-4 transition-transform" 
-                      :class="{ 'rotate-180': expandedMobileCategories.includes(category.id) }"
+                      :class="{ 'rotate-180': isCategoryExpanded(category.id) }"
                       fill="none" 
                       stroke="currentColor" 
                       viewBox="0 0 24 24"
@@ -187,7 +222,7 @@
                   
                   <!-- Submenu -->
                   <Transition name="slide-down">
-                    <ul v-if="expandedMobileCategories.includes(category.id)" class="space-y-1 mt-1 pr-4 border-r-2 border-gray-300">
+                    <ul v-if="isCategoryExpanded(category.id)" class="space-y-1 mt-1 pr-4 border-r-2 border-gray-300">
                       <li v-for="child in getChildren(category.id)" :key="child.id">
                         <NuxtLink 
                           :to="`/category/${child.slug}`"
@@ -213,6 +248,7 @@
                   {{ category.name }}
                 </NuxtLink>
               </li>
+              
               <li>
                 <NuxtLink 
                   to="/opinions" 
@@ -223,6 +259,41 @@
                   مقالات الرأي
                 </NuxtLink>
               </li>
+              
+              <!-- قائمة "المزيد" للأقسام الإضافية في الموبايل -->
+              <li v-if="hasMoreCategories">
+                <button 
+                  class="mobile-nav-link w-full text-right flex items-center justify-between"
+                  @click="toggleMobileSubmenu('more')"
+                >
+                  <span>المزيد</span>
+                  <svg 
+                    class="w-4 h-4 transition-transform" 
+                    :class="{ 'rotate-180': isCategoryExpanded('more') }"
+                    fill="none" 
+                    stroke="currentColor" 
+                    viewBox="0 0 24 24"
+                  >
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"/>
+                  </svg>
+                </button>
+                
+                <!-- الأقسام الإضافية -->
+                <Transition name="slide-down">
+                  <ul v-if="isCategoryExpanded('more')" class="space-y-1 mt-1 pr-4 border-r-2 border-gray-300">
+                    <li v-for="category in moreCategories" :key="category.id">
+                      <NuxtLink 
+                        :to="`/category/${category.slug}`"
+                        class="mobile-nav-link text-sm"
+                        :class="{ 'active': isActive(`/category/${category.slug}`) }"
+                        @click="closeMobileMenu"
+                      >
+                        {{ category.name }}
+                      </NuxtLink>
+                    </li>
+                  </ul>
+                </Transition>
+              </li>
             </ul>
           </nav>
 
@@ -231,6 +302,7 @@
             <div class="flex flex-col gap-2 text-sm">
               <NuxtLink to="/about" class="text-gray-600 hover:text-gray-900 px-3.5 py-2" @click="closeMobileMenu">من نحن</NuxtLink>
               <NuxtLink to="/contact" class="text-gray-600 hover:text-gray-900 px-3.5 py-2" @click="closeMobileMenu">اتصل بنا</NuxtLink>
+              <a href="/rss" target="_blank" rel="noopener" class="text-gray-600 hover:text-gray-900 px-3.5 py-2">RSS</a>
             </div>
           </div>
         </div>
@@ -247,9 +319,27 @@ const config = useRuntimeConfig()
 
 const showMobileMenu = ref(false)
 const showSearch = ref(false)
-const expandedMobileCategories = ref<number[]>([])
+const expandedMobileCategories = ref<(number | string)[]>([])
 const categories = computed(() => categoriesStore.categories)
 const mainCategories = computed(() => categoriesStore.getMainCategories)
+
+// تحديد عدد الأقسام المرئية (9 أقسام + الرئيسية + مقالات الرأي = 11 عنصر في القائمة)
+const MAX_VISIBLE_CATEGORIES = 9
+
+// الأقسام المرئية (أول 9 أقسام)
+const visibleCategories = computed(() => {
+  return mainCategories.value.slice(0, MAX_VISIBLE_CATEGORIES)
+})
+
+// الأقسام الإضافية (بعد الـ9 أقسام الأولى)
+const moreCategories = computed(() => {
+  return mainCategories.value.slice(MAX_VISIBLE_CATEGORIES)
+})
+
+// هل يوجد أقسام إضافية؟
+const hasMoreCategories = computed(() => {
+  return mainCategories.value.length > MAX_VISIBLE_CATEGORIES
+})
 
 // Check if a category has children
 const hasChildren = (categoryId: number) => {
@@ -261,13 +351,18 @@ const getChildren = (categoryId: number) => {
   return categoriesStore.getChildrenOf(categoryId)
 }
 
+// Helper function to check if category is expanded
+const isCategoryExpanded = (categoryId: number | string): boolean => {
+  return expandedMobileCategories.value.some(id => id === categoryId)
+}
+
 // Toggle mobile submenu
-const toggleMobileSubmenu = (categoryId: number) => {
-  const index = expandedMobileCategories.value.indexOf(categoryId)
+const toggleMobileSubmenu = (categoryId: number | string) => {
+  const index = expandedMobileCategories.value.findIndex(id => id === categoryId)
   if (index > -1) {
     expandedMobileCategories.value.splice(index, 1)
   } else {
-    expandedMobileCategories.value.push(categoryId)
+    expandedMobileCategories.value = [...expandedMobileCategories.value, categoryId]
   }
 }
 

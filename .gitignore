@@ -30,3 +30,7 @@ newsroom-key.pem
 *.log
 .idea/
 .vscode/
+
+# Local archives / DB dumps (do not commit)
+stc.zip
+adenstc_db.sql.gz

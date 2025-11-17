@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404 - الصفحة غير موجودة | انتقالي العاصمة عدن</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background-color: #f3f4f6; /* رمادي فاتح مثل الخلفية في الفرونت */
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .top-bar {
+            background-color: #0f172a; /* لون قريب من bg-navy */
+            color: #e5e7eb;
+            padding: 0.5rem 1.5rem;
+            font-size: 0.875rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .top-bar .brand {
+            font-weight: 700;
+            letter-spacing: 0.05em;
+        }
+
+        .top-bar a {
+            color: #e5e7eb;
+            text-decoration: none;
+            font-size: 0.8rem;
+        }
+
+        .top-bar a:hover {
+            text-decoration: underline;
+        }
+
+        .page-wrapper {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem 1rem;
+        }
+
+        .card {
+            background-color: #ffffff;
+            border-radius: 1rem;
+            box-shadow: 0 10px 30px rgba(15,23,42,0.12);
+            border: 1px solid #e5e7eb;
+            max-width: 640px;
+            width: 100%;
+            padding: 2.5rem 2rem;
+            text-align: center;
+        }
+
+        .logo-text {
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: #111827;
+            margin-bottom: 1.5rem;
+        }
+
+        .logo-text span {
+            color: #D4AF37; /* الذهبي المستخدم في الهيدر */
+        }
+
+        .error-code {
+            font-size: 3.75rem;
+            font-weight: 800;
+            color: #111827;
+            margin-bottom: 0.5rem;
+        }
+
+        .error-divider {
+            width: 4rem;
+            height: 0.25rem;
+            margin: 0 auto 1.5rem auto;
+            border-radius: 999px;
+            background: linear-gradient(to left, #D4AF37, #0f172a);
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            margin-bottom: 0.75rem;
+            color: #111827;
+        }
+
+        p {
+            font-size: 0.95rem;
+            margin-bottom: 1.5rem;
+            color: #4b5563;
+            line-height: 1.7;
+        }
+
+        .actions {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 0.75rem;
+            margin-top: 0.5rem;
+        }
+
+        .btn-primary {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.7rem 1.8rem;
+            border-radius: 999px;
+            border: none;
+            cursor: pointer;
+            background-color: #D4AF37;
+            color: #111827;
+            font-weight: 600;
+            font-size: 0.95rem;
+            text-decoration: none;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+            transition: transform 0.15s ease-out, box-shadow 0.15s ease-out, background-color 0.15s ease-out;
+        }
+
+        .btn-primary:hover {
+            background-color: #c49b2f;
+            transform: translateY(-1px);
+            box-shadow: 0 12px 30px rgba(0,0,0,0.18);
+        }
+
+        .btn-secondary {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.65rem 1.4rem;
+            border-radius: 999px;
+            border: 1px solid #d1d5db;
+            background-color: #ffffff;
+            color: #374151;
+            font-size: 0.9rem;
+            text-decoration: none;
+            transition: background-color 0.15s ease-out, color 0.15s ease-out;
+        }
+
+        .btn-secondary:hover {
+            background-color: #f3f4f6;
+        }
+
+        .hint {
+            margin-top: 1.5rem;
+            font-size: 0.8rem;
+            color: #6b7280;
+        }
+
+        @media (max-width: 640px) {
+            .card {
+                padding: 1.75rem 1.25rem;
+            }
+            .error-code {
+                font-size: 2.75rem;
+            }
+            h1 {
+                font-size: 1.25rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="page-wrapper">
+        <div class="card">
+            <div class="logo-text"><span>انتقالي العاصمة عدن</span></div>
+            <div class="error-code">404</div>
+            <div class="error-divider"></div>
+            <h1>عذراً، الصفحة غير موجودة</h1>
+            <p>
+                الرابط الذي حاولت الوصول إليه غير متوفر حالياً.
+                قد يكون تم نقل المحتوى أو حذفه.
+            </p>
+            <div class="actions">
+                <a href="/" class="btn-primary">العودة للصفحة الرئيسية</a>
+                <a href="/contact" class="btn-secondary">التواصل مع إدارة الموقع</a>
+            </div>
+            <div class="hint">
+                إذا استمر ظهور هذه الصفحة مع رابط صحيح، يرجى إبلاغ فريق الدعم الفني.
+            </div>
+        </div>
+    </div>
+</body>
+</html>

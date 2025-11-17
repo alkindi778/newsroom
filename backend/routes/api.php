@@ -12,6 +12,7 @@ use App\Http\Controllers\Api\PushSubscriptionController;
 use App\Http\Controllers\Api\ManifestController;
 use App\Http\Controllers\Api\ContactMessageController;
 use App\Http\Controllers\Api\SocialMediaController;
+use App\Http\Controllers\Api\RssFeedController;
 
 /*
 |--------------------------------------------------------------------------
@@ -75,6 +76,9 @@ Route::prefix('v1')->group(function () {
     Route::post('/videos/{id}/view', [VideoController::class, 'incrementView'])->whereNumber('id');
     Route::post('/videos/{id}/like', [VideoController::class, 'like'])->whereNumber('id');
     Route::get('/videos/{slug}', [VideoController::class, 'show']);
+
+    // RSS Feeds (Public)
+    Route::get('/rss-feeds', [RssFeedController::class, 'index']);
 
     // Newspaper Issues (Public)
     Route::get('/newspaper-issues', [NewspaperIssueController::class, 'index']);
