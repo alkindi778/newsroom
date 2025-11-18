@@ -26,6 +26,12 @@ return [
 
         'role' => Spatie\Permission\Models\Role::class,
 
+        /*
+         * The User model class name.
+         */
+
+        'user' => App\Models\User::class,
+
     ],
 
     'table_names' => [
