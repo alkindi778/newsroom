@@ -34,6 +34,10 @@ export const useOpinionsStore = defineStore('opinions', {
         if (params.page) queryParams.append('page', params.page.toString())
         if (params.per_page) queryParams.append('per_page', params.per_page.toString())
         
+        // إضافة الترتيب (الافتراضي: من الأحدث)
+        queryParams.append('sort_by', 'published_at')
+        queryParams.append('sort_dir', 'desc')
+        
         const response = await apiFetch<any>(
           `/opinions?${queryParams.toString()}`
         )

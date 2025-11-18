@@ -251,7 +251,7 @@ const fetchWriterOpinions = async (page: number = 1) => {
   
   try {
     const response = await apiFetch<any>(
-      `/writers/${writer.value.id}/opinions?page=${page}&per_page=${perPage}&status=published`
+      `/writers/${writer.value.id}/opinions?page=${page}&per_page=${perPage}&status=published&sort_by=published_at&sort_dir=desc`
     )
     
     if (response && response.data) {
