@@ -20,7 +20,7 @@ class ContactMessageController extends Controller
                 'full_name' => 'required|string|max:255',
                 'email' => 'required|email|max:255',
                 'phone' => 'required|string|max:20',
-                'meeting_type' => 'required|in:private,general,urgent',
+                'meeting_type' => 'required|in:contact,complaint,suggestion',
                 'subject' => 'required|string|max:255',
                 'message' => 'required|string|min:10',
             ], [
@@ -42,8 +42,27 @@ class ContactMessageController extends Controller
                 ], 422);
             }
 
+            // استخدام البيانات المتحققة فقط
+            $data = $validator->validated();
+
+            // تحويل قيم meeting_type القادمة من الفرونت إلى القيم المخزّنة في قاعدة البيانات
+            // DB enum: ['private', 'general', 'urgent']
+            if (isset($data['meeting_type'])) {
+                switch ($data['meeting_type']) {
+                    case 'contact':
+                        $data['meeting_type'] = 'general';
+                        break;
+                    case 'complaint':
+                        $data['meeting_type'] = 'urgent';
+                        break;
+                    case 'suggestion':
+                        $data['meeting_type'] = 'private';
+                        break;
+                }
+            }
+
             // إنشاء الرسالة
-            $message = ContactMessage::create($request->all());
+            $message = ContactMessage::create($data);
 
             return response()->json([
                 'success' => true,
