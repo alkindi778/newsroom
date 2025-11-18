@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Facades\URL;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 use App\Jobs\OptimizeMediaImage;
 use Illuminate\Support\Facades\Log;
@@ -30,6 +31,11 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // فرض HTTPS في Production أو عند تفعيل APP_FORCE_HTTPS
+        if ($this->app->environment('production') || config('app.force_https')) {
+            URL::forceScheme('https');
+        }
+
         // الضغط يتم الآن في MediaLibraryController مباشرة بعد الرفع
         // لا حاجة لـ Event Listener هنا
 
