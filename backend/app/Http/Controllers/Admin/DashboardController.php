@@ -18,6 +18,12 @@ class DashboardController extends Controller
 {
     public function index()
     {
+        // إذا كان المستخدم سكرتير، حوّله مباشرة إلى رسائل التواصل
+        $user = auth()->user();
+        if ($user && $user->hasRole('سكرتير')) {
+            return redirect()->route('admin.contact-messages.index');
+        }
+
         // Main statistics
         $stats = [
             'articles_count' => Article::count(),

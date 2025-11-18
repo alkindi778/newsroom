@@ -28,7 +28,36 @@
         
         <!-- Navigation -->
         <nav class="flex-1 px-4 py-6 overflow-y-auto sidebar-scroll">
-            <ul class="space-y-1">
+            @php
+                $user = auth()->user();
+            @endphp
+
+            @if($user && $user->hasRole('سكرتير'))
+                <!-- Sidebar مبسّط لدور السكرتير: رسائل التواصل فقط -->
+                <ul class="space-y-1">
+                    <li>
+                        <a href="{{ route('admin.contact-messages.index') }}" 
+                           class="group flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 {{ request()->routeIs('admin.contact-messages.*') ? 'bg-gradient-to-l from-cyan-600 to-cyan-700 shadow-lg shadow-cyan-500/30' : 'hover:bg-white/5 hover:translate-x-[-4px]' }}">
+                            <div class="w-9 h-9 flex items-center justify-center rounded-lg {{ request()->routeIs('admin.contact-messages.*') ? 'bg-white/20' : 'bg-white/5 group-hover:bg-white/10' }} transition-colors">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                                </svg>
+                            </div>
+                            <span class="flex-1">رسائل التواصل</span>
+                            @php
+                                $newMessagesCount = \App\Models\ContactMessage::where('status', 'new')->count();
+                            @endphp
+                            @if($newMessagesCount > 0)
+                            <span class="px-2 py-0.5 bg-red-500 text-white text-xs font-bold rounded-full">{{ $newMessagesCount }}</span>
+                            @endif
+                            @if(request()->routeIs('admin.contact-messages.*'))
+                            <div class="w-1.5 h-1.5 bg-white rounded-full animate-pulse"></div>
+                            @endif
+                        </a>
+                    </li>
+                </ul>
+            @else
+                <ul class="space-y-1">
                 <li>
                     <a href="{{ route('admin.dashboard') }}" 
                        class="group flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 {{ request()->routeIs('admin.dashboard') ? 'bg-gradient-to-l from-blue-600 to-blue-700 shadow-lg shadow-blue-500/30' : 'hover:bg-white/5 hover:translate-x-[-4px]' }}">
@@ -442,8 +471,9 @@
                         @endif
                     </a>
                 </li>
-                @endcan
+                @endcanany
             </ul>
+            @endif
         </nav>
         
         <!-- User Info & Logout -->
