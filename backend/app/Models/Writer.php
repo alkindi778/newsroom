@@ -134,10 +134,24 @@ class Writer extends Model implements HasMedia
         
         // fallback للصور القديمة
         if ($this->image) {
-            // جميع الصور في storage/media/old_photos
-            // المسار في DB: old_photos/filename.jpg
-            // المسار الفعلي: storage/media/old_photos/filename.jpg
-            return asset('storage/media/' . $this->image);
+            // تحقق إذا كان المسار يحتوي بالفعل على 'storage/media/'
+            if (str_starts_with($this->image, 'storage/media/')) {
+                // المسار يحتوي على storage/media/ بالفعل - استخدمه مباشرة
+                if (file_exists(public_path($this->image))) {
+                    return asset($this->image);
+                }
+            } elseif (str_starts_with($this->image, 'storage/')) {
+                // المسار يحتوي على storage/ فقط - أضف media/
+                $correctedPath = str_replace('storage/', 'storage/media/', $this->image);
+                if (file_exists(public_path($correctedPath))) {
+                    return asset($correctedPath);
+                }
+            } else {
+                // المسار لا يحتوي على storage/ - أضف storage/media/
+                if (file_exists(public_path('storage/media/' . $this->image))) {
+                    return asset('storage/media/' . $this->image);
+                }
+            }
         }
         
         // Default avatar

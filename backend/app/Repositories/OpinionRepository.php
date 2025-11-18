@@ -16,7 +16,7 @@ class OpinionRepository implements OpinionRepositoryInterface
         $this->model = $model;
     }
 
-    public function getAllWithFilters($search = null, $status = null, $writerId = null, $featured = null, $sortBy = 'created_at', $sortDirection = 'desc', $perPage = 10): LengthAwarePaginator
+    public function getAllWithFilters($search = null, $status = null, $writerId = null, $featured = null, $sortBy = 'published_at', $sortDirection = 'desc', $perPage = 10): LengthAwarePaginator
     {
         $query = $this->model->with('writer');
 
@@ -42,12 +42,13 @@ class OpinionRepository implements OpinionRepositoryInterface
             $query->featured();
         }
 
-        // الترتيب
-        $allowedSorts = ['title', 'created_at', 'published_at', 'views', 'likes'];
+        // الترتيب - من الأحدث للأقدم حسب تاريخ النشر
+        $allowedSorts = ['id', 'title', 'created_at', 'published_at', 'views', 'likes'];
         if (in_array($sortBy, $allowedSorts)) {
             $query->orderBy($sortBy, $sortDirection);
         } else {
-            $query->orderBy('created_at', 'desc');
+            // الترتيب الافتراضي: من الأحدث للأقدم حسب تاريخ النشر
+            $query->orderByRaw('COALESCE(published_at, created_at) DESC');
         }
 
         return $query->paginate($perPage);

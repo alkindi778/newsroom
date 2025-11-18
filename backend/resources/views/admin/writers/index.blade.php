@@ -61,8 +61,8 @@
                         <td class="px-6 py-4 whitespace-nowrap">
                             <div class="flex items-center">
                                 <div class="flex-shrink-0 h-12 w-12">
-                                    @if($writer->image)
-                                    <img class="h-12 w-12 rounded-full object-cover" src="{{ asset('storage/' . $writer->image) }}" alt="{{ $writer->name }}">
+                                    @if($writer->image_url)
+                                    <img class="h-12 w-12 rounded-full object-cover" src="{{ $writer->image_url }}" alt="{{ $writer->name }}" loading="lazy">
                                     @else
                                     <div class="h-12 w-12 rounded-full bg-gray-300 flex items-center justify-center">
                                         <svg class="h-6 w-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">

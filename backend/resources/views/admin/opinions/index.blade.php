@@ -103,12 +103,12 @@
                     <tr class="hover:bg-gray-50">
                         <td class="px-6 py-4">
                             <div class="flex items-center">
-                                @if($opinion->image)
+                                @if($opinion->image_url)
                                 <div class="flex-shrink-0 h-12 w-12">
-                                    <img class="h-12 w-12 rounded object-cover" src="{{ asset('storage/' . $opinion->image) }}" alt="{{ $opinion->title }}">
+                                    <img class="h-12 w-12 rounded object-cover" src="{{ $opinion->image_url }}" alt="{{ $opinion->title }}" loading="lazy">
                                 </div>
                                 @endif
-                                <div class="{{ $opinion->image ? 'mr-4' : '' }}">
+                                <div class="{{ $opinion->image_url ? 'mr-4' : '' }}">
                                     <div class="text-sm font-medium text-gray-900 line-clamp-2">{{ $opinion->title }}</div>
                                     @if($opinion->excerpt)
                                     <div class="text-sm text-gray-500 line-clamp-1 mt-1">{{ $opinion->excerpt }}</div>
@@ -118,12 +118,12 @@
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
                             <div class="flex items-center">
-                                @if($opinion->writer->image)
+                                @if($opinion->writer->image_url)
                                 <div class="flex-shrink-0 h-8 w-8">
-                                    <img class="h-8 w-8 rounded-full object-cover" src="{{ asset('storage/' . $opinion->writer->image) }}" alt="{{ $opinion->writer->name }}">
+                                    <img class="h-8 w-8 rounded-full object-cover" src="{{ $opinion->writer->image_url }}" alt="{{ $opinion->writer->name }}" loading="lazy">
                                 </div>
                                 @endif
-                                <div class="{{ $opinion->writer->image ? 'mr-3' : '' }}">
+                                <div class="{{ $opinion->writer->image_url ? 'mr-3' : '' }}">
                                     <div class="text-sm font-medium text-gray-900">{{ $opinion->writer->name }}</div>
                                 </div>
                             </div>

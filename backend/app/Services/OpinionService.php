@@ -24,7 +24,7 @@ class OpinionService
     /**
      * الحصول على جميع مقالات الرأي مع الفلاتر
      */
-    public function getAllWithFilters($search = null, $status = null, $writerId = null, $featured = null, $sortBy = 'created_at', $sortDirection = 'desc', $perPage = 10)
+    public function getAllWithFilters($search = null, $status = null, $writerId = null, $featured = null, $sortBy = 'published_at', $sortDirection = 'desc', $perPage = 10)
     {
         try {
             return $this->opinionRepository->getAllWithFilters($search, $status, $writerId, $featured, $sortBy, $sortDirection, $perPage);

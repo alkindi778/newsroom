@@ -211,8 +211,23 @@ class Opinion extends Model implements HasMedia
             $webpPath = $this->getWebPVersion($imagePath);
             $finalPath = $webpPath ?: $imagePath;
             
-            if (file_exists(public_path('storage/' . $finalPath))) {
-                return asset('storage/' . $finalPath);
+            // تحقق إذا كان المسار يحتوي بالفعل على 'storage/media/'
+            if (str_starts_with($finalPath, 'storage/media/')) {
+                // المسار يحتوي على storage/media/ بالفعل - استخدمه مباشرة
+                if (file_exists(public_path($finalPath))) {
+                    return asset($finalPath);
+                }
+            } elseif (str_starts_with($finalPath, 'storage/')) {
+                // المسار يحتوي على storage/ فقط - أضف media/
+                $correctedPath = str_replace('storage/', 'storage/media/', $finalPath);
+                if (file_exists(public_path($correctedPath))) {
+                    return asset($correctedPath);
+                }
+            } else {
+                // المسار لا يحتوي على storage/ - أضف storage/media/
+                if (file_exists(public_path('storage/media/' . $finalPath))) {
+                    return asset('storage/media/' . $finalPath);
+                }
             }
         }
         

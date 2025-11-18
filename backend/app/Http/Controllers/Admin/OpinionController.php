@@ -29,7 +29,7 @@ class OpinionController extends Controller
                 $request->get('status'),
                 $request->get('writer'),
                 $request->get('featured'),
-                $request->get('sort_by', 'created_at'),
+                $request->get('sort_by', 'published_at'),
                 $request->get('sort_direction', 'desc'),
                 10
             );
