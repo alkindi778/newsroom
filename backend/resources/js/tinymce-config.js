@@ -10,24 +10,13 @@ import 'tinymce/skins/ui/oxide/skin.css';
 import 'tinymce/skins/ui/oxide/content.css';
 import 'tinymce/skins/content/default/content.css';
 
-// Import plugins
+// Import only essential plugins (باقي الـ plugins تحمّل عند الطلب)
 import 'tinymce/plugins/lists';
-import 'tinymce/plugins/advlist';
 import 'tinymce/plugins/link';
 import 'tinymce/plugins/image';
-import 'tinymce/plugins/table';
+import 'tinymce/plugins/directionality';
 import 'tinymce/plugins/code';
 import 'tinymce/plugins/fullscreen';
-import 'tinymce/plugins/directionality';
-import 'tinymce/plugins/visualblocks';
-import 'tinymce/plugins/wordcount';
-import 'tinymce/plugins/charmap';
-import 'tinymce/plugins/searchreplace';
-import 'tinymce/plugins/insertdatetime';
-import 'tinymce/plugins/media';
-import 'tinymce/plugins/anchor';
-import 'tinymce/plugins/autolink';
-import 'tinymce/plugins/autosave';
 
 /**
  * Helper: الحصول على المسار الديناميكي
@@ -58,20 +47,15 @@ export function initTinyMCE(selector = '#content') {
         // الاتجاه (RTL للعربية)
         directionality: 'rtl',
         
-        // الإضافات الاحترافية
+        // Plugins الأساسية فقط
         plugins: [
-            'advlist', 'autolink', 'lists', 'link', 'image', 'charmap',
-            'searchreplace', 'visualblocks', 'code', 'fullscreen',
-            'insertdatetime', 'media', 'table', 'wordcount',
-            'directionality', 'anchor', 'autosave'
+            'lists', 'link', 'image', 'code', 'fullscreen', 'directionality'
         ],
         
-        // شريط أدوات احترافي متعدد الأسطر
-        toolbar1: 'undo redo | blocks | bold italic underline strikethrough | ' +
-                  'forecolor backcolor | alignleft aligncenter alignright alignjustify',
-        
-        toolbar2: 'bullist numlist outdent indent | link image multiimage media table | ' +
-                  'charmap insertdatetime | searchreplace visualblocks code fullscreen | ltr rtl',
+        // شريط أدوات مبسّط وسريع
+        toolbar: 'undo redo | blocks | bold italic underline | forecolor backcolor | ' +
+                 'alignleft aligncenter alignright alignjustify | ' +
+                 'bullist numlist | link image multiimage | code fullscreen | ltr rtl',
         
         // إعدادات الفقرات
         forced_root_block: 'p',
@@ -82,17 +66,6 @@ export function initTinyMCE(selector = '#content') {
         
         // Enter يُنشئ فقرة جديدة، Shift+Enter لكسر السطر
         newline_behavior: 'block',
-        
-        // إعدادات القوائم المتقدمة
-        advlist_bullet_styles: 'disc,circle,square',
-        advlist_number_styles: 'default,lower-alpha,lower-roman,upper-alpha,upper-roman',
-        
-        // إعدادات الجداول
-        table_toolbar: 'tableprops tabledelete | tableinsertrowbefore tableinsertrowafter tabledeleterow | tableinsertcolbefore tableinsertcolafter tabledeletecol',
-        table_appearance_options: false,
-        table_advtab: false,
-        table_cell_advtab: false,
-        table_row_advtab: false,
         
         // تحسين التجربة
         paste_as_text: false,
@@ -111,13 +84,6 @@ export function initTinyMCE(selector = '#content') {
         image_title: true,
         image_description: true,
         image_dimensions: true,
-        
-        // Autosave
-        autosave_ask_before_unload: true,
-        autosave_interval: '30s',
-        autosave_prefix: 'tinymce-autosave-{path}{query}-{id}-',
-        autosave_restore_when_empty: false,
-        autosave_retention: '20m',
         
         // خيارات المحتوى مع تنسيق الفقرات
         content_style: `
