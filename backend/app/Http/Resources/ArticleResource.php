@@ -14,6 +14,20 @@ class ArticleResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+        // Debugging: استخراج مسارات الصور من المحتوى
+        if ($request->routeIs('api.v1.articles.show') && $this->content) {
+            preg_match_all('/<img[^>]+src=["\']([^"\']+)["\'][^>]*>/i', $this->content, $matches);
+            $imageSrcs = $matches[1] ?? [];
+            
+            \Log::info('📰 Article Resource - Images Debug', [
+                'article_id' => $this->id,
+                'article_title' => $this->title,
+                'image_path' => $this->image_path,
+                'content_images' => $imageSrcs,
+                'total_images' => count($imageSrcs),
+            ]);
+        }
+        
         return [
             'id' => $this->id,
             'title' => $this->title,

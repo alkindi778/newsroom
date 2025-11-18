@@ -31,6 +31,14 @@ export default defineNuxtConfig({
       // تقليل fetch errors أثناء التطوير
       hmr: {
         overlay: false
+      },
+      // Proxy للـ storage في بيئة التطوير
+      proxy: {
+        '/storage': {
+          target: 'http://localhost/newsroom/backend/public',
+          changeOrigin: true,
+          secure: false
+        }
       }
     }
   },

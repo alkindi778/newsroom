@@ -40,7 +40,8 @@ class EmbeddingService
         try {
             $this->validateApiKey();
             
-            $response = Http::withHeader('x-goog-api-key', $this->apiKey)
+            $response = Http::timeout(60)
+                ->withHeader('x-goog-api-key', $this->apiKey)
                 ->post("{$this->baseUrl}/{$this->model}:embedContent", [
                     'model' => "models/{$this->model}",
                     'content' => [
@@ -93,7 +94,8 @@ class EmbeddingService
             
             $parts = array_map(fn($text) => ['text' => $text], $texts);
 
-            $response = Http::withHeader('x-goog-api-key', $this->apiKey)
+            $response = Http::timeout(60)
+                ->withHeader('x-goog-api-key', $this->apiKey)
                 ->post("{$this->baseUrl}/{$this->model}:embedContent", [
                     'model' => "models/{$this->model}",
                     'content' => [

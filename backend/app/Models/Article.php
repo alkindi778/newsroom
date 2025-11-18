@@ -275,7 +275,10 @@ class Article extends Model implements HasMedia
             // تحقق من وجود نسخة WebP
             $webpPath = $this->getWebPVersion($imagePath);
             $finalPath = $webpPath ?: $imagePath;
-            return asset('storage/' . $finalPath);
+            
+            // إرجاع مسار نسبي بدلاً من URL كامل
+            // Frontend سيضيف domain بنفسه
+            return '/storage/' . $finalPath;
         }
 
         return null;
@@ -297,7 +300,7 @@ class Article extends Model implements HasMedia
             $imagePath = $this->attributes['featured_image'];
             $webpPath = $this->getWebPVersion($imagePath);
             $finalPath = $webpPath ?: $imagePath;
-            return asset('storage/' . $finalPath);
+            return '/storage/' . $finalPath;
         }
 
         // Final fallback to main image

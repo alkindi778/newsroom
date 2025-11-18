@@ -249,7 +249,45 @@ const { data: articleData, error: fetchError } = await useAsyncData(
   }
 )
 
-const article = computed(() => articleData.value)
+const article = computed(() => {
+  const data = articleData.value
+  
+  // Debugging logs
+  if (data && process.client) {
+    console.log('🔍 Article Data:', {
+      id: data.id,
+      title: data.title,
+      image: data.image,
+      content_length: data.content?.length || 0
+    })
+    
+    // استخراج الصور من المحتوى
+    const imgRegex = /<img[^>]+src="([^">]+)"/g
+    const matches = [...(data.content || '').matchAll(imgRegex)]
+    const imageSrcs = matches.map(m => m[1])
+    
+    console.log('🖼️ Images in content:', imageSrcs)
+    console.log('📊 Total images:', imageSrcs.length)
+    
+    // فحص الصور بعد التحميل
+    setTimeout(() => {
+      const imgs = document.querySelectorAll('.article-content img')
+      console.log('🎨 DOM Images after render:', imgs.length)
+      imgs.forEach((img: any, index) => {
+        console.log(`  Image ${index + 1}:`, {
+          src: img.src,
+          complete: img.complete,
+          naturalWidth: img.naturalWidth,
+          naturalHeight: img.naturalHeight,
+          error: img.complete && img.naturalWidth === 0
+        })
+      })
+    }, 1000)
+  }
+  
+  return data
+})
+
 const loading = ref(false)
 const error = computed(() => fetchError.value?.message || null)
 const relatedArticles = computed(() => articlesStore.articles.slice(0, 3))
