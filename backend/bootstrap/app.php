@@ -22,6 +22,9 @@ return Application::configure(basePath: dirname(__DIR__))
         }
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        // Trust all proxies for HTTPS detection
+        $middleware->trustProxies(at: '*');
+        
         // تفعيل CORS لجميع routes
         $middleware->api(prepend: [
             \Illuminate\Http\Middleware\HandleCors::class,
