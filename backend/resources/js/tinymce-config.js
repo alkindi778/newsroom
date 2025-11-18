@@ -52,10 +52,12 @@ export function initTinyMCE(selector = '#content') {
             'lists', 'link', 'image', 'code', 'fullscreen', 'directionality'
         ],
         
-        // شريط أدوات مبسّط وسريع
-        toolbar: 'undo redo | blocks | bold italic underline | forecolor backcolor | ' +
-                 'alignleft aligncenter alignright alignjustify | ' +
-                 'bullist numlist | link image multiimage | code fullscreen | ltr rtl',
+        // شريط أدوات على سطرين واضحين
+        toolbar1: 'undo redo | blocks | bold italic underline strikethrough | ' +
+                  'forecolor backcolor | alignleft aligncenter alignright alignjustify',
+        
+        toolbar2: 'bullist numlist outdent indent | link image multiimage | ' +
+                  'code fullscreen | ltr rtl',
         
         // إعدادات الفقرات
         forced_root_block: 'p',
