@@ -67,15 +67,17 @@ class ArticleRepository implements ArticleRepositoryInterface
             $query->whereDate('created_at', $request->date);
         }
 
-        // Sorting options
-        $sortField = $request->get('sort', 'created_at');
+        // Sorting options - دائماً من الأحدث للأقدم حسب تاريخ النشر
+        $sortField = $request->get('sort', 'published_at');
         $sortDirection = $request->get('direction', 'desc');
         
-        $allowedSortFields = ['created_at', 'updated_at', 'title', 'published_at'];
+        $allowedSortFields = ['id', 'created_at', 'updated_at', 'title', 'published_at'];
         if (in_array($sortField, $allowedSortFields)) {
             $query->orderBy($sortField, $sortDirection);
         } else {
-            $query->latest();
+            // الترتيب الافتراضي: من الأحدث للأقدم حسب تاريخ النشر
+            // إذا كان published_at فارغ، نستخدم id (الأحدث = ID أكبر)
+            $query->orderByRaw('COALESCE(published_at, created_at) DESC');
         }
 
         return $query->paginate($request->get('per_page', 10));
