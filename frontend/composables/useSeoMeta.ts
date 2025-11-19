@@ -151,9 +151,13 @@ export const useAppSeoMeta = () => {
     let articleImage = ''
 
     if (imagePath) {
-      articleImage = imagePath.startsWith('http')
-        ? imagePath
-        : `${siteUrl}/storage/${imagePath}`
+      if (imagePath.startsWith('http')) {
+        articleImage = imagePath
+      } else {
+        // إزالة /storage/ من البداية إذا كان موجود
+        const cleanPath = imagePath.startsWith('/storage/') ? imagePath.substring(9) : imagePath
+        articleImage = `${siteUrl}/storage/${cleanPath}`
+      }
       console.log('Article Image Path:', imagePath, '-> Full URL:', articleImage)
     } else {
       console.log('No article image found, will use fallback')
@@ -282,9 +286,13 @@ export const useAppSeoMeta = () => {
     let opinionImage = ''
 
     if (imagePath) {
-      opinionImage = imagePath.startsWith('http')
-        ? imagePath
-        : `${siteUrl}/storage/${imagePath}`
+      if (imagePath.startsWith('http')) {
+        opinionImage = imagePath
+      } else {
+        // إزالة /storage/ من البداية إذا كان موجود
+        const cleanPath = imagePath.startsWith('/storage/') ? imagePath.substring(9) : imagePath
+        opinionImage = `${siteUrl}/storage/${cleanPath}`
+      }
     }
 
     let publisherLogo = ''
