@@ -5,13 +5,14 @@
         <!-- عن الموقع -->
         <div>
           <img 
-            v-if="siteLogo" 
-            :src="siteLogo" 
+            v-if="footerLogo || siteLogo" 
+            :src="footerLogo || siteLogo" 
             :alt="siteName"
-            :style="{ width: logoWidth + 'px', height: 'auto', maxWidth: '100%' }"
-            class="mb-4 logo-white"
+            :style="{ width: footerLogoWidth + 'px', height: 'auto', maxWidth: '100%' }"
+            class="mb-4"
+            :class="{ 'logo-white': !footerLogo }"
           />
-          <h3 v-if="!siteLogo" class="text-white text-xl font-bold mb-4">{{ siteName }}</h3>
+          <h3 v-if="!footerLogo && !siteLogo" class="text-white text-xl font-bold mb-4">{{ siteName }}</h3>
           <p class="text-sm mb-4">
             {{ siteDescription }}
           </p>
@@ -124,6 +125,18 @@ const siteLogo = computed(() => {
 const logoWidth = computed(() => {
   const width = settingsStore.getSetting('site_logo_width', '180')
   return parseInt(width) || 180
+})
+
+// Footer Logo Settings
+const footerLogo = computed(() => {
+  const logo = settingsStore.getSetting('footer_logo')
+  if (!logo) return null
+  // إذا كان الشعار يبدأ بـ / نستخدمه مباشرة، وإلا نضيف storage/
+  return logo.startsWith('http') ? logo : `${(config as any).public.apiBase.replace('/api/v1', '')}/storage/${logo}`
+})
+const footerLogoWidth = computed(() => {
+  const width = settingsStore.getSetting('footer_logo_width', '150')
+  return parseInt(width) || 150
 })
 
 const handleSubscribe = () => {
