@@ -13,6 +13,7 @@ use App\Http\Controllers\Api\ManifestController;
 use App\Http\Controllers\Api\ContactMessageController;
 use App\Http\Controllers\Api\SocialMediaController;
 use App\Http\Controllers\Api\RssFeedController;
+use App\Http\Controllers\Api\SmartSummaryController;
 
 /*
 |--------------------------------------------------------------------------
@@ -43,6 +44,13 @@ Route::prefix('v1')->group(function () {
     Route::get('/articles/{article}/similar', [SearchController::class, 'similar']);
     Route::get('/articles/{article}/check-duplicates', [SearchController::class, 'checkDuplicates']);
     Route::get('/articles/{slug}', [ArticleController::class, 'show']);
+    
+    // Smart Summary for Articles
+    Route::post('/articles/{articleId}/smart-summary', [SmartSummaryController::class, 'generateSummary']);
+    Route::get('/articles/{articleId}/smart-summary', [SmartSummaryController::class, 'getCachedSummary']);
+    Route::delete('/articles/{articleId}/smart-summary', [SmartSummaryController::class, 'clearCache']);
+    Route::post('/articles/smart-summary/batch', [SmartSummaryController::class, 'batchGenerate']);
+    Route::get('/smart-summary/stats', [SmartSummaryController::class, 'getSummaryStats']);
     
     // Categories
     Route::get('/categories', [CategoryController::class, 'index']);
