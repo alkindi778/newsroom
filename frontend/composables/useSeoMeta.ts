@@ -193,15 +193,36 @@ export const useAppSeoMeta = () => {
         '@id': articleUrl
       },
       headline: article.title,
+      description: article.meta_description || article.excerpt,
       datePublished: article.published_at,
       dateModified: article.updated_at || article.published_at,
       author: {
-        '@type': 'Person',
+        '@type': 'NewsMediaOrganization',
         name: article.author?.name || siteName
       },
       publisher: {
-        '@type': 'Organization',
+        '@type': 'NewsMediaOrganization',
         name: siteName
+      }
+    }
+
+    // إضافة WebSite Schema
+    const websiteSchema = {
+      '@context': 'https://schema.org',
+      '@type': 'WebSite',
+      name: siteName,
+      url: siteUrl,
+      potentialAction: {
+        '@type': 'SearchAction',
+        target: {
+          '@type': 'EntryPoint',
+          urlTemplate: `${siteUrl}/search?q={search_term_string}`
+        },
+        'query-input': {
+          '@type': 'PropertyValueSpecification',
+          valueRequired: 'http://schema.org/True',
+          valueName: 'search_term_string'
+        }
       }
     }
 
@@ -265,6 +286,10 @@ export const useAppSeoMeta = () => {
         } as any,
         {
           type: 'application/ld+json',
+          children: JSON.stringify(websiteSchema)
+        } as any,
+        {
+          type: 'application/ld+json',
           children: JSON.stringify(breadcrumbSchema)
         } as any
       ]
@@ -278,7 +303,6 @@ export const useAppSeoMeta = () => {
     const siteName = settingsStore.getSetting('site_name')
     const siteLogo = settingsStore.getSetting('site_logo')
     const siteUrl = (config as any).public.siteUrl
-    const baseApiUrl = (config as any).public.apiBase.replace('/api/v1', '')
     const opinionUrl = `${siteUrl}/opinions/${opinion.slug}`
 
     const imagePath = opinion.image || opinion.image_url
@@ -322,14 +346,15 @@ export const useAppSeoMeta = () => {
         '@id': opinionUrl
       },
       headline: opinion.title,
+      description: opinion.meta_description || opinion.excerpt,
       datePublished: opinion.published_at,
       dateModified: opinion.updated_at || opinion.published_at,
       author: {
-        '@type': 'Person',
+        '@type': 'NewsMediaOrganization',
         name: opinion.writer?.name || siteName
       },
       publisher: {
-        '@type': 'Organization',
+        '@type': 'NewsMediaOrganization',
         name: siteName
       }
     }
