@@ -281,16 +281,16 @@ export const useAppSeoMeta = () => {
       script: [
         {
           type: 'application/ld+json',
-          innerHTML: JSON.stringify(newsArticleSchema)
-        },
+          children: JSON.stringify(newsArticleSchema)
+        } as any,
         {
           type: 'application/ld+json',
-          innerHTML: JSON.stringify(websiteSchema)
-        },
+          children: JSON.stringify(websiteSchema)
+        } as any,
         {
           type: 'application/ld+json',
-          innerHTML: JSON.stringify(breadcrumbSchema)
-        }
+          children: JSON.stringify(breadcrumbSchema)
+        } as any
       ]
     })
   }

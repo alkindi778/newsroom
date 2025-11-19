@@ -417,12 +417,12 @@ useHead(() => {
     script: [
       {
         type: 'application/ld+json',
-        innerHTML: JSON.stringify(newsSchema)
-      },
+        children: JSON.stringify(newsSchema)
+      } as any,
       {
         type: 'application/ld+json', 
-        innerHTML: JSON.stringify(websiteSchema)
-      }
+        children: JSON.stringify(websiteSchema)
+      } as any
     ]
   }
 })
