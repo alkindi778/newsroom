@@ -27,6 +27,8 @@ interface SiteSettings {
   site_logo: string
   site_logo_width: string
   site_favicon: string
+  footer_logo: string
+  footer_logo_width: string
   
   // SEO
   site_locale: string

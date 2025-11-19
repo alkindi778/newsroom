@@ -8,7 +8,7 @@
             v-if="footerLogo || siteLogo" 
             :src="footerLogo || siteLogo" 
             :alt="siteName"
-            :style="{ width: footerLogoWidth + 'px', height: 'auto', maxWidth: '100%' }"
+            :style="{ width: (footerLogo ? footerLogoWidth : logoWidth) + 'px', height: 'auto', maxWidth: '100%' }"
             class="mb-4"
             :class="{ 'logo-white': !footerLogo }"
           />
@@ -124,19 +124,30 @@ const siteLogo = computed(() => {
 })
 const logoWidth = computed(() => {
   const width = settingsStore.getSetting('site_logo_width', '180')
-  return parseInt(width) || 180
+  const parsed = parseInt(width) || 180
+  console.log('Logo Width from settings:', width, 'parsed:', parsed)
+  return parsed
 })
 
 // Footer Logo Settings
 const footerLogo = computed(() => {
   const logo = settingsStore.getSetting('footer_logo')
+  console.log('Footer logo from settings:', logo)
   if (!logo) return null
   // إذا كان الشعار يبدأ بـ / نستخدمه مباشرة، وإلا نضيف storage/
   return logo.startsWith('http') ? logo : `${(config as any).public.apiBase.replace('/api/v1', '')}/storage/${logo}`
 })
 const footerLogoWidth = computed(() => {
   const width = settingsStore.getSetting('footer_logo_width', '150')
-  return parseInt(width) || 150
+  const parsed = parseInt(width) || 150
+  console.log('Footer logo width from settings:', width, 'parsed:', parsed)
+  return parsed
+})
+
+// Force refresh settings on component mount
+onMounted(() => {
+  // Force fetch settings to ensure we have latest data
+  settingsStore.fetchSettings(true)
 })
 
 const handleSubscribe = () => {
