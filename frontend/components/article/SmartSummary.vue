@@ -147,7 +147,7 @@ const processedSummary = computed(() => {
   if (!currentSummary.value) return ''
   
   // فصل المحتوى عن التحذير
-  const parts = currentSummary.value.split('<div class="ai-disclaimer"')
+  const parts = currentSummary.value.split('<div class=\"ai-disclaimer\"')
   return parts[0]?.trim() || ''
 })
 
@@ -621,7 +621,39 @@ onMounted(() => {
 }
 
 .error-close:hover {
-  background: rgba(239, 68, 68, 0.1);
-  border-radius: 0.25rem;
+  color: #b91c1c;
+}
+
+/* Animations */
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(147, 51, 234, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 40px rgba(147, 51, 234, 0.8);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .summary-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+  
+  .smart-summary-btn {
+    font-size: 1rem;
+    padding: 0.75rem 1rem;
+  }
 }
 </style>

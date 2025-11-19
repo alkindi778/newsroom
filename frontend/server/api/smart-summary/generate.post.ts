@@ -83,7 +83,7 @@ export default defineEventHandler(async (event): Promise<SummaryResponse> => {
     // توليد المحتوى مع النموذج
     // @ts-ignore - تجاهل خطأ TypeScript مؤقتاً
     const response = await ai.models.generateContent({
-      model: 'gemini-flash-latest',
+      model: 'gemini-flash-latest', 
       contents: contents
     })
 
