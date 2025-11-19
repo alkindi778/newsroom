@@ -234,6 +234,7 @@ const apiBase = ((config as any).public?.apiBase || '/api/v1') as string
 const { getImageUrl } = useImageUrl()
 const { formatDate } = useDateFormat()
 const { setArticleSeoMeta } = useAppSeoMeta()
+const { processArticleText } = useHtmlEntities()
 
 const slug = computed(() => route.params.slug as string)
 
@@ -252,11 +253,17 @@ const { data: articleData, error: fetchError } = await useAsyncData(
 const article = computed(() => {
   const data = articleData.value
   
+  if (!data) return data
+
+  // معالجة HTML entities
+  const processedData = processArticleText(data)
+  
   // Debugging logs
   if (data && process.client) {
     console.log('🔍 Article Data:', {
       id: data.id,
       title: data.title,
+      processed_title: processedData.title,
       image: data.image,
       content_length: data.content?.length || 0
     })
@@ -285,7 +292,7 @@ const article = computed(() => {
     }, 1000)
   }
   
-  return data
+  return processedData
 })
 
 const loading = ref(false)

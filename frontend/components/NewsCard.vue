@@ -17,11 +17,11 @@
     <div class="flex-1 flex flex-col justify-between p-4">
       <!-- العنوان الفرعي -->
       <p v-if="article.subtitle" class="text-sm text-blue-600 font-semibold mb-2 line-clamp-1">
-        {{ article.subtitle }}
+        {{ decodeHtmlEntities(article.subtitle) }}
       </p>
       <!-- العنوان -->
       <h3 class="text-xl font-bold text-gray-900 line-clamp-3 leading-snug text-right mb-3">
-        {{ article.title }}
+        {{ decodeHtmlEntities(article.title) }}
       </h3>
 
       <!-- التاريخ والقسم -->
@@ -43,6 +43,7 @@ const props = defineProps<{
 const { getImageUrl } = useImageUrl()
 const { formatDate } = useDateFormat()
 const { getArticleLink } = useArticleLink()
+const { decodeHtmlEntities } = useHtmlEntities()
 </script>
 
 <style scoped>

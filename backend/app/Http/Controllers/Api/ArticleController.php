@@ -65,15 +65,15 @@ class ArticleController extends Controller
             $transformedData = $articles->getCollection()->map(function ($article) {
                 return [
                     'id' => $article->id,
-                    'title' => $article->title,
-                    'subtitle' => $article->subtitle,
-                    'source' => $article->source,
+                    'title' => $this->decodeHtmlEntities($article->title),
+                    'subtitle' => $this->decodeHtmlEntities($article->subtitle),
+                    'source' => $this->decodeHtmlEntities($article->source),
                     'slug' => $article->slug,
                     'content' => $this->fixContentImageUrls($article->content),
-                    'excerpt' => $article->excerpt ?? ($article->content ? mb_substr(strip_tags($article->content), 0, 150) . '...' : ''),
+                    'excerpt' => $this->decodeHtmlEntities($article->excerpt) ?? ($article->content ? mb_substr(strip_tags($article->content), 0, 150) . '...' : ''),
                     'image' => $article->image_path,  // استخدام Media Library accessor
                     'thumbnail' => $article->thumbnail_path,  // استخدام Media Library accessor
-                    'meta_description' => $article->meta_description,
+                    'meta_description' => $this->decodeHtmlEntities($article->meta_description),
                     'keywords' => $article->keywords ? array_map('trim', explode(',', str_replace('،', ',', $article->keywords))) : [],
                     'views' => $article->views ?? 0,
                     'show_in_slider' => $article->show_in_slider ?? false,
@@ -148,15 +148,15 @@ class ArticleController extends Controller
             // Transform data to include all new fields
             $transformedArticle = [
                 'id' => $article->id,
-                'title' => $article->title,
-                'subtitle' => $article->subtitle,
-                'source' => $article->source,
+                'title' => $this->decodeHtmlEntities($article->title),
+                'subtitle' => $this->decodeHtmlEntities($article->subtitle),
+                'source' => $this->decodeHtmlEntities($article->source),
                 'slug' => $article->slug,
                 'content' => $this->fixContentImageUrls($article->content),
-                'excerpt' => $article->excerpt ?? ($article->content ? mb_substr(strip_tags($article->content), 0, 150) . '...' : ''),
+                'excerpt' => $this->decodeHtmlEntities($article->excerpt) ?? ($article->content ? mb_substr(strip_tags($article->content), 0, 150) . '...' : ''),
                 'image' => $article->image_path,
                 'thumbnail' => $article->thumbnail_path,
-                'meta_description' => $article->meta_description,
+                'meta_description' => $this->decodeHtmlEntities($article->meta_description),
                 'keywords' => $article->keywords ? array_map('trim', explode(',', str_replace('،', ',', $article->keywords))) : [],
                 'views' => $article->views,
                 'show_in_slider' => $article->show_in_slider ?? false,
@@ -213,8 +213,8 @@ class ArticleController extends Controller
         return $relatedArticles->map(function ($article) {
             return [
                 'id' => $article->id,
-                'title' => $article->title,
-                'subtitle' => $article->subtitle,
+                'title' => $this->decodeHtmlEntities($article->title),
+                'subtitle' => $this->decodeHtmlEntities($article->subtitle),
                 'slug' => $article->slug,
                 'image' => $article->image_path,
                 'thumbnail' => $article->thumbnail_path,
@@ -576,18 +576,18 @@ class ArticleController extends Controller
             $transformedData = $articles->map(function ($article) {
                 return [
                     'id' => $article->id,
-                    'title' => $article->title ? mb_convert_encoding($article->title, 'UTF-8', 'UTF-8') : null,
-                    'subtitle' => $article->subtitle ? mb_convert_encoding($article->subtitle, 'UTF-8', 'UTF-8') : null,
-                    'source' => $article->source ? mb_convert_encoding($article->source, 'UTF-8', 'UTF-8') : null,
+                    'title' => $this->decodeHtmlEntities($article->title),
+                    'subtitle' => $this->decodeHtmlEntities($article->subtitle),
+                    'source' => $this->decodeHtmlEntities($article->source),
                     'slug' => $article->slug,
-                    'excerpt' => $article->excerpt ? mb_convert_encoding($article->excerpt, 'UTF-8', 'UTF-8') : mb_convert_encoding(substr(strip_tags($article->content), 0, 100) . '...', 'UTF-8', 'UTF-8'),
+                    'excerpt' => $this->decodeHtmlEntities($article->excerpt) ?? mb_substr(strip_tags($article->content), 0, 100) . '...',
                     'image' => $article->image_path,
                     'thumbnail' => $article->thumbnail_path,
                     'views' => $article->views ?? 0,
                     'published_at' => $article->published_at?->toISOString(),
                     'category' => $article->category ? [
                         'id' => $article->category->id,
-                        'name' => mb_convert_encoding($article->category->name, 'UTF-8', 'UTF-8'),
+                        'name' => $this->decodeHtmlEntities($article->category->name),
                         'slug' => $article->category->slug
                     ] : null
                 ];
@@ -642,13 +642,16 @@ class ArticleController extends Controller
     }
     
     /**
-     * تحويل مسارات الصور في المحتوى إلى مسارات كاملة
+     * تحويل مسارات الصور في المحتوى إلى مسارات كاملة وفك ترميز HTML entities
      */
     private function fixContentImageUrls($content)
     {
         if (empty($content)) {
             return $content;
         }
+        
+        // فك ترميز HTML entities أولاً
+        $content = html_entity_decode($content, ENT_QUOTES | ENT_HTML5, 'UTF-8');
         
         // إذا كان المحتوى لا يحتوي على HTML tags، نحوله إلى فقرات
         if (!preg_match('/<[^>]+>/', $content)) {
@@ -724,5 +727,17 @@ class ArticleController extends Controller
         );
         
         return $content;
+    }
+    
+    /**
+     * فك ترميز HTML entities من النص
+     */
+    private function decodeHtmlEntities(?string $text): ?string
+    {
+        if (empty($text)) {
+            return $text;
+        }
+        
+        return html_entity_decode($text, ENT_QUOTES | ENT_HTML5, 'UTF-8');
     }
 }
