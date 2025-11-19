@@ -243,10 +243,10 @@ const getErrorMessage = (err: any) => {
 onMounted(async () => {
   hasUsedSummary.value = localStorage.getItem('has_used_smart_summary') === 'true'
   
-  // تعطيل cache check مؤقتاً - البراوزر يستخدم كود قديم
-  // if (props.content) {
-  //   await checkForExistingSummary()
-  // }
+  if (props.content) {
+    // التحقق من وجود cache أولاً
+    await checkForExistingSummary()
+  }
   
   if (props.autoGenerate && (props.content || props.articleId)) {
     generateSummary()
@@ -261,6 +261,7 @@ const checkForExistingSummary = async () => {
   try {
     // إنشاء نفس الـ hash المستخدم في الـ API
     const contentHash = await generateContentHash(props.content, props.type || 'news', props.length || 'medium')
+    console.log('🔍 البحث عن cache بـ hash:', contentHash)
     
     // استخدام رابط نسبي فقط - ديناميكي لأي موقع
     const response = await fetch(`/api/v1/smart-summaries/get/${contentHash}`, {
