@@ -158,9 +158,8 @@ export const useAppSeoMeta = () => {
         const cleanPath = imagePath.startsWith('/storage/') ? imagePath.substring(9) : imagePath
         articleImage = `${siteUrl}/storage/${cleanPath}`
       }
-      console.log('Article Image Path:', imagePath, '-> Full URL:', articleImage)
     } else {
-      console.log('No article image found, will use fallback')
+      // No image found, fallback will be used by setSeoMeta
     }
 
     let publisherLogo = ''
