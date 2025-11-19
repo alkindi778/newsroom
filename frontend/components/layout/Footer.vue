@@ -8,8 +8,13 @@
             v-if="footerLogo || siteLogo" 
             :src="footerLogo || siteLogo" 
             :alt="siteName"
-            :style="{ width: (footerLogo ? footerLogoWidth : logoWidth) + 'px', height: 'auto', maxWidth: '100%' }"
-            class="mb-4"
+            :style="{ 
+              width: (footerLogo ? footerLogoWidth : logoWidth) + 'px !important', 
+              height: 'auto !important', 
+              maxWidth: '100% !important',
+              minWidth: '80px !important'
+            }"
+            class="mb-4 footer-logo"
             :class="{ 'logo-white': !footerLogo }"
           />
           <h3 v-if="!footerLogo && !siteLogo" class="text-white text-xl font-bold mb-4">{{ siteName }}</h3>
@@ -145,9 +150,12 @@ const footerLogoWidth = computed(() => {
 })
 
 // Force refresh settings on component mount
-onMounted(() => {
+onMounted(async () => {
+  // Clear cache first
+  settingsStore.clearCache()
   // Force fetch settings to ensure we have latest data
-  settingsStore.fetchSettings(true)
+  await settingsStore.fetchSettings(true)
+  console.log('Settings refreshed in Footer component')
 })
 
 const handleSubscribe = () => {
@@ -161,6 +169,12 @@ const handleSubscribe = () => {
 <style scoped>
 .logo-white {
   filter: brightness(0) invert(1);
+}
+
+.footer-logo {
+  display: block !important;
+  width: auto !important;
+  max-width: 100% !important;
 }
 
 .social-icon {
