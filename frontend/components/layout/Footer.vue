@@ -1,14 +1,21 @@
 <template>
   <footer class="bg-navy-900 text-white mt-16">
     <div class="container mx-auto px-4 py-12">
-      <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
         <!-- عن الموقع -->
-        <div>
+        <div class="text-right">
           <img 
             v-if="footerLogo || siteLogo" 
             :src="footerLogo || siteLogo" 
             :alt="siteName"
-            :style="`width: ${footerLogo ? footerLogoWidth : logoWidth}px !important; height: auto !important; display: block !important; min-width: 120px !important;`"
+            :style="{
+              width: ((footerLogo ? footerLogoWidth : logoWidth) * 1.5) + 'px !important',
+              height: 'auto !important',
+              display: 'block !important',
+              marginRight: '0 !important',
+              marginLeft: 'auto !important',
+              maxWidth: '300px !important'
+            }"
             class="mb-4"
             :class="{ 'logo-white': !footerLogo }"
           />
@@ -16,7 +23,7 @@
           <p class="text-sm mb-4">
             {{ siteDescription }}
           </p>
-          <div class="flex gap-3">
+          <div class="flex gap-3 justify-end">
             <a v-if="socialFacebook" :href="socialFacebook" target="_blank" rel="noopener" class="social-icon">
               <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
@@ -67,26 +74,6 @@
           </ul>
         </div>
 
-        <!-- النشرة البريدية -->
-        <div>
-          <h4 class="text-white font-bold mb-4">النشرة البريدية</h4>
-          <p class="text-sm mb-4">اشترك ليصلك كل جديد</p>
-          <form @submit.prevent="handleSubscribe" class="space-y-2">
-            <input
-              v-model="email"
-              type="email"
-              placeholder="بريدك الإلكتروني"
-              required
-              class="w-full px-4 py-2 rounded-lg bg-gray-800 border border-gray-700 focus:border-primary focus:outline-none text-white text-sm"
-            />
-            <button
-              type="submit"
-              class="w-full bg-primary hover:bg-primary-600 text-white py-2 rounded-lg font-semibold transition-colors"
-            >
-              اشترك الآن
-            </button>
-          </form>
-        </div>
       </div>
 
       <!-- حقوق النشر -->
@@ -104,7 +91,6 @@ const settingsStore = useSettingsStore()
 const config = useRuntimeConfig()
 const categories = computed(() => categoriesStore.categories)
 
-const email = ref('')
 const currentYear = new Date().getFullYear()
 
 // Site Settings
@@ -147,12 +133,6 @@ onMounted(async () => {
   await settingsStore.fetchSettings(true)
 })
 
-const handleSubscribe = () => {
-  // TODO: إضافة منطق الاشتراك في النشرة البريدية
-  console.log('Subscribe:', email.value)
-  alert('شكراً لاشتراكك! سنرسل لك أحدث الأخبار.')
-  email.value = ''
-}
 </script>
 
 <style scoped>
