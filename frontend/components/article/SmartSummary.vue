@@ -251,6 +251,7 @@ onMounted(async () => {
   }
 })
 
+
 // دالة للتحقق من وجود ملخص محفوظ
 const checkForExistingSummary = async () => {
   if (!props.content) return
