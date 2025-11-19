@@ -8,13 +8,8 @@
             v-if="footerLogo || siteLogo" 
             :src="footerLogo || siteLogo" 
             :alt="siteName"
-            :style="{ 
-              width: (footerLogo ? footerLogoWidth : logoWidth) + 'px !important', 
-              height: 'auto !important', 
-              maxWidth: '100% !important',
-              minWidth: '80px !important'
-            }"
-            class="mb-4 footer-logo"
+            :style="`width: ${footerLogo ? footerLogoWidth : logoWidth}px !important; height: auto !important; display: block !important; min-width: 120px !important;`"
+            class="mb-4"
             :class="{ 'logo-white': !footerLogo }"
           />
           <h3 v-if="!footerLogo && !siteLogo" class="text-white text-xl font-bold mb-4">{{ siteName }}</h3>
@@ -129,24 +124,19 @@ const siteLogo = computed(() => {
 })
 const logoWidth = computed(() => {
   const width = settingsStore.getSetting('site_logo_width', '180')
-  const parsed = parseInt(width) || 180
-  console.log('Logo Width from settings:', width, 'parsed:', parsed)
-  return parsed
+  return parseInt(width) || 180
 })
 
 // Footer Logo Settings
 const footerLogo = computed(() => {
   const logo = settingsStore.getSetting('footer_logo')
-  console.log('Footer logo from settings:', logo)
   if (!logo) return null
   // إذا كان الشعار يبدأ بـ / نستخدمه مباشرة، وإلا نضيف storage/
   return logo.startsWith('http') ? logo : `${(config as any).public.apiBase.replace('/api/v1', '')}/storage/${logo}`
 })
 const footerLogoWidth = computed(() => {
   const width = settingsStore.getSetting('footer_logo_width', '150')
-  const parsed = parseInt(width) || 150
-  console.log('Footer logo width from settings:', width, 'parsed:', parsed)
-  return parsed
+  return parseInt(width) || 150
 })
 
 // Force refresh settings on component mount
@@ -155,7 +145,6 @@ onMounted(async () => {
   settingsStore.clearCache()
   // Force fetch settings to ensure we have latest data
   await settingsStore.fetchSettings(true)
-  console.log('Settings refreshed in Footer component')
 })
 
 const handleSubscribe = () => {
@@ -171,11 +160,6 @@ const handleSubscribe = () => {
   filter: brightness(0) invert(1);
 }
 
-.footer-logo {
-  display: block !important;
-  width: auto !important;
-  max-width: 100% !important;
-}
 
 .social-icon {
   width: 2.5rem;
