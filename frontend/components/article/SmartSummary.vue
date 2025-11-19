@@ -241,10 +241,12 @@ const getErrorMessage = (err: any) => {
 
 // Auto-generate on mount if requested
 onMounted(async () => {
-  if (props.content) {
-    // التحقق من وجود cache أولاً
-    await checkForExistingSummary()
-  }
+  hasUsedSummary.value = localStorage.getItem('has_used_smart_summary') === 'true'
+  
+  // تعطيل cache check مؤقتاً - البراوزر يستخدم كود قديم
+  // if (props.content) {
+  //   await checkForExistingSummary()
+  // }
   
   if (props.autoGenerate && (props.content || props.articleId)) {
     generateSummary()
