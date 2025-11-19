@@ -345,6 +345,88 @@ watchEffect(() => {
   }
 })
 
+// إضافة Schema مباشرة لضمان server-side rendering
+useHead(() => {
+  if (!article.value) return {}
+  
+  const config = useRuntimeConfig()
+  const settingsStore = useSettingsStore()
+  const siteUrl = config.public.siteUrl
+  const siteName = settingsStore.getSetting('site_name')
+  const articleUrl = `${siteUrl}/news/${article.value.slug}`
+  
+  const imagePath = article.value.image || article.value.image_url
+  let articleImage = ''
+  if (imagePath) {
+    if (imagePath.startsWith('http')) {
+      articleImage = imagePath
+    } else {
+      const cleanPath = imagePath.startsWith('/storage/') ? imagePath.substring(9) : imagePath
+      articleImage = `${siteUrl}/storage/${cleanPath}`
+    }
+  }
+
+  const newsSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'NewsArticle',
+    mainEntityOfPage: {
+      '@type': 'WebPage',
+      '@id': articleUrl
+    },
+    headline: article.value.title,
+    description: article.value.meta_description || article.value.excerpt,
+    datePublished: article.value.published_at,
+    dateModified: article.value.updated_at || article.value.published_at,
+    author: {
+      '@type': 'NewsMediaOrganization',
+      name: article.value.author?.name || siteName
+    },
+    publisher: {
+      '@type': 'NewsMediaOrganization',
+      name: siteName
+    }
+  }
+
+  if (articleImage) {
+    newsSchema.image = {
+      '@type': 'ImageObject',
+      url: articleImage
+    }
+  }
+
+  const websiteSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: siteName,
+    url: siteUrl,
+    potentialAction: {
+      '@type': 'SearchAction',
+      target: {
+        '@type': 'EntryPoint',
+        urlTemplate: `${siteUrl}/search?q={search_term_string}`
+      },
+      'query-input': {
+        '@type': 'PropertyValueSpecification',
+        valueRequired: 'http://schema.org/True',  
+        valueName: 'search_term_string'
+      }
+    }
+  }
+
+  return {
+    script: [
+      {
+        type: 'application/ld+json',
+        children: JSON.stringify(newsSchema)
+      },
+      {
+        type: 'application/ld+json', 
+        children: JSON.stringify(websiteSchema)
+      }
+    ]
+  }
+})
+
 // زيادة عدد المشاهدات وجلب أخبار ذات صلة بعد التحميل
 onMounted(async () => {
   if (article.value) {
