@@ -166,7 +166,7 @@ export const useAppSeoMeta = () => {
     setSeoMeta({
       title: article.title,
       description: article.meta_description || article.excerpt,
-      image: article.image,
+      image: articleImage,
       url: `/news/${article.slug}`,
       type: 'article',
       author: article.author?.name || siteName,

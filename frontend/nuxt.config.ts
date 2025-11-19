@@ -94,7 +94,7 @@ export default defineNuxtConfig({
     public: {
       // استخدام IP الجهاز للوصول من الهاتف أو localhost للتطوير
       apiBase: process.env.NUXT_PUBLIC_API_BASE || 'http://localhost/newsroom/backend/public/api/v1',
-      siteUrl: process.env.NUXT_PUBLIC_SITE_URL || 'http://localhost:3000',
+      siteUrl: process.env.NUXT_PUBLIC_SITE_URL || 'https://adenlink.cloud',
       // Google Tag Manager ID
       gtmId: process.env.NUXT_PUBLIC_GTM_ID || 'GTM-XXXXXXX'
     }
