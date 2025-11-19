@@ -346,11 +346,11 @@ watchEffect(() => {
 })
 
 // إضافة Schema مباشرة لضمان server-side rendering
+const settingsStore = useSettingsStore()
+
 useHead(() => {
   if (!article.value) return {}
   
-  const config = useRuntimeConfig()
-  const settingsStore = useSettingsStore()
   const siteUrl = (config as any).public.siteUrl
   const siteName = settingsStore.getSetting('site_name')
   const articleUrl = `${siteUrl}/news/${article.value.slug}`
