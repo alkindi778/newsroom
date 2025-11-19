@@ -351,7 +351,7 @@ useHead(() => {
   
   const config = useRuntimeConfig()
   const settingsStore = useSettingsStore()
-  const siteUrl = config.public.siteUrl
+  const siteUrl = (config as any).public.siteUrl
   const siteName = settingsStore.getSetting('site_name')
   const articleUrl = `${siteUrl}/news/${article.value.slug}`
   
@@ -366,7 +366,7 @@ useHead(() => {
     }
   }
 
-  const newsSchema = {
+  const newsSchema: any = {
     '@context': 'https://schema.org',
     '@type': 'NewsArticle',
     mainEntityOfPage: {
@@ -417,11 +417,11 @@ useHead(() => {
     script: [
       {
         type: 'application/ld+json',
-        children: JSON.stringify(newsSchema)
+        innerHTML: JSON.stringify(newsSchema)
       },
       {
         type: 'application/ld+json', 
-        children: JSON.stringify(websiteSchema)
+        innerHTML: JSON.stringify(websiteSchema)
       }
     ]
   }

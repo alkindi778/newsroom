@@ -281,17 +281,16 @@ export const useAppSeoMeta = () => {
       script: [
         {
           type: 'application/ld+json',
-          // استخدام children لتمرير JSON-LD، مع cast لتجاوز قيود النوع في TS
-          children: JSON.stringify(newsArticleSchema)
-        } as any,
+          innerHTML: JSON.stringify(newsArticleSchema)
+        },
         {
           type: 'application/ld+json',
-          children: JSON.stringify(websiteSchema)
-        } as any,
+          innerHTML: JSON.stringify(websiteSchema)
+        },
         {
           type: 'application/ld+json',
-          children: JSON.stringify(breadcrumbSchema)
-        } as any
+          innerHTML: JSON.stringify(breadcrumbSchema)
+        }
       ]
     })
   }
