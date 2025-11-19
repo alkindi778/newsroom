@@ -73,7 +73,7 @@ class SmartSummaryController extends Controller
             if ($existingSummary) {
                 return response()->json([
                     'success' => true,
-                    'summary' => $existingSummary->summary,
+                    'summary' => is_array($existingSummary) ? $existingSummary['summary'] : $existingSummary->summary,
                     'cached' => true
                 ]);
             }
