@@ -207,6 +207,90 @@
                     <p class="text-xs text-gray-500">ICO, PNG (يُفضل 32×32 بكسل)</p>
                 </div>
             </div>
+            
+            <!-- Footer Logo -->
+            <div>
+                <label for="footer_logo" class="block text-sm font-medium text-gray-700 mb-2">
+                    شعار الفوتر (Footer Logo)
+                </label>
+                <div class="space-y-3">
+                    <!-- Current/Preview Footer Logo -->
+                    <div id="footer_logo_preview_container" class="flex items-center justify-center w-full h-32 bg-gray-900 border-2 border-dashed border-gray-600 rounded-lg relative" style="{{ isset($settings['general']['footer_logo']) && $settings['general']['footer_logo'] ? '' : 'display: none;' }}">
+                        <img id="footer_logo_preview_image"
+                             src="{{ isset($settings['general']['footer_logo']) && $settings['general']['footer_logo'] ? asset('storage/' . $settings['general']['footer_logo']) : '' }}" 
+                             alt="Footer Logo" 
+                             class="max-h-28 object-contain">
+                        <!-- Remove Button -->
+                        <button type="button" 
+                                id="remove_footer_logo_btn"
+                                onclick="removeFooterLogo()"
+                                class="absolute top-2 left-2 bg-red-600 text-white p-2 rounded-full hover:bg-red-700 transition shadow-lg">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                        </button>
+                    </div>
+                    
+                    <!-- Empty State -->
+                    <div id="footer_logo_empty_state" class="flex items-center justify-center w-full h-32 bg-gray-900 border-2 border-dashed border-gray-600 rounded-lg" style="{{ isset($settings['general']['footer_logo']) && $settings['general']['footer_logo'] ? 'display: none;' : '' }}">
+                        <div class="text-center">
+                            <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                            </svg>
+                            <p class="mt-1 text-sm text-gray-400">لا يوجد شعار للفوتر</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Upload Button -->
+                    <input type="file" 
+                           name="settings[footer_logo]" 
+                           id="footer_logo" 
+                           accept="image/*"
+                           onchange="previewFooterLogo(this)"
+                           class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-gray-50 file:text-gray-700 hover:file:bg-gray-100 transition">
+                    <p class="text-xs text-gray-500">PNG, JPG, SVG (يُفضل 200×60 بكسل) - للاستخدام في الفوتر الداكن</p>
+                </div>
+                
+                <!-- Footer Logo Width Control -->
+                <div class="mt-4">
+                    <label for="footer_logo_width" class="block text-sm font-medium text-gray-700 mb-2">
+                        عرض شعار الفوتر (بالبكسل)
+                    </label>
+                    <div class="flex items-center gap-3">
+                        <input type="range" 
+                               name="settings[footer_logo_width]" 
+                               id="footer_logo_width" 
+                               min="80" 
+                               max="300" 
+                               step="10"
+                               value="{{ $settings['general']['footer_logo_width'] ?? '150' }}"
+                               oninput="updateFooterLogoWidth(this.value)"
+                               class="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-gray-600">
+                        <div class="flex items-center gap-2">
+                            <input type="number" 
+                                   id="footer_logo_width_display" 
+                                   value="{{ $settings['general']['footer_logo_width'] ?? '150' }}"
+                                   min="80" 
+                                   max="300"
+                                   onchange="document.getElementById('footer_logo_width').value = this.value; updateFooterLogoWidth(this.value)"
+                                   class="w-20 px-3 py-2 border border-gray-300 rounded-lg text-center text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            <span class="text-sm text-gray-600">px</span>
+                        </div>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-2">حدد عرض الشعار في الفوتر (من 80px إلى 300px)</p>
+                    
+                    <!-- Footer Logo Live Preview -->
+                    <div class="mt-3 p-3 bg-gray-800 rounded-lg border border-gray-600">
+                        <p class="text-xs font-medium text-gray-300 mb-2">معاينة في الفوتر:</p>
+                        <div class="flex items-center justify-center py-4 bg-gray-900 rounded border border-gray-700">
+                            <div id="footer_logo_size_preview" style="width: {{ $settings['general']['footer_logo_width'] ?? '150' }}px; height: auto; background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%); border-radius: 4px; display: flex; align-items: center; justify-content: center; padding: 15px;">
+                                <span class="text-white text-xs font-bold">FOOTER LOGO</span>
+                            </div>
+                        </div>
+                        <p class="text-xs text-gray-400 text-center mt-2">العرض الحالي: <span id="footer_current_width_display">{{ $settings['general']['footer_logo_width'] ?? '150' }}</span>px</p>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>

@@ -78,6 +78,22 @@ class SiteSettingsSeeder extends Seeder
                 'description' => 'أيقونة الموقع',
                 'order' => 8
             ],
+            [
+                'key' => 'footer_logo',
+                'value' => '',
+                'type' => 'image',
+                'group' => 'general',
+                'description' => 'شعار الفوتر',
+                'order' => 9
+            ],
+            [
+                'key' => 'footer_logo_width',
+                'value' => '150',
+                'type' => 'text',
+                'group' => 'general',
+                'description' => 'عرض شعار الفوتر بالبكسل',
+                'order' => 10
+            ],
 
             // SEO Settings
             [

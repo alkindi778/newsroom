@@ -301,6 +301,55 @@ function updateLogoWidth(value) {
         preview.style.width = value + 'px';
     }
 }
+
+// Footer Logo Preview Functionality
+function previewFooterLogo(input) {
+    const file = input.files[0];
+    if (file) {
+        // Check file size (10MB limit)
+        if (file.size > 10 * 1024 * 1024) {
+            alert('حجم الملف كبير جداً. الحد الأقصى 10MB');
+            input.value = '';
+            return;
+        }
+        
+        // Check file type
+        if (!file.type.startsWith('image/')) {
+            alert('يرجى اختيار ملف صورة صحيح');
+            input.value = '';
+            return;
+        }
+        
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            document.getElementById('footer_logo_preview_image').src = e.target.result;
+            document.getElementById('footer_logo_preview_container').style.display = '';
+            document.getElementById('footer_logo_empty_state').style.display = 'none';
+        };
+        reader.readAsDataURL(file);
+    }
+}
+
+function removeFooterLogo() {
+    const input = document.getElementById('footer_logo');
+    input.value = '';
+    document.getElementById('footer_logo_preview_container').style.display = 'none';
+    document.getElementById('footer_logo_empty_state').style.display = '';
+    document.getElementById('footer_logo_preview_image').src = '';
+}
+
+// Footer Logo Width Control
+function updateFooterLogoWidth(value) {
+    // Update display value
+    document.getElementById('footer_logo_width_display').value = value;
+    document.getElementById('footer_current_width_display').textContent = value;
+    
+    // Update preview
+    const preview = document.getElementById('footer_logo_size_preview');
+    if (preview) {
+        preview.style.width = value + 'px';
+    }
+}
 </script>
 
 <style>
