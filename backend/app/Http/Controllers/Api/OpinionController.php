@@ -24,7 +24,7 @@ class OpinionController extends Controller
         $status = $request->query('status'); // published|draft
         $writerId = $request->query('writer');
         $featured = $request->boolean('featured', null);
-        $sortBy = $request->query('sort_by', 'created_at');
+        $sortBy = $request->query('sort_by', 'published_at');
         $sortDir = $request->query('sort_dir', 'desc');
         $perPage = (int) $request->query('per_page', 10);
 
@@ -51,7 +51,7 @@ class OpinionController extends Controller
             'published',    // status
             null,           // writerId
             null,           // featured
-            'created_at',   // sortBy
+            'published_at', // sortBy - من الأحدث للأقدم حسب تاريخ النشر
             'desc',         // sortDir
             $limit          // perPage
         );
