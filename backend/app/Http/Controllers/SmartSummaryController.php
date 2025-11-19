@@ -65,8 +65,15 @@ class SmartSummaryController extends Controller
                 ], 400);
             }
 
-            // توليد hash للمحتوى
-            $contentHash = hash('sha256', $request->input('content') . $request->input('type') . $request->input('length'));
+            // توليد hash للمحتوى (متطابق مع Frontend)
+            $content = $request->input('content');
+            $type = $request->input('type');
+            $length = $request->input('length');
+            
+            // تنظيف المحتوى مثل Frontend
+            $normalizedContent = trim(strtolower(preg_replace('/\s+/', ' ', $content)));
+            $key = $normalizedContent . '-' . $type . '-' . $length;
+            $contentHash = hash('sha256', $key);
             
             // التحقق من وجود ملخص محفوظ
             $existingSummary = $this->cacheService->getSummary($contentHash);
@@ -79,9 +86,6 @@ class SmartSummaryController extends Controller
             }
 
             // توليد الملخص (مؤقت - بسيط)
-            $content = $request->input('content');
-            $type = $request->input('type');
-            $length = $request->input('length');
             
             $summary = $this->generateSimpleSummary($content, $type, $length);
             
