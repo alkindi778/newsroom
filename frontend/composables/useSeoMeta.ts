@@ -153,14 +153,14 @@ export const useAppSeoMeta = () => {
     if (imagePath) {
       articleImage = imagePath.startsWith('http')
         ? imagePath
-        : `${baseApiUrl}/storage/${imagePath}`
+        : `${siteUrl}/storage/${imagePath}`
     }
 
     let publisherLogo = ''
     if (siteLogo) {
       publisherLogo = siteLogo.startsWith('http')
         ? siteLogo
-        : `${baseApiUrl}/storage/${siteLogo}`
+        : `${siteUrl}/storage/${siteLogo}`
     }
 
     setSeoMeta({
@@ -281,14 +281,14 @@ export const useAppSeoMeta = () => {
     if (imagePath) {
       opinionImage = imagePath.startsWith('http')
         ? imagePath
-        : `${baseApiUrl}/storage/${imagePath}`
+        : `${siteUrl}/storage/${imagePath}`
     }
 
     let publisherLogo = ''
     if (siteLogo) {
       publisherLogo = siteLogo.startsWith('http')
         ? siteLogo
-        : `${baseApiUrl}/storage/${siteLogo}`
+        : `${siteUrl}/storage/${siteLogo}`
     }
 
     setSeoMeta({
