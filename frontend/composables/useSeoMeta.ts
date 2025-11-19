@@ -66,7 +66,7 @@ export const useAppSeoMeta = () => {
         ? defaultOgImage 
         : defaultOgImage.startsWith('/') 
           ? `${siteUrl}${defaultOgImage}`
-          : `${(config as any).public.apiBase.replace('/api/v1', '')}/storage/${defaultOgImage}`
+          : `${siteUrl}/storage/${defaultOgImage}`
     } else {
       // fallback أخير
       fullImage = `${siteUrl}/og-image.jpg`
@@ -154,6 +154,9 @@ export const useAppSeoMeta = () => {
       articleImage = imagePath.startsWith('http')
         ? imagePath
         : `${siteUrl}/storage/${imagePath}`
+      console.log('Article Image Path:', imagePath, '-> Full URL:', articleImage)
+    } else {
+      console.log('No article image found, will use fallback')
     }
 
     let publisherLogo = ''
