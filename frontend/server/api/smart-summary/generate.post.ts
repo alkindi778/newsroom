@@ -8,6 +8,8 @@ interface RequestBody {
   type?: 'news' | 'opinion' | 'analysis'
   length?: 'short' | 'medium' | 'long'
   language?: 'ar' | 'en'
+  // إذا كان true، نفحص الكاش فقط بدون توليد ملخص جديد
+  onlyCache?: boolean
 }
 
 interface CachedSummary {
@@ -90,6 +92,15 @@ export default defineEventHandler(async (event): Promise<SummaryResponse> => {
         word_count: cachedSummary.word_count || countWords(cachedSummary.summary),
         compression_ratio: cachedSummary.compression_ratio || Math.round((1 - (cachedSummary.summary.replace(/<[^>]*>/g, '').length / body.content.length)) * 100),
         original_length: cachedSummary.original_length || body.content.length
+      }
+    }
+
+    // إذا كان الطلب فقط لفحص الكاش، لا نولد ملخص جديد
+    if (body.onlyCache) {
+      return {
+        success: false,
+        message: 'لا يوجد ملخص محفوظ بعد لهذا المحتوى',
+        error_code: 404
       }
     }
 

@@ -244,7 +244,7 @@ onMounted(async () => {
   hasUsedSummary.value = localStorage.getItem('has_used_smart_summary') === 'true'
   
   if (props.content) {
-    // التحقق من وجود cache أولاً
+    // التحقق من وجود cache عبر Nuxt API (الذي يتكلم مع Laravel)
     await checkForExistingSummary()
   }
   
@@ -254,60 +254,38 @@ onMounted(async () => {
 })
 
 
-// دالة للتحقق من وجود ملخص محفوظ
+// دالة للتحقق من وجود ملخص محفوظ (تعتمد على نفس Nuxt API المستخدم في التوليد)
 const checkForExistingSummary = async () => {
   if (!props.content) return
   
   try {
-    // إنشاء نفس الـ hash المستخدم في الـ API
-    const contentHash = await generateContentHash(props.content, props.type || 'news', props.length || 'medium')
-    console.log('🔍 البحث عن cache بـ hash:', contentHash)
-    
-    // استخدام رابط نسبي فقط - ديناميكي لأي موقع
-    const response = await fetch(`/api/v1/smart-summaries/get/${contentHash}`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-      }
+    const payload = {
+      content: props.content || '',
+      type: props.type,
+      length: props.length,
+      onlyCache: true
+    }
+
+    const result: any = await $fetch('/api/smart-summary/generate', {
+      method: 'POST',
+      body: payload
     })
-    
-    if (response.ok) {
-      const data = await response.json()
-      if (data.success && data.summary) {
-        console.log('✅ تم العثور على ملخص محفوظ - تم الاسترجاع من قاعدة البيانات')
-        currentSummary.value = data.summary.summary
-        summaryData.value = {
-          summary: data.summary.summary,
-          word_count: data.summary.word_count,
-          compression_ratio: data.summary.compression_ratio,
-          original_length: data.summary.original_length
-        }
-        hasUsedSummary.value = true
-        // لا نظهر الملخص تلقائياً، المستخدم يحدد
-        // showSummary.value = true
+
+    if (result.success && result.summary) {
+      console.log('✅ تم العثور على ملخص محفوظ - تم الاسترجاع من قاعدة البيانات عبر Nuxt API')
+      currentSummary.value = result.summary
+      summaryData.value = {
+        summary: result.summary,
+        word_count: result.word_count,
+        compression_ratio: result.compression_ratio,
+        original_length: result.original_length
       }
+      hasUsedSummary.value = true
+      // لا نظهر الملخص تلقائياً، المستخدم يضغط الزر عند الحاجة
     }
   } catch (error) {
-    console.log('لا يوجد ملخص محفوظ، سيتم التوليد عند الطلب')
+    console.log('لا يوجد ملخص محفوظ لهذا المحتوى، سيتم التوليد عند الطلب')
   }
-}
-
-// دالة لإنشاء hash مطابقة للـ API
-const generateContentHash = async (content: string, type: string, length: string): Promise<string> => {
-  const normalizedContent = content
-    .replace(/\s+/g, ' ')
-    .trim()
-    .toLowerCase()
-  
-  const key = `${normalizedContent}-${type}-${length}`
-  
-  // استخدام Web Crypto API
-  const encoder = new TextEncoder()
-  const data = encoder.encode(key)
-  const hashBuffer = await crypto.subtle.digest('SHA-256', data)
-  const hashArray = Array.from(new Uint8Array(hashBuffer))
-  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('')
 }
 
 // Store usage in localStorage
