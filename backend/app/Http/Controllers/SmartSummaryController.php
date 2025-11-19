@@ -46,6 +46,104 @@ class SmartSummaryController extends Controller
     }
 
     /**
+     * توليد وحفظ ملخص جديد (من Frontend)
+     */
+    public function generateAndStore(Request $request): JsonResponse
+    {
+        try {
+            $validator = Validator::make($request->all(), [
+                'content' => 'required|string|min:100',
+                'type' => 'required|in:news,opinion,analysis',
+                'length' => 'required|in:short,medium,long'
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'بيانات غير صحيحة',
+                    'errors' => $validator->errors()
+                ], 400);
+            }
+
+            // توليد hash للمحتوى
+            $contentHash = hash('sha256', $request->input('content') . $request->input('type') . $request->input('length'));
+            
+            // التحقق من وجود ملخص محفوظ
+            $existingSummary = $this->cacheService->getSummary($contentHash);
+            if ($existingSummary) {
+                return response()->json([
+                    'success' => true,
+                    'summary' => $existingSummary->summary,
+                    'cached' => true
+                ]);
+            }
+
+            // توليد الملخص (مؤقت - بسيط)
+            $content = $request->input('content');
+            $type = $request->input('type');
+            $length = $request->input('length');
+            
+            $summary = $this->generateSimpleSummary($content, $type, $length);
+            
+            // حفظ الملخص
+            $summaryData = [
+                'content_hash' => $contentHash,
+                'original_content_sample' => substr($content, 0, 500),
+                'summary' => $summary,
+                'type' => $type,
+                'length' => $length,
+                'word_count' => str_word_count($summary),
+                'original_length' => strlen($content)
+            ];
+            
+            $savedSummary = $this->cacheService->storeSummary($summaryData);
+
+            return response()->json([
+                'success' => true,
+                'summary' => $summary,
+                'cached' => false
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('خطأ في توليد الملخص: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'حدث خطأ في توليد الملخص'
+            ], 500);
+        }
+    }
+
+    /**
+     * توليد ملخص بسيط مؤقت
+     */
+    private function generateSimpleSummary(string $content, string $type, string $length): string
+    {
+        // تنظيف المحتوى من HTML والصور
+        $cleanContent = strip_tags($content);
+        $cleanContent = preg_replace('/\s+/', ' ', $cleanContent);
+        $cleanContent = trim($cleanContent);
+        
+        // تقسيم إلى جمل
+        $sentences = preg_split('/[.!?]+/', $cleanContent);
+        $sentences = array_filter(array_map('trim', $sentences));
+        
+        // تحديد عدد الجمل حسب الطول
+        $maxSentences = $length === 'short' ? 2 : ($length === 'medium' ? 3 : 4);
+        
+        // أخذ أول الجمل
+        $selectedSentences = array_slice($sentences, 0, $maxSentences);
+        
+        $summary = implode('. ', $selectedSentences) . '.';
+        
+        // تحديد الطول حسب النوع
+        if ($type === 'opinion') {
+            $summary = 'يرى الكاتب أن ' . $summary;
+        }
+        
+        return $summary;
+    }
+
+    /**
      * حفظ ملخص جديد
      */
     public function storeSummary(Request $request): JsonResponse

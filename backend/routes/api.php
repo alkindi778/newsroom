@@ -148,7 +148,7 @@ Route::prefix('v1')->group(function () {
 });
 
 // Route للملخص الذكي من Nuxt frontend (خارج v1 prefix)
-Route::post('/smart-summary/generate', [\App\Http\Controllers\SmartSummaryController::class, 'storeSummary']);
+Route::post('/smart-summary/generate', [\App\Http\Controllers\SmartSummaryController::class, 'generateAndStore']);
 
 // CORS is handled automatically by config/cors.php
 // No need for duplicate routes
