@@ -69,8 +69,7 @@
             {{ article.excerpt }}
           </p>
 
-          <!-- إحصائيات المقال -->
-          <ArticleArticleStats :article="article" />
+          <!-- تم حذف إحصائيات المقال -->
 
           <!-- معلومات الخبر -->
           <div class="flex flex-wrap items-center gap-4 text-base text-gray-600 pb-6 border-b border-gray-200">
@@ -102,9 +101,14 @@
           </div>
 
           <!-- الملخص الذكي -->
-          <ArticleSummaryToggle @toggle="handleSummaryToggle">
-            <ArticleSmartSummary v-if="showSmartSummary" :article="article" />
-          </ArticleSummaryToggle>
+          <div class="mb-8">
+            <ArticleSmartSummary 
+              :article-id="article.id"
+              :content="article.content"
+              type="news"
+              length="medium"
+            />
+          </div>
 
           <div 
             class="prose prose-sm sm:prose-base md:prose-lg lg:prose-xl max-w-none text-right leading-loose article-content"
@@ -331,9 +335,6 @@ const articleUrl = computed(() => {
 // حالة نسخ الرابط
 const copied = ref(false)
 
-// حالة الملخص الذكي
-const showSmartSummary = ref(false)
-
 // دالة نسخ رابط المقال
 const copyArticleUrl = async () => {
   if (process.client && navigator.clipboard) {
@@ -349,10 +350,7 @@ const copyArticleUrl = async () => {
   }
 }
 
-// دالة التحكم في الملخص الذكي
-const handleSummaryToggle = (enabled: boolean) => {
-  showSmartSummary.value = enabled
-}
+// تم حذف دالة handleSummaryToggle
 
 // SEO Meta Tags - يتم تحديثها عند تغيير المقال
 watchEffect(() => {

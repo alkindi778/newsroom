@@ -52,6 +52,15 @@ Route::prefix('v1')->group(function () {
     Route::post('/articles/smart-summary/batch', [SmartSummaryController::class, 'batchGenerate']);
     Route::get('/smart-summary/stats', [SmartSummaryController::class, 'getSummaryStats']);
     
+    // Smart Summary Cache System (New)
+    Route::prefix('smart-summaries')->group(function () {
+        Route::get('/get/{hash}', [\App\Http\Controllers\SmartSummaryController::class, 'getSummary']);
+        Route::post('/store', [\App\Http\Controllers\SmartSummaryController::class, 'storeSummary']);
+        Route::get('/stats', [\App\Http\Controllers\SmartSummaryController::class, 'getStats']);
+        Route::get('/recent', [\App\Http\Controllers\SmartSummaryController::class, 'getRecent']);
+        Route::delete('/cleanup', [\App\Http\Controllers\SmartSummaryController::class, 'cleanup']);
+    });
+    
     // Categories
     Route::get('/categories', [CategoryController::class, 'index']);
     Route::get('/categories/{slug}', [CategoryController::class, 'show']);

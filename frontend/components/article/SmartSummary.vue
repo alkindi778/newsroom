@@ -2,59 +2,31 @@
   <div class="smart-summary-container">
     <!-- زر توليد الملخص -->
     <div class="summary-button-container">
-      <button
-        ref="summaryBtn"
-        @click="toggleSummary"
-        :disabled="isGenerating"
-        class="smart-summary-btn"
-        :class="{
-          'generating': isGenerating,
-          'has-summary': currentSummary,
-          'hidden-summary': hasSummary && !showSummary
-        }"
+      <!-- زر توليد الملخص -->
+      <button 
+        @click="generateSummary"
+        :disabled="isGenerating || !props.content"
+        class="smart-summary-button"
       >
-        <div class="button-content">
-          <component :is="'div'" class="button-icon">
-            <!-- Loading icon -->
-            <svg v-if="getButtonIcon === 'loading'" :class="{ 'rotating': isGenerating }" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M21 12a9 9 0 11-6.219-8.56"/>
-            </svg>
-            <!-- Eye icon -->
-            <svg v-else-if="getButtonIcon === 'eye'" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/>
-              <circle cx="12" cy="12" r="3"/>
-            </svg>
-            <!-- Eye-off icon -->
-            <svg v-else-if="getButtonIcon === 'eye-off'" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="m15 18-.722-3.25"/>
-              <path d="M2 12s3-7 10-7c1.763 0 3.37.487 4.69 1.273"/>
-              <path d="m22 22-5-5"/>
-              <path d="m17 17-.5-1.5"/>
-              <path d="M9.681 9.681a3 3 0 1 0 4.24 4.24"/>
-              <path d="M6.5 6.5A10 10 0 0 0 2 12s3 7 10 7c1.454 0 2.807-.31 4.068-.832"/>
-            </svg>
-            <!-- Sparkles icon -->
-            <svg v-else width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.582a.5.5 0 0 1 0 .963L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/>
-            </svg>
-          </component>
-          <span class="button-text">{{ getButtonText }}</span>
-          <span v-if="!hasUsedSummary && !currentSummary" class="new-badge">جديد</span>
+        <i :class="getButtonIcon"></i>
+        <span v-if="isGenerating">جاري التوليد...</span>
+        <span v-else-if="currentSummary && showSummary">إخفاء الملخص</span>
+        <span v-else-if="currentSummary && !showSummary">إظهار الملخص</span>
+        <span v-else>ملخص سريع</span>
+        <div v-if="isGenerating" class="loading-dots">
+          <span></span><span></span><span></span>
         </div>
       </button>
     </div>
+
+    <!-- تم حذف مؤشر التحميل -->
 
     <!-- عرض الملخص -->
     <div v-if="showSummary && currentSummary" class="summary-result">
       <div class="summary-header">
         <h3 class="summary-title">
-          <svg class="summary-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.582a.5.5 0 0 1 0 .963L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/>
-          </svg>
-          الملخص الذكي
-          <span v-if="summaryData?.compression_ratio" class="compression-badge">
-            ضغط {{ summaryData.compression_ratio }}%
-          </span>
+          <i class="fas fa-file-alt summary-icon"></i>
+          الملخص
         </h3>
       </div>
 
@@ -109,9 +81,7 @@ const props = withDefaults(defineProps<Props>(), {
   autoGenerate: false
 })
 
-// Refs
-const summaryBtn = ref<HTMLButtonElement>()
-const summaryContent = ref<HTMLDivElement>()
+// تم حذف refs غير المستخدمة
 
 // State
 const currentSummary = ref('')
@@ -121,27 +91,14 @@ const showSummary = ref(false)
 const error = ref('')
 const isTyping = ref(false)
 const typedSummary = ref('')
-const copySuccess = ref(false)
 const hasUsedSummary = ref(false)
 const startTime = ref(0)
 const generationTime = ref(0)
 
+// تم حذف loading animation
 
 // Computed
 const hasSummary = computed(() => !!currentSummary.value)
-const getButtonIcon = computed(() => {
-  if (isGenerating.value) return 'loading'
-  if (hasSummary.value && !showSummary.value) return 'eye'
-  if (hasSummary.value && showSummary.value) return 'eye-off'
-  return 'sparkles'
-})
-
-const getButtonText = computed(() => {
-  if (isGenerating.value) return 'جاري التوليد...'
-  if (hasSummary.value && !showSummary.value) return 'عرض الملخص'
-  if (hasSummary.value && showSummary.value) return 'إخفاء الملخص'
-  return 'ملخص ذكي بالذكاء الاصطناعي'
-})
 
 const processedSummary = computed(() => {
   if (!currentSummary.value) return ''
@@ -158,19 +115,11 @@ const aiDisclaimer = computed(() => {
   return parts[1] ? '<div class="ai-disclaimer"' + parts[1] : ''
 })
 
-const wordCount = computed(() => {
-  if (!props.content) return 0
-  return props.content.split(/\s+/).length
-})
-
-const estimatedTime = computed(() => {
-  const baseTime = 8
-  const lengthMultiplier: Record<string, number> = {
-    short: 0.7,
-    medium: 1,
-    long: 1.3
-  }
-  return Math.round(baseTime * (lengthMultiplier[props.length] || 1))
+const getButtonIcon = computed(() => {
+  if (isGenerating.value) return 'fas fa-brain fa-spin'
+  if (currentSummary.value && showSummary.value) return 'fas fa-eye-slash'
+  if (currentSummary.value && !showSummary.value) return 'fas fa-database'
+  return 'fas fa-brain'
 })
 
 // API Service
@@ -178,6 +127,12 @@ const config = useRuntimeConfig()
 
 const generateSummary = async () => {
   if (isGenerating.value) return
+  
+  // إذا كان الملخص موجود، فقط أظهره/أخفه
+  if (currentSummary.value) {
+    showSummary.value = !showSummary.value
+    return
+  }
   
   try {
     isGenerating.value = true
@@ -196,7 +151,7 @@ const generateSummary = async () => {
       body: payload
     })
     
-    if (result.success) {
+    if (result.success && result.summary) {
       summaryData.value = {
         summary: result.summary,
         word_count: result.word_count,
@@ -232,30 +187,7 @@ const toggleSummary = () => {
   }
 }
 
-const regenerateSummary = async () => {
-  currentSummary.value = ''
-  summaryData.value = undefined
-  showSummary.value = false
-  await generateSummary()
-}
-
-const copySummary = async () => {
-  try {
-    await navigator.clipboard.writeText(processedSummary.value)
-    copySuccess.value = true
-    setTimeout(() => copySuccess.value = false, 2000)
-  } catch (err) {
-    // Fallback للمتصفحات القديمة
-    const textArea = document.createElement('textarea')
-    textArea.value = processedSummary.value
-    document.body.appendChild(textArea)
-    textArea.select()
-    document.execCommand('copy')
-    document.body.removeChild(textArea)
-    copySuccess.value = true
-    setTimeout(() => copySuccess.value = false, 2000)
-  }
-}
+// تم حذف دوال copySummary و regenerateSummary
 
 const shareSummary = () => {
   if (navigator.share) {
@@ -275,7 +207,7 @@ const clearError = () => {
   error.value = ''
 }
 
-// Animation functions
+// تم حذف startLoadingAnimation
 
 const startTypingEffect = async (text: string) => {
   if (!text) return
@@ -284,7 +216,7 @@ const startTypingEffect = async (text: string) => {
   typedSummary.value = ''
   
   const cleanText = text.replace(/<[^>]*>/g, '')
-  const speed = 30 // milliseconds per character
+  const speed = 15 // milliseconds per character - أسرع
   
   for (let i = 0; i <= cleanText.length; i++) {
     typedSummary.value = cleanText.slice(0, i)
@@ -308,11 +240,71 @@ const getErrorMessage = (err: any) => {
 }
 
 // Auto-generate on mount if requested
-onMounted(() => {
+onMounted(async () => {
+  if (props.content) {
+    // التحقق من وجود cache أولاً
+    await checkForExistingSummary()
+  }
+  
   if (props.autoGenerate && (props.content || props.articleId)) {
     generateSummary()
   }
 })
+
+// دالة للتحقق من وجود ملخص محفوظ
+const checkForExistingSummary = async () => {
+  if (!props.content) return
+  
+  try {
+    // إنشاء نفس الـ hash المستخدم في الـ API
+    const contentHash = await generateContentHash(props.content, props.type || 'news', props.length || 'medium')
+    
+    // استخدام رابط نسبي فقط - ديناميكي لأي موقع
+    const response = await fetch(`/api/v1/smart-summaries/get/${contentHash}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      }
+    })
+    
+    if (response.ok) {
+      const data = await response.json()
+      if (data.success && data.summary) {
+        console.log('✅ تم العثور على ملخص محفوظ - تم الاسترجاع من قاعدة البيانات')
+        currentSummary.value = data.summary.summary
+        summaryData.value = {
+          summary: data.summary.summary,
+          word_count: data.summary.word_count,
+          compression_ratio: data.summary.compression_ratio,
+          original_length: data.summary.original_length
+        }
+        hasUsedSummary.value = true
+        // لا نظهر الملخص تلقائياً، المستخدم يحدد
+        // showSummary.value = true
+      }
+    }
+  } catch (error) {
+    console.log('لا يوجد ملخص محفوظ، سيتم التوليد عند الطلب')
+  }
+}
+
+// دالة لإنشاء hash مطابقة للـ API
+const generateContentHash = async (content: string, type: string, length: string): Promise<string> => {
+  const normalizedContent = content
+    .replace(/\s+/g, ' ')
+    .trim()
+    .toLowerCase()
+  
+  const key = `${normalizedContent}-${type}-${length}`
+  
+  // استخدام Web Crypto API
+  const encoder = new TextEncoder()
+  const data = encoder.encode(key)
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data)
+  const hashArray = Array.from(new Uint8Array(hashBuffer))
+  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('')
+}
 
 // Store usage in localStorage
 watchEffect(() => {
@@ -326,56 +318,92 @@ onMounted(() => {
 })
 </script>
 
-<style scoped>
-.smart-summary-container {
-  width: 100%;
-  max-width: none;
-}
+<style>
+  /* الأساسي */
+  .smart-summary-container {
+    margin: 1.5rem 0;
+    direction: rtl;
+    text-align: right;
+    font-family: 'Azer', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  }
 
-.summary-button-container {
-  margin-bottom: 1rem;
-}
+  /* زر الملخص السريع - اللون #1e2a4a */
+  .smart-summary-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.875rem 1.5rem;
+    background: #1e2a4a;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 1rem;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(30, 42, 74, 0.3);
+    position: relative;
+    overflow: hidden;
+    font-family: 'Azer', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  }
 
-/* الزر الرئيسي */
-.smart-summary-btn {
-  background: #007bff;
-  border: 1px solid #007bff;
-  color: white;
-  padding: 10px 16px;
-  border-radius: 6px;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-family: 'Azer', sans-serif;
-}
-.smart-summary-btn:hover:not(:disabled) {
-  background: #0056b3;
-  border-color: #0056b3;
-}
+  .smart-summary-button:hover:not(:disabled) {
+    background: #243355;
+    box-shadow: 0 6px 20px rgba(30, 42, 74, 0.4);
+    transform: translateY(-2px);
+  }
 
-.smart-summary-btn:disabled {
-  opacity: 0.7;
-  cursor: not-allowed;
-  transform: none;
-}
+  .smart-summary-button:disabled {
+    opacity: 0.8;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  .smart-summary-button:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 8px rgba(30, 42, 74, 0.3);
+  }
+
+  /* Loading dots animation */
+  .loading-dots {
+    display: inline-flex;
+    gap: 2px;
+    margin-right: 5px;
+  }
+
+  .loading-dots span {
+    width: 4px;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 50%;
+    animation: loading-bounce 1.4s infinite ease-in-out;
+  }
+
+  .loading-dots span:nth-child(1) { animation-delay: -0.32s; }
+  .loading-dots span:nth-child(2) { animation-delay: -0.16s; }
+
+  @keyframes loading-bounce {
+    0%, 80%, 100% {
+      transform: scale(0.8);
+      opacity: 0.5;
+    }
+    40% {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
 
 .smart-summary-btn.generating {
-  background: #6c757d;
-  border-color: #6c757d;
+  background: linear-gradient(135deg, #a855f7, #ec4899);
+  animation: pulse-glow 2s infinite;
 }
 
 .smart-summary-btn.has-summary {
-  background: #28a745;
-  border-color: #28a745;
+  background: linear-gradient(135deg, #10b981, #14b8a6);
 }
 
 .smart-summary-btn.hidden-summary {
-  background: #6c757d;
-  border-color: #6c757d;
+  background: linear-gradient(135deg, #6b7280, #3b82f6);
 }
 
 .button-content {
@@ -403,125 +431,112 @@ onMounted(() => {
   animation: pulse 2s infinite;
 }
 
+/* تم حذف CSS مؤشر التحميل */
 
-/* عرض الملخص */
+/* عرض الملخص - متناسق مع الموقع */
 .summary-result {
-  background: linear-gradient(145deg, #ffffff 0%, #f8f9ff 100%);
+  background: #ffffff;
   border-radius: 16px;
-  border: 1px solid #e3e8f0;
-  box-shadow: 0 8px 32px rgba(30, 42, 74, 0.12);
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 8px 25px rgba(30, 42, 74, 0.1);
   overflow: hidden;
-  margin-top: 20px;
-  position: relative;
-}
-
-.summary-result::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 3px;
-  background: linear-gradient(90deg, #1E2A4A 0%, #4285f4 50%, #1E2A4A 100%);
+  margin-top: 1rem;
 }
 
 .summary-header {
-  background: linear-gradient(135deg, #1E2A4A 0%, #2d3f5f  100%);
+  background: #1e2a4a;
   color: white;
-  padding: 16px 20px;
-  position: relative;
-  overflow: hidden;
-}
-
-.summary-header::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  right: 0;
-  width: 100px;
-  height: 100%;
-  background: linear-gradient(45deg, rgba(255,255,255,0.1) 0%, transparent 100%);
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .summary-title {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 0.75rem;
   font-size: 1.1rem;
   font-weight: 600;
-  flex-wrap: nowrap;
-  position: relative;
-  z-index: 1;
-}
-
-.summary-title .summary-icon {
-  color: #ffd700;
-  filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.3));
-  animation: sparkle 2s ease-in-out infinite alternate;
-}
-
-@keyframes sparkle {
-  0% { transform: scale(1); opacity: 0.8; }
-  100% { transform: scale(1.1); opacity: 1; }
-}
-
-.rotating {
-  animation: rotate 1s linear infinite;
-}
-
-@keyframes rotate {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  margin: 0;
 }
 
 .compression-badge {
-  background: linear-gradient(135deg, #00d4aa 0%, #00a085 100%);
-  color: white;
-  padding: 4px 12px;
-  border-radius: 20px;
-  font-size: 11px;
-  font-weight: 600;
-  margin-left: 8px;
-  box-shadow: 0 2px 8px rgba(0, 212, 170, 0.3);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.2);
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  margin-left: 0.5rem;
 }
 
+/* أيقونات ملونة */
+.ai-icon {
+  color: #a78bfa !important;
+}
+
+.summary-icon {
+  color: rgba(255, 255, 255, 0.9) !important;
+  margin-left: 0.5rem;
+}
 
 .summary-content {
-  padding: 24px;
-  background: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(10px);
+  padding: 1.75rem 1.5rem;
+  line-height: 1.8;
 }
 
 .typing-effect {
-  font-size: 16px;
-  line-height: 1.7;
-  color: #2d3748;
-  white-space: pre-line;
-  font-family: 'Azer', sans-serif;
-  text-align: justify;
-  margin-bottom: 16px;
+  font-size: 1.125rem;
+  line-height: 1.75;
+  color: #374151;
 }
 
 .typing-cursor {
-  animation: blink 1s infinite;
-  color: #1E2A4A;
+  animation: pulse 1s infinite;
+  color: #1e2a4a;
   font-weight: 700;
 }
 
-@keyframes blink {
-  0%, 50% { opacity: 1; }
-  51%, 100% { opacity: 0; }
+.summary-text {
+  font-size: 1.125rem;
+  line-height: 1.8;
+  color: #2d3748;
+  font-weight: 400;
 }
 
-.summary-text {
-  font-size: 16px;
-  line-height: 1.7;
-  color: #2d3748;
-  white-space: pre-line;
-  font-family: 'Azer', sans-serif;
-  text-align: justify;
-  margin-bottom: 16px;
+.summary-text strong {
+  color: #1e2a4a;
+  font-weight: 600;
+}
+
+/* AI Disclaimer - متناسق مع لون الموقع */
+.ai-disclaimer {
+  background: linear-gradient(135deg, #f8fafc, #edf2f7);
+  border: 1px solid rgba(30, 42, 74, 0.1);
+  border-radius: 12px;
+  padding: 1.25rem;
+  margin-top: 1.5rem;
+  font-size: 0.9rem;
+  box-shadow: 0 2px 8px rgba(30, 42, 74, 0.05);
+}
+
+.disclaimer-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: #1e2a4a;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+}
+
+.disclaimer-header i {
+  font-size: 1.1rem;
+}
+
+.disclaimer-text {
+  color: #4a5568;
+  line-height: 1.6;
+  margin: 0;
+  font-size: 0.9rem;
 }
 
 /* رسائل الخطأ */
@@ -557,71 +572,85 @@ onMounted(() => {
 }
 
 .error-message {
-  color: #b91c1c;
-  margin-top: 0.25rem;
-}
-
-/* Responsive للهواتف */
-@media (max-width: 768px) {
-  .smart-summary-btn {
-    width: 100%;
-    padding: 12px 16px;
-    font-size: 16px;
-    justify-content: center;
-  }
-  
-  .summary-result {
-    margin-top: 16px;
-    border-radius: 12px;
-    box-shadow: 0 4px 20px rgba(30, 42, 74, 0.15);
-  }
-  
-  .summary-header {
-    padding: 14px 16px;
-  }
-  
-  .summary-title {
-    font-size: 15px;
-    gap: 6px;
-  }
-  
-  .summary-content {
-    padding: 18px;
-  }
-  
-  .typing-effect, .summary-text {
-    font-size: 15px;
-    line-height: 1.6;
-  }
-  
-  .compression-badge {
-    font-size: 11px;
-    padding: 2px 6px;
-  }
-  
-  
-  .error-container {
-    border-radius: 6px;
-    padding: 12px;
-  }
-  
-  .new-badge {
-    font-size: 11px;
-    padding: 2px 6px;
-  }
+  color: #991b1b;
+  font-size: 0.875rem;
+  margin: 0;
 }
 
 .error-close {
-  color: #ef4444;
   background: none;
   border: none;
-  padding: 0.25rem;
+  color: #6b7280;
   cursor: pointer;
-  flex-shrink: 0;
+  padding: 0.25rem;
+  border-radius: 0.25rem;
+  transition: all 0.3s ease;
 }
 
 .error-close:hover {
-  color: #b91c1c;
+  background: #f3f4f6;
+  color: #374151;
+}
+
+/* Responsive Design - للهاتف والكمبيوتر */
+@media (max-width: 768px) {
+  .smart-summary-container {
+    margin: 1rem 0;
+  }
+  
+  .smart-summary-button {
+    width: 100%;
+    justify-content: center;
+    padding: 1rem 1.5rem;
+    font-size: 1rem;
+  }
+  
+  .summary-header {
+    padding: 1rem 1.25rem;
+    flex-direction: column;
+    gap: 1rem;
+    text-align: center;
+  }
+  
+  .summary-title {
+    justify-content: center;
+    font-size: 1rem;
+  }
+  
+  .summary-content {
+    padding: 1.5rem 1.25rem;
+  }
+  
+  .summary-text {
+    font-size: 1rem;
+    line-height: 1.7;
+  }
+  
+  .ai-disclaimer {
+    padding: 1rem;
+    margin-top: 1.25rem;
+    font-size: 0.85rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .smart-summary-button {
+    padding: 0.875rem 1.25rem;
+    font-size: 0.95rem;
+    gap: 0.5rem;
+  }
+  
+  .summary-content {
+    padding: 1.25rem 1rem;
+  }
+  
+  .summary-text {
+    font-size: 0.95rem;
+  }
+  
+  .control-btn {
+    padding: 0.375rem;
+  }
 }
 
 /* Animations */

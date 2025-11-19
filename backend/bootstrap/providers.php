@@ -5,4 +5,5 @@ return [
     App\Providers\EventServiceProvider::class,
     App\Providers\FortifyServiceProvider::class,
     App\Providers\RepositoryServiceProvider::class,
+    App\Providers\SmartSummaryServiceProvider::class,
 ];

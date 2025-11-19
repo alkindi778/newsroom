@@ -32,10 +32,15 @@ export default defineNuxtConfig({
       hmr: {
         overlay: false
       },
-      // Proxy للـ storage في بيئة التطوير
+      // Proxy للـ storage وAPI في بيئة التطوير
       proxy: {
         '/storage': {
           target: 'http://localhost/newsroom/backend/public',
+          changeOrigin: true,
+          secure: false
+        },
+        '/api/v1': {
+          target: process.env.NUXT_BACKEND_URL || 'http://localhost/newsroom/backend/public',
           changeOrigin: true,
           secure: false
         }
@@ -91,6 +96,9 @@ export default defineNuxtConfig({
 
   // Runtime config للاتصال بالـ Backend
   runtimeConfig: {
+    // Server-side only (private)
+    geminiApiKey: process.env.GEMINI_API_KEY,
+    
     public: {
       // استخدام IP الجهاز للوصول من الهاتف أو localhost للتطوير
       apiBase: process.env.NUXT_PUBLIC_API_BASE || 'http://localhost/newsroom/backend/public/api/v1',
