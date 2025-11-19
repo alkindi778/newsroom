@@ -12,10 +12,22 @@ export const useDateFormat = () => {
     }
 
     const options: Intl.DateTimeFormatOptions = format === 'full'
-      ? { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' }
-      : { year: 'numeric', month: 'short', day: 'numeric' }
+      ? { 
+          year: 'numeric', 
+          month: 'long', 
+          day: 'numeric', 
+          hour: '2-digit', 
+          minute: '2-digit',
+          calendar: 'gregory' // استخدام التقويم الميلادي
+        }
+      : { 
+          year: 'numeric', 
+          month: 'short', 
+          day: 'numeric',
+          calendar: 'gregory' // استخدام التقويم الميلادي
+        }
 
-    return new Intl.DateTimeFormat('ar-SA', options).format(d)
+    return new Intl.DateTimeFormat('ar-EG', options).format(d)
   }
 
   // حساب الوقت النسبي (منذ 5 دقائق، منذ ساعة، إلخ)

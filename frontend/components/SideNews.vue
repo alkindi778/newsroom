@@ -12,7 +12,7 @@
           :src="getImageUrl(article.thumbnail || article.image)"
           :alt="article.title"
           loading="lazy"
-          class="w-full h-full object-cover"
+          class="w-full h-full object-fill"
         />
       </div>
 
