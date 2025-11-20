@@ -2,19 +2,22 @@
 
 namespace App\Http\Controllers;
 
-use App\Services\CacheService;
-use Illuminate\Http\Request;
+use App\Services\SmartSummaryCacheService;
+use App\Services\GeminiService;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 
 class SmartSummaryController extends Controller
 {
-    private CacheService $cacheService;
+    private SmartSummaryCacheService $cacheService;
+    private GeminiService $geminiService;
 
-    public function __construct(CacheService $cacheService)
+    public function __construct(SmartSummaryCacheService $cacheService, GeminiService $geminiService)
     {
         $this->cacheService = $cacheService;
+        $this->geminiService = $geminiService;
     }
     /**
      * استرجاع ملخص بواسطة hash
@@ -85,9 +88,13 @@ class SmartSummaryController extends Controller
                 ]);
             }
 
-            // توليد الملخص (مؤقت - بسيط)
+            // توليد الملخص باستخدام Gemini AI
+            $summary = $this->geminiService->generateSummary($content, $type, $length);
             
-            $summary = $this->generateSimpleSummary($content, $type, $length);
+            // إذا فشل Gemini، استخدم الملخص البسيط كبديل
+            if (!$summary) {
+                $summary = $this->generateSimpleSummary($content, $type, $length);
+            }
             
             // حفظ الملخص
             $summaryData = [
