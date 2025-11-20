@@ -26,7 +26,7 @@
 
       <!-- التاريخ والقسم -->
       <div class="flex items-center justify-between text-sm text-gray-600">
-        <span class="font-semibold">{{ article.category?.name }}</span>
+        <span v-if="article.category" class="font-semibold">{{ getCategoryName(article.category) }}</span>
         <time class="text-gray-500">{{ formatDate(article.published_at, 'relative') }}</time>
       </div>
     </div>
@@ -43,7 +43,17 @@ const props = defineProps<{
 const { getImageUrl } = useImageUrl()
 const { formatDate } = useDateFormat()
 const { getArticleLink } = useArticleLink()
+const { getCategoryName } = useLocalizedContent()
 const { decodeHtmlEntities } = useHtmlEntities()
+
+// Debug: تحقق من اسم القسم
+watchEffect(() => {
+  if (props.article.category) {
+    console.log('📰 NewsCard - Article:', props.article.title?.substring(0, 30))
+    console.log('📰 NewsCard - Category:', props.article.category)
+    console.log('📰 NewsCard - Category Name (getCategoryName):', getCategoryName(props.article.category))
+  }
+})
 </script>
 
 <style scoped>

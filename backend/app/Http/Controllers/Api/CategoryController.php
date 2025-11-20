@@ -72,7 +72,7 @@ class CategoryController extends Controller
 
             // جلب الأخبار المنشورة فقط مع pagination
             $query = $category->articles()
-                ->with(['user:id,name', 'category:id,name,slug'])
+                ->with(['user:id,name', 'category:id,name,name_en,slug'])
                 ->where('is_published', true)
                 ->whereNotNull('published_at')
                 ->where('published_at', '<=', now())
@@ -109,6 +109,7 @@ class CategoryController extends Controller
                     'category' => $article->category ? [
                         'id' => $article->category->id,
                         'name' => $article->category->name,
+                        'name_en' => $article->category->name_en,
                         'slug' => $article->category->slug
                     ] : null
                 ];

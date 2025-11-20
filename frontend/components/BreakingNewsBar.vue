@@ -18,7 +18,7 @@
           <Transition name="slide-fade" mode="out-in">
             <div v-if="currentNews" :key="currentIndex" class="flex items-center">
               <NuxtLink
-                :to="`/news/${currentNews.slug}`"
+                :to="getArticleLink(currentNews as any)"
                 class="text-white hover:text-gray-200 transition-colors duration-200 font-bold text-sm md:text-3xl truncate"
               >
                 {{ currentNews.title }}
@@ -67,6 +67,7 @@
 </template>
 
 <script setup lang="ts">
+const { getArticleLink } = useArticleLink()
 const config = useRuntimeConfig()
 const apiBase = ((config as any).public?.apiBase || '/api/v1') as string
 

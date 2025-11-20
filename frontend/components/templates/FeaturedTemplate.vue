@@ -2,7 +2,7 @@
   <section class="mb-12">
     <!-- Header -->
     <div class="mb-6">
-      <NuxtLink v-if="categorySlug" :to="`/category/${categorySlug}`" class="flex items-center gap-2">
+      <NuxtLink v-if="categorySlug" :to="localePath('/category/' + categorySlug)" class="flex items-center gap-2">
         <h2 class="text-3xl font-bold text-gray-900">{{ title }}</h2>
         <svg class="w-6 h-6 text-gray-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
@@ -37,7 +37,7 @@
             <!-- Category Badge -->
             <div v-if="mainArticle.category" class="absolute top-4 right-4">
               <span class="px-3 py-1 bg-blue-600 text-white text-sm font-medium rounded">
-                {{ mainArticle.category.name }}
+                {{ getCategoryName(mainArticle.category) }}
               </span>
             </div>
 
@@ -120,6 +120,9 @@
 
 <script setup lang="ts">
 import type { Article } from '~/types'
+const localePath = useLocalePath()
+const { getCategoryName } = useLocalizedContent()
+
 interface Props {
   title?: string
   categorySlug?: string

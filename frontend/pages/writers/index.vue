@@ -52,7 +52,7 @@
           <NuxtLink
             v-for="writer in writers"
             :key="writer.id"
-            :to="`/writers/${writer.slug}`"
+            :to="localePath('/writers/' + writer.slug)"
             class="group block bg-white rounded-lg shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100 p-4 text-center"
           >
             <div class="relative w-24 h-24 mx-auto mb-3">
@@ -101,6 +101,7 @@
 </template>
 
 <script setup lang="ts">
+const localePath = useLocalePath()
 const writersStore = useWritersStore()
 
 const writers = computed(() => writersStore.writers)

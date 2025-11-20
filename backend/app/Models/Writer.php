@@ -17,13 +17,17 @@ class Writer extends Model implements HasMedia
 
     protected $fillable = [
         'name',
+        'name_en',
         'slug',
         'email',
         'phone',
         'bio',
+        'bio_en',
         'image',
         'position',
+        'position_en',
         'specialization',
+        'specialization_en',
         'facebook_url',
         'twitter_url',
         'linkedin_url',

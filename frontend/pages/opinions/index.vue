@@ -129,7 +129,7 @@
         <NuxtLink
           v-for="writer in displayedWriters"
           :key="writer.id"
-          :to="`/writers/${writer.slug}`"
+          :to="localePath('/writers/' + writer.slug)"
           class="group text-center"
         >
           <div class="relative w-24 h-24 mx-auto mb-2">
@@ -172,6 +172,7 @@
 <script setup lang="ts">
 import AdvertisementZone from '~/components/AdvertisementZone.vue'
 
+const localePath = useLocalePath()
 const opinionsStore = useOpinionsStore()
 
 const opinions = computed(() => opinionsStore.opinions)

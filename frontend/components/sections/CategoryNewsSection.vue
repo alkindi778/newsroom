@@ -9,7 +9,7 @@
       </div>
       <NuxtLink 
         v-if="category?.slug"
-        :to="`/category/${category.slug}`" 
+        :to="localePath('/category/' + category.slug)" 
         class="text-blue-600 hover:text-blue-700 text-sm font-medium flex items-center gap-1 transition-colors">
         المزيد
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -40,6 +40,8 @@
 </template>
 
 <script setup lang="ts">
+const localePath = useLocalePath()
+
 interface Props {
   title?: string | null
   subtitle?: string | null

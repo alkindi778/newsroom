@@ -9,6 +9,7 @@
 const settingsStore = useSettingsStore()
 const config = useRuntimeConfig()
 const route = useRoute()
+const { locale, localeProperties } = useI18n()
 
 // جلب الإعدادات قبل render الصفحة (SSR)
 await settingsStore.fetchSettings()
@@ -63,8 +64,8 @@ watchEffect(() => {
         }
       : '%s',
     htmlAttrs: {
-      lang: 'ar',
-      dir: 'rtl'
+      lang: locale.value,
+      dir: localeProperties.value.dir || 'rtl'
     },
     meta: [
       { charset: 'utf-8' },

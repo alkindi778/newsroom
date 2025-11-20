@@ -3,7 +3,7 @@
     <!-- Header -->
     <div class="mb-6">
       <div class="flex items-center justify-between">
-        <NuxtLink v-if="categorySlug" :to="`/category/${categorySlug}`" class="flex items-center gap-2">
+        <NuxtLink v-if="categorySlug" :to="localePath('/category/' + categorySlug)" class="flex items-center gap-2">
           <h2 class="text-3xl font-bold text-gray-900">{{ title }}</h2>
           <svg class="w-6 h-6 text-gray-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
@@ -55,6 +55,8 @@
 </template>
 
 <script setup lang="ts">
+const localePath = useLocalePath()
+
 interface Props {
   title?: string
   categorySlug?: string

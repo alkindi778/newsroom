@@ -4,12 +4,22 @@
 @tailwind components;
 @tailwind utilities;
 
-/* إعدادات عامة للغة العربية */
+/* إعدادات عامة */
 @layer base {
   body {
     @apply font-sans antialiased bg-gray-50;
+  }
+
+  /* اتجاه RTL للعربية */
+  html[dir="rtl"] body {
     direction: rtl;
     text-align: right;
+  }
+
+  /* اتجاه LTR للإنجليزية */
+  html[dir="ltr"] body {
+    direction: ltr;
+    text-align: left;
   }
 
   * {
@@ -57,6 +67,27 @@
   
   .ltr {
     direction: ltr;
+  }
+
+  /* Margin utilities that flip with direction */
+  html[dir="rtl"] .ms-auto {
+    margin-right: auto !important;
+    margin-left: 0 !important;
+  }
+  
+  html[dir="ltr"] .ms-auto {
+    margin-left: auto !important;
+    margin-right: 0 !important;
+  }
+
+  html[dir="rtl"] .me-auto {
+    margin-left: auto !important;
+    margin-right: 0 !important;
+  }
+  
+  html[dir="ltr"] .me-auto {
+    margin-right: auto !important;
+    margin-left: 0 !important;
   }
 
   /* Text utilities */

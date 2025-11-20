@@ -29,7 +29,7 @@
             <!-- تكرار الأخبار للحصول على حلقة متصلة -->
             <template v-for="(article, index) in displayArticles" :key="`${article.id}-${index}`">
               <NuxtLink 
-                :to="`/news/${article.slug}`"
+                :to="getArticleLink(article as any)"
                 class="ticker-item flex items-center gap-1 md:gap-2 hover:text-primary transition-colors duration-200"
               >
                 <span class="inline-block w-1 h-1 md:w-1.5 md:h-1.5 bg-primary rounded-full animate-ping"></span>
@@ -72,7 +72,9 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, computed } from 'vue'
 
-interface Article {
+const { getArticleLink } = useArticleLink()
+
+interface TickerArticle {
   id: number
   title: string
   subtitle?: string
@@ -82,10 +84,10 @@ interface Article {
 
 interface ApiResponse {
   status: string
-  data: Article[]
+  data: TickerArticle[]
 }
 
-const articles = ref<Article[]>([])
+const articles = ref<TickerArticle[]>([])
 const isPaused = ref(false)
 const tickerContent = ref<HTMLElement | null>(null)
 const isClient = ref(false)

@@ -13,8 +13,8 @@
 
           <!-- روابط سريعة -->
           <div class="hidden md:flex items-center gap-6">
-            <NuxtLink to="/about" class="hover:text-gray-300 transition-colors">من نحن</NuxtLink>
-            <NuxtLink to="/contact" class="hover:text-gray-300 transition-colors">اتصل بنا</NuxtLink>
+            <NuxtLink :to="localePath('/about')" class="hover:text-gray-300 transition-colors">{{ $t('common.about_us') }}</NuxtLink>
+            <NuxtLink :to="localePath('/contact')" class="hover:text-gray-300 transition-colors">{{ $t('common.contact_us') }}</NuxtLink>
             <a href="/rss" target="_blank" rel="noopener" class="flex items-center gap-1 hover:text-primary-200 transition-colors">
               <span>RSS</span>
               <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -68,6 +68,8 @@
 
           <!-- زر مباشر -->
           
+          <!-- Language Switcher -->
+          <LanguageSwitcher />
         </div>
       </div>
     </div>
@@ -97,11 +99,11 @@
         <ul class="flex items-center gap-2 md:gap-0 md:justify-between py-0 overflow-visible scrollbar-hide">
           <li>
             <NuxtLink 
-              to="/" 
+              :to="localePath('/')" 
               class="nav-link"
               :class="{ 'active': isActive('/') }"
             >
-              الرئيسية
+              {{ $t('common.home') }}
             </NuxtLink>
           </li>
           <!-- عرض أول 9 أقسام -->
@@ -113,7 +115,7 @@
                 style="display: flex; align-items: center; justify-content: center;"
                 :class="{ 'active': isActive(`/category/${category.slug}`) }"
               >
-                <span>{{ category.name }}</span>
+                <span>{{ getCategoryName(category) }}</span>
                 <svg class="w-4 h-4 transition-transform group-hover:rotate-180" style="flex-shrink: 0; margin-top: 0;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"/>
                 </svg>
@@ -124,11 +126,11 @@
                 <NuxtLink 
                   v-for="child in getChildren(category.id)" 
                   :key="child.id"
-                  :to="`/category/${child.slug}`"
+                  :to="localePath('/category/' + child.slug)"
                   class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 first:rounded-t-lg last:rounded-b-lg transition-colors"
                   :class="{ 'bg-blue-50 text-blue-600': isActive(`/category/${child.slug}`) }"
                 >
-                  {{ child.name }}
+                  {{ getCategoryName(child) }}
                 </NuxtLink>
               </div>
             </template>
@@ -136,21 +138,21 @@
             <!-- إذا لم يكن للقسم أطفال: رابط عادي -->
             <NuxtLink 
               v-else
-              :to="`/category/${category.slug}`" 
+              :to="localePath('/category/' + category.slug)" 
               class="nav-link"
               :class="{ 'active': isActive(`/category/${category.slug}`) }"
             >
-              {{ category.name }}
+              {{ getCategoryName(category) }}
             </NuxtLink>
           </li>
           
           <li>
             <NuxtLink 
-              to="/opinions" 
+              :to="localePath('/opinions')" 
               class="nav-link"
               :class="{ 'active': isActive('/opinions') }"
             >
-              مقالات الرأي
+              {{ $t('common.opinions') }}
             </NuxtLink>
           </li>
           
@@ -160,7 +162,7 @@
               class="nav-link flex gap-1"
               style="display: flex; align-items: center; justify-content: center;"
             >
-              <span>المزيد</span>
+              <span>{{ $t('common.read_more') }}</span>
               <svg class="w-4 h-4 transition-transform group-hover:rotate-180" style="flex-shrink: 0; margin-top: 0;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"/>
               </svg>
@@ -171,11 +173,11 @@
               <NuxtLink 
                 v-for="category in moreCategories" 
                 :key="category.id"
-                :to="`/category/${category.slug}`"
+                :to="localePath('/category/' + category.slug)"
                 class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 first:rounded-t-lg last:rounded-b-lg transition-colors"
                 :class="{ 'bg-blue-50 text-blue-600': isActive(`/category/${category.slug}`) }"
               >
-                {{ category.name }}
+                {{ getCategoryName(category) }}
               </NuxtLink>
             </div>
           </li>
@@ -191,12 +193,12 @@
             <ul class="space-y-1">
               <li>
                 <NuxtLink 
-                  to="/" 
+                  :to="localePath('/')" 
                   class="mobile-nav-link"
                   :class="{ 'active': isActive('/') }"
                   @click="closeMobileMenu"
                 >
-                  الرئيسية
+                  {{ $t('common.home') }}
                 </NuxtLink>
               </li>
               <!-- عرض أول 9 أقسام -->
@@ -208,7 +210,7 @@
                     :class="{ 'active': isActive(`/category/${category.slug}`) }"
                     @click="toggleMobileSubmenu(category.id)"
                   >
-                    <span>{{ category.name }}</span>
+                    <span>{{ getCategoryName(category) }}</span>
                     <svg 
                       class="w-4 h-4 transition-transform" 
                       :class="{ 'rotate-180': isCategoryExpanded(category.id) }"
@@ -225,12 +227,12 @@
                     <ul v-if="isCategoryExpanded(category.id)" class="space-y-1 mt-1 pr-4 border-r-2 border-gray-300">
                       <li v-for="child in getChildren(category.id)" :key="child.id">
                         <NuxtLink 
-                          :to="`/category/${child.slug}`"
+                          :to="localePath('/category/' + child.slug)"
                           class="mobile-nav-link text-sm"
                           :class="{ 'active': isActive(`/category/${child.slug}`) }"
                           @click="closeMobileMenu"
                         >
-                          {{ child.name }}
+                          {{ getCategoryName(child) }}
                         </NuxtLink>
                       </li>
                     </ul>
@@ -240,23 +242,23 @@
                 <!-- إذا لم يكن للقسم أطفال: رابط عادي -->
                 <NuxtLink 
                   v-else
-                  :to="`/category/${category.slug}`" 
+                  :to="localePath('/category/' + category.slug)" 
                   class="mobile-nav-link"
                   :class="{ 'active': isActive(`/category/${category.slug}`) }"
                   @click="closeMobileMenu"
                 >
-                  {{ category.name }}
+                  {{ getCategoryName(category) }}
                 </NuxtLink>
               </li>
               
               <li>
                 <NuxtLink 
-                  to="/opinions" 
+                  :to="localePath('/opinions')" 
                   class="mobile-nav-link"
                   :class="{ 'active': isActive('/opinions') }"
                   @click="closeMobileMenu"
                 >
-                  مقالات الرأي
+                  {{ $t('common.opinions') }}
                 </NuxtLink>
               </li>
               
@@ -266,7 +268,7 @@
                   class="mobile-nav-link w-full text-right flex items-center justify-between"
                   @click="toggleMobileSubmenu('more')"
                 >
-                  <span>المزيد</span>
+                  <span>{{ $t('common.read_more') }}</span>
                   <svg 
                     class="w-4 h-4 transition-transform" 
                     :class="{ 'rotate-180': isCategoryExpanded('more') }"
@@ -283,12 +285,12 @@
                   <ul v-if="isCategoryExpanded('more')" class="space-y-1 mt-1 pr-4 border-r-2 border-gray-300">
                     <li v-for="category in moreCategories" :key="category.id">
                       <NuxtLink 
-                        :to="`/category/${category.slug}`"
+                        :to="localePath('/category/' + category.slug)"
                         class="mobile-nav-link text-sm"
                         :class="{ 'active': isActive(`/category/${category.slug}`) }"
                         @click="closeMobileMenu"
                       >
-                        {{ category.name }}
+                        {{ getCategoryName(category) }}
                       </NuxtLink>
                     </li>
                   </ul>
@@ -300,8 +302,8 @@
           <!-- روابط إضافية للموبايل -->
           <div class="mt-4 pt-4 border-t border-gray-200">
             <div class="flex flex-col gap-2 text-sm">
-              <NuxtLink to="/about" class="text-gray-600 hover:text-gray-900 px-3.5 py-2" @click="closeMobileMenu">من نحن</NuxtLink>
-              <NuxtLink to="/contact" class="text-gray-600 hover:text-gray-900 px-3.5 py-2" @click="closeMobileMenu">اتصل بنا</NuxtLink>
+              <NuxtLink :to="localePath('/about')" class="text-gray-600 hover:text-gray-900 px-3.5 py-2" @click="closeMobileMenu">{{ $t('common.about_us') }}</NuxtLink>
+              <NuxtLink :to="localePath('/contact')" class="text-gray-600 hover:text-gray-900 px-3.5 py-2" @click="closeMobileMenu">{{ $t('common.contact_us') }}</NuxtLink>
               <a href="/rss" target="_blank" rel="noopener" class="text-gray-600 hover:text-gray-900 px-3.5 py-2">RSS</a>
             </div>
           </div>
@@ -316,6 +318,9 @@ const categoriesStore = useCategoriesStore()
 const settingsStore = useSettingsStore()
 const route = useRoute()
 const config = useRuntimeConfig()
+const { locale, localeProperties } = useI18n()
+const localePath = useLocalePath()
+const { getCategoryName } = useLocalizedContent()
 
 const showMobileMenu = ref(false)
 const showSearch = ref(false)
@@ -383,7 +388,7 @@ const showSiteName = computed(() => true) // يمكن جعله setting لاحق�
 // التاريخ الحالي
 const currentDate = computed(() => {
   const date = new Date()
-  return new Intl.DateTimeFormat('ar-SA', {
+  return new Intl.DateTimeFormat(locale.value === 'ar' ? 'ar-SA' : 'en-US', {
     weekday: 'long',
     year: 'numeric',
     month: 'long',

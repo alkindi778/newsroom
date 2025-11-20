@@ -1,0 +1,45 @@
+{
+    "common": {
+        "home": "الرئيسية",
+        "search": "بحث",
+        "language": "اللغة",
+        "read_more": "اقرأ المزيد",
+        "latest_news": "آخر الأخبار",
+        "breaking_news": "عاجل",
+        "most_read": "الأكثر قراءة",
+        "videos": "فيديو",
+        "opinions": "مقالات الرأي",
+        "contact_us": "اتصل بنا",
+        "about_us": "من نحن",
+        "copyright": "جميع الحقوق محفوظة",
+        "loading": "جاري التحميل...",
+        "error": "حدث خطأ ما",
+        "no_results": "لا توجد نتائج",
+        "search_placeholder": "ابحث عن..."
+    },
+    "nav": {
+        "news": "أخبار",
+        "reports": "تقارير",
+        "interviews": "مقابلات",
+        "economy": "اقتصاد",
+        "sports": "رياضة",
+        "culture": "ثقافة وفن"
+    },
+    "article": {
+        "share": "مشاركة",
+        "related_articles": "أخبار ذات صلة",
+        "comments": "التعليقات",
+        "author": "الكاتب",
+        "date": "التاريخ",
+        "source": "المصدر"
+    },
+    "footer": {
+        "quick_links": "روابط سريعة",
+        "privacy_policy": "سياسة الخصوصية",
+        "terms_conditions": "الشروط والأحكام",
+        "categories": "الأقسام",
+        "follow_us": "تابعنا",
+        "follow_us_text": "تابعنا على وسائل التواصل الاجتماعي",
+        "designed_by": "تصميم وتطوير"
+    }
+}

@@ -127,8 +127,16 @@ onMounted(async () => {
       sectionsStore.fetchSections()
     ])
     
+    console.log('🏠 Index - Homepage sections:', sectionsStore.sections)
+    console.log('🏠 Index - Active sections:', sectionsStore.activeSections)
+    
     // جلب الأخبار المميزة أولاً (للسلايدر) - للـ fallback فقط
     await articlesStore.fetchFeaturedArticles(10)
+    
+    console.log('🏠 Index - Featured articles:', articlesStore.featuredArticles.slice(0, 2).map(a => ({
+      title: a.title,
+      category: a.category
+    })))
     
     // ثم جلب باقي البيانات بشكل متوازي - للـ fallback فقط
     await Promise.all([

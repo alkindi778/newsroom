@@ -22,26 +22,26 @@
 
         <!-- روابط سريعة -->
         <div>
-          <h4 class="text-white font-bold mb-4">روابط سريعة</h4>
+          <h4 class="text-white font-bold mb-4">{{ $t('footer.quick_links') }}</h4>
           <ul class="space-y-2 text-sm">
-            <li><NuxtLink to="/" class="hover:text-white transition-colors">الرئيسية</NuxtLink></li>
-            <li><NuxtLink to="/about" class="hover:text-white transition-colors">من نحن</NuxtLink></li>
-            <li><NuxtLink to="/contact" class="hover:text-white transition-colors">اتصل بنا</NuxtLink></li>
-            <li><NuxtLink to="/privacy" class="hover:text-white transition-colors">سياسة الخصوصية</NuxtLink></li>
-            <li><NuxtLink to="/terms" class="hover:text-white transition-colors">الشروط والأحكام</NuxtLink></li>
+            <li><NuxtLink :to="localePath('/')" class="hover:text-white transition-colors">{{ $t('common.home') }}</NuxtLink></li>
+            <li><NuxtLink :to="localePath('/about')" class="hover:text-white transition-colors">{{ $t('common.about_us') }}</NuxtLink></li>
+            <li><NuxtLink :to="localePath('/contact')" class="hover:text-white transition-colors">{{ $t('common.contact_us') }}</NuxtLink></li>
+            <li><NuxtLink :to="localePath('/privacy')" class="hover:text-white transition-colors">{{ $t('footer.privacy_policy') }}</NuxtLink></li>
+            <li><NuxtLink :to="localePath('/terms')" class="hover:text-white transition-colors">{{ $t('footer.terms_conditions') }}</NuxtLink></li>
           </ul>
         </div>
 
         <!-- الأقسام -->
         <div>
-          <h4 class="text-white font-bold mb-4">الأقسام</h4>
+          <h4 class="text-white font-bold mb-4">{{ $t('footer.categories') }}</h4>
           <ul class="space-y-2 text-sm">
             <li v-for="category in categories.slice(0, 6)" :key="category.id">
               <NuxtLink 
-                :to="`/category/${category.slug}`" 
+                :to="localePath('/category/' + category.slug)" 
                 class="hover:text-white transition-colors"
               >
-                {{ category.name }}
+                {{ getCategoryName(category) }}
               </NuxtLink>
             </li>
           </ul>
@@ -49,8 +49,8 @@
 
         <!-- وسائل التواصل الاجتماعي -->
         <div>
-          <h4 class="text-white font-bold mb-4">تابعنا</h4>
-          <p class="text-sm mb-4">تابعنا على وسائل التواصل الاجتماعي</p>
+          <h4 class="text-white font-bold mb-4">{{ $t('footer.follow_us') }}</h4>
+          <p class="text-sm mb-4">{{ $t('footer.follow_us_text') }}</p>
           <div class="flex gap-3 flex-wrap">
             <a v-if="socialFacebook" :href="socialFacebook" target="_blank" rel="noopener" class="social-icon">
               <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -79,8 +79,8 @@
 
       <!-- حقوق النشر -->
       <div class="border-t border-gray-800 mt-8 pt-8 text-center text-sm">
-        <p class="mb-2">© {{ currentYear }} {{ siteName }}. جميع الحقوق محفوظة.</p>
-        <p class="text-gray-400">تصميم وتطوير: <span class="text-white font-semibold">عبدالسلام التوي</span></p>
+        <p class="mb-2">© {{ currentYear }} {{ siteName }}. {{ $t('common.copyright') }}.</p>
+        <p class="text-gray-400">{{ $t('footer.designed_by') }}: <span class="text-white font-semibold">عبدالسلام التوي</span></p>
       </div>
     </div>
   </footer>
@@ -90,6 +90,8 @@
 const categoriesStore = useCategoriesStore()
 const settingsStore = useSettingsStore()
 const config = useRuntimeConfig()
+const localePath = useLocalePath()
+const { getCategoryName } = useLocalizedContent()
 const categories = computed(() => categoriesStore.categories)
 
 const currentYear = new Date().getFullYear()

@@ -16,10 +16,10 @@
       <!-- القسم -->
       <NuxtLink 
         v-if="article.category" 
-        :to="`/category/${article.category.slug}`"
+        :to="localePath('/category/' + article.category.slug)"
         class="inline-block bg-accent hover:bg-accent-600 px-4 py-2 rounded-full text-sm font-bold mb-4 transition-colors"
       >
-        {{ article.category.name }}
+        {{ getCategoryName(article.category) }}
       </NuxtLink>
 
       <!-- العنوان الفرعي -->
@@ -84,6 +84,9 @@
 
 <script setup lang="ts">
 import type { Article } from '~/types'
+
+const localePath = useLocalePath()
+const { getCategoryName } = useLocalizedContent()
 
 const props = defineProps<{
   article: Article

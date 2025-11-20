@@ -19,10 +19,12 @@ class Article extends Model implements HasMedia
     use SoftDeletes, InteractsWithMedia, LogsActivity;
     protected $fillable = [
         'title',
+        'title_en',
         'subtitle',
         'source',
         'slug',
         'content',
+        'content_en',
         'image',
         'category_id',
         'user_id',

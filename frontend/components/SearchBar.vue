@@ -25,7 +25,7 @@
       <NuxtLink
         v-for="result in results"
         :key="result.id"
-        :to="`/news/${result.slug}`"
+        :to="getArticleLink(result)"
         class="flex items-center gap-3 p-3 hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-0"
         @click="closeResults"
       >
@@ -36,7 +36,7 @@
         />
         <div class="flex-1">
           <h4 class="font-semibold text-sm text-gray-900 line-clamp-1">{{ result.title }}</h4>
-          <p class="text-xs text-gray-500 mt-1">{{ result.category?.name }}</p>
+          <p v-if="result.category" class="text-xs text-gray-500 mt-1">{{ getCategoryName(result.category) }}</p>
         </div>
       </NuxtLink>
     </div>
@@ -52,6 +52,9 @@ const showResults = ref(false)
 let searchTimeout: NodeJS.Timeout | null = null
 
 const { getImageUrl } = useImageUrl()
+const { getArticleLink } = useArticleLink()
+const { getCategoryName } = useLocalizedContent()
+const localePath = useLocalePath()
 const router = useRouter()
 
 // البحث السريع مع debounce
@@ -84,7 +87,7 @@ watch(searchQuery, () => {
 
 const handleSearch = () => {
   if (searchQuery.value.trim()) {
-    router.push(`/search?q=${encodeURIComponent(searchQuery.value)}`)
+    router.push(localePath(`/search?q=${encodeURIComponent(searchQuery.value)}`))
     closeResults()
   }
 }

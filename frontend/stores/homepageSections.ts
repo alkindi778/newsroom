@@ -6,11 +6,14 @@ export interface HomepageSection {
   slug: string
   type: string
   title: string | null
+  title_en: string | null
   subtitle: string | null
+  subtitle_en: string | null
   category_id: number | null
   category: {
     id: number
     name: string
+    name_en?: string | null
     slug: string
   } | null
   order: number
@@ -136,7 +139,9 @@ export const useHomepageSectionsStore = defineStore('homepageSections', {
           slug: 'main-slider',
           type: 'slider',
           title: null,
+          title_en: null,
           subtitle: null,
+          subtitle_en: null,
           category_id: null,
           category: null,
           order: 0,
@@ -150,7 +155,9 @@ export const useHomepageSectionsStore = defineStore('homepageSections', {
           slug: 'latest-news',
           type: 'latest_news',
           title: 'آخر الأخبار',
+          title_en: 'Latest News',
           subtitle: null,
+          subtitle_en: null,
           category_id: null,
           category: null,
           order: 1,
@@ -164,7 +171,9 @@ export const useHomepageSectionsStore = defineStore('homepageSections', {
           slug: 'trending',
           type: 'trending',
           title: 'الأكثر قراءة',
+          title_en: 'Most Read',
           subtitle: null,
+          subtitle_en: null,
           category_id: null,
           category: null,
           order: 2,
@@ -178,7 +187,9 @@ export const useHomepageSectionsStore = defineStore('homepageSections', {
           slug: 'videos',
           type: 'videos',
           title: 'فيديو العربية',
+          title_en: 'Videos',
           subtitle: null,
+          subtitle_en: null,
           category_id: null,
           category: null,
           order: 3,
@@ -192,7 +203,9 @@ export const useHomepageSectionsStore = defineStore('homepageSections', {
           slug: 'opinions',
           type: 'opinions',
           title: 'مقالات الرأي',
+          title_en: 'Opinion Articles',
           subtitle: null,
+          subtitle_en: null,
           category_id: null,
           category: null,
           order: 4,

@@ -74,7 +74,7 @@
           </h3>
           <div class="flex items-center justify-between text-sm text-gray-600 mt-auto pt-2">
             <span v-if="article.category" class="font-semibold">
-              {{ article.category.name }}
+              {{ getCategoryName(article.category) }}
             </span>
             <span class="text-gray-500">{{ formatViews(article.views) }} مشاهدة</span>
           </div>
@@ -94,6 +94,9 @@
 
 <script setup lang="ts">
 import type { Article } from '~/types'
+
+const { getCategoryName } = useLocalizedContent()
+const articlesStore = useArticlesStore()
 
 interface Props {
   title?: string | null

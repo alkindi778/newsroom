@@ -2,7 +2,7 @@
   <section class="mb-12">
     <!-- Header -->
     <div class="mb-6">
-      <NuxtLink v-if="categorySlug" :to="`/category/${categorySlug}`" class="flex items-center gap-2">
+      <NuxtLink v-if="categorySlug" :to="localePath('/category/' + categorySlug)" class="flex items-center gap-2">
         <h2 class="text-3xl font-bold text-gray-900">{{ title }}</h2>
         <svg class="w-6 h-6 text-gray-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
@@ -57,7 +57,7 @@
               />
               <div v-if="articles[2].category" 
                    class="absolute top-4 right-4 px-3 py-1.5 bg-red-600 text-white font-bold rounded">
-                {{ articles[2].category.name }}
+                {{ getCategoryName(articles[2].category) }}
               </div>
             </div>
             <div class="space-y-3">
@@ -90,7 +90,7 @@
                 />
                 <div v-if="article.category" 
                      class="absolute top-3 right-3 px-2 py-1 bg-red-600 text-white text-xs font-bold rounded">
-                  {{ article.category.name }}
+                  {{ getCategoryName(article.category) }}
                 </div>
               </div>
               <p v-if="article.subtitle" class="text-sm text-blue-600 font-semibold mb-1">
@@ -120,7 +120,7 @@
               />
               <div v-if="article.category" 
                    class="absolute top-2 right-2 px-2 py-1 bg-red-600 text-white text-xs font-bold rounded">
-                {{ article.category.name }}
+                {{ getCategoryName(article.category) }}
               </div>
             </div>
             <p v-if="article.subtitle" class="text-xs text-blue-600 font-semibold mb-1 line-clamp-1">
@@ -159,6 +159,9 @@
 
 <script setup lang="ts">
 import type { Article } from '~/types'
+
+const localePath = useLocalePath()
+const { getCategoryName } = useLocalizedContent()
 
 interface Props {
   title?: string

@@ -1,0 +1,45 @@
+{
+    "common": {
+        "home": "Home",
+        "search": "Search",
+        "language": "Language",
+        "read_more": "Read More",
+        "latest_news": "Latest News",
+        "breaking_news": "Breaking",
+        "most_read": "Most Read",
+        "videos": "Videos",
+        "opinions": "Opinions",
+        "contact_us": "Contact Us",
+        "about_us": "About Us",
+        "copyright": "All rights reserved",
+        "loading": "Loading...",
+        "error": "Something went wrong",
+        "no_results": "No results found",
+        "search_placeholder": "Search for..."
+    },
+    "nav": {
+        "news": "News",
+        "reports": "Reports",
+        "interviews": "Interviews",
+        "economy": "Economy",
+        "sports": "Sports",
+        "culture": "Culture & Art"
+    },
+    "article": {
+        "share": "Share",
+        "related_articles": "Related Articles",
+        "comments": "Comments",
+        "author": "Author",
+        "date": "Date",
+        "source": "Source"
+    },
+    "footer": {
+        "quick_links": "Quick Links",
+        "privacy_policy": "Privacy Policy",
+        "terms_conditions": "Terms & Conditions",
+        "categories": "Categories",
+        "follow_us": "Follow Us",
+        "follow_us_text": "Follow us on social media",
+        "designed_by": "Designed & Developed by"
+    }
+}

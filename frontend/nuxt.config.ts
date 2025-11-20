@@ -2,15 +2,28 @@
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   devtools: { enabled: false },
-  
+
   modules: [
     '@nuxtjs/tailwindcss',
-    '@pinia/nuxt'
+    '@pinia/nuxt',
+    '@nuxtjs/i18n'
   ],
 
-  // إعدادات Pinia
-  pinia: {
-    storesDirs: ['./stores/**'],
+  // إعدادات الترجمة
+  i18n: {
+    locales: [
+      { code: 'ar', iso: 'ar-YE', file: 'ar.json', name: 'العربية', dir: 'rtl' },
+      { code: 'en', iso: 'en-US', file: 'en.json', name: 'English', dir: 'ltr' }
+    ],
+    defaultLocale: 'ar',
+    langDir: 'locales',
+    strategy: 'prefix_except_default', // ar (default) -> /, en -> /en
+    detectBrowserLanguage: {
+      useCookie: true,
+      cookieKey: 'i18n_redirected',
+      redirectOn: 'root',
+    },
+    vueI18n: './i18n.config.ts' // ملف تكوين إضافي إذا لزم الأمر
   },
 
   // إخفاء تحذيرات Vue
@@ -56,7 +69,7 @@ export default defineNuxtConfig({
     },
     // Route rules لتحسين الأداء
     routeRules: {
-      '/api/**': { 
+      '/api/**': {
         cors: true,
         headers: {
           'Access-Control-Allow-Origin': '*',
@@ -98,7 +111,7 @@ export default defineNuxtConfig({
   runtimeConfig: {
     // Server-side only (private)
     geminiApiKey: process.env.GEMINI_API_KEY,
-    
+
     public: {
       // استخدام IP الجهاز للوصول من الهاتف أو localhost للتطوير
       apiBase: process.env.NUXT_PUBLIC_API_BASE || 'http://localhost/newsroom/backend/public/api/v1',
@@ -109,14 +122,11 @@ export default defineNuxtConfig({
   },
 
   // إعدادات التطبيق - الحد الأدنى فقط، الباقي من Backend
+  // ملاحظة: lang و dir يتم تحديدهما ديناميكياً في app.vue
   app: {
     head: {
       charset: 'utf-8',
       viewport: 'width=device-width, initial-scale=1',
-      htmlAttrs: {
-        lang: 'ar',
-        dir: 'rtl'
-      },
       meta: [
         // Meta tags أساسية فقط
         { name: 'format-detection', content: 'telephone=no' },

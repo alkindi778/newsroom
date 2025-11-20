@@ -76,7 +76,7 @@
             </svg>
           </div>
           <div class="stat-info">
-            <div class="stat-number">{{ article.category.name }}</div>
+            <div class="stat-number">{{ getCategoryName(article.category) }}</div>
             <div class="stat-label">القسم</div>
           </div>
         </div>
@@ -154,7 +154,11 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
+import type { Article } from '~/types'
+
+const { getCategoryName } = useLocalizedContent()
+
 const props = defineProps({
   article: {
     type: Object,
@@ -194,7 +198,7 @@ const readingProgress = computed(() => {
 })
 
 // Methods
-const formatNumber = (num) => {
+const formatNumber = (num: number) => {
   if (num >= 1000000) {
     return (num / 1000000).toFixed(1) + 'M'
   }

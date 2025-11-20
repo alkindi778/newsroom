@@ -3,6 +3,7 @@
 export interface Category {
   id: number
   name: string
+  name_en?: string
   slug: string
   parent_id?: number | null
   articles_count?: number
@@ -22,10 +23,12 @@ export interface User {
 export interface Article {
   id: number
   title: string
+  title_en?: string
   slug: string
   subtitle?: string
   excerpt?: string
   content: string
+  content_en?: string
   source?: string
   image?: string
   image_url?: string

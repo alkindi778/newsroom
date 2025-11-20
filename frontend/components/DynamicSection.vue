@@ -73,9 +73,12 @@ const sectionComponent = computed(() => {
 
 // Component-specific props
 const componentProps = computed(() => {
+  const { locale } = useI18n()
+  const isEnglish = locale.value === 'en'
+  
   const baseProps: any = {
-    title: props.section.title,
-    subtitle: props.section.subtitle,
+    title: isEnglish && props.section.title_en ? props.section.title_en : props.section.title,
+    subtitle: isEnglish && props.section.subtitle_en ? props.section.subtitle_en : props.section.subtitle,
     limit: props.section.items_count,
     settings: props.section.settings
   }

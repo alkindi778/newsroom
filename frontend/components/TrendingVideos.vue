@@ -119,7 +119,7 @@ interface Video {
 const videos = ref<Video[]>([])
 const loading = ref(false)
 const imageLoaded = ref<Record<number, boolean>>({})
-const sectionTitle = ref<string>('فيديو العربية')
+const sectionTitle = ref<string>('')
 
 const { apiFetch } = useApi()
 const { getImageUrl } = useImageUrl()

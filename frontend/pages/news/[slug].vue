@@ -16,19 +16,19 @@
     </div>
 
     <!-- Article Content -->
-    <div v-else-if="article" class="max-w-4xl mx-auto">
+    <div v-else-if="displayArticle" class="max-w-4xl mx-auto">
       <!-- Breadcrumb -->
         <nav class="mb-4 md:mb-6 text-xs sm:text-sm px-2 sm:px-0">
         <ol class="flex items-center gap-1 sm:gap-2 text-gray-600">
-          <li><NuxtLink to="/" class="hover:text-blue-600">الرئيسية</NuxtLink></li>
+          <li><NuxtLink :to="localePath('/')" class="hover:text-blue-600">{{ $t('common.home') }}</NuxtLink></li>
           <li>/</li>
-          <li v-if="article.category">
-            <NuxtLink :to="`/category/${article.category.slug}`" class="hover:text-blue-600">
-              {{ article.category.name }}
+          <li v-if="displayArticle.category">
+            <NuxtLink :to="localePath('/category/' + displayArticle.category.slug)" class="hover:text-blue-600">
+              {{ getCategoryName(displayArticle.category) }}
             </NuxtLink>
           </li>
-          <li v-if="article.category">/</li>
-          <li class="text-gray-900 font-semibold truncate">{{ article.title }}</li>
+          <li v-if="displayArticle.category">/</li>
+          <li class="text-gray-900 font-semibold truncate">{{ displayArticle.title }}</li>
         </ol>
       </nav>
 
@@ -46,27 +46,27 @@
       <article class="bg-white rounded-lg shadow-lg overflow-hidden">
         <!-- القسم -->
         <NuxtLink 
-          v-if="article.category" 
-          :to="`/category/${article.category.slug}`"
+          v-if="displayArticle.category" 
+          :to="localePath('/category/' + displayArticle.category.slug)"
           class="inline-block bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-br-lg font-semibold text-sm transition-colors"
         >
-          {{ article.category.name }}
+          {{ getCategoryName(displayArticle.category) }}
         </NuxtLink>
 
         <!-- العنوان -->
         <div class="p-4 sm:p-6 md:p-12">
           <!-- العنوان الفرعي -->
-          <h2 v-if="article.subtitle" class="text-xl sm:text-2xl md:text-3xl lg:text-4xl text-blue-600 mb-3 md:mb-4 leading-relaxed font-semibold">
-            {{ article.subtitle }}
+          <h2 v-if="displayArticle.subtitle" class="text-xl sm:text-2xl md:text-3xl lg:text-4xl text-blue-600 mb-3 md:mb-4 leading-relaxed font-semibold">
+            {{ displayArticle.subtitle }}
           </h2>
 
           <h1 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold text-gray-900 mb-4 md:mb-6 leading-tight">
-            {{ article.title }}
+            {{ displayArticle.title }}
           </h1>
 
           <!-- المقتطف -->
-          <p v-if="article.excerpt" class="text-lg sm:text-xl md:text-2xl lg:text-3xl text-gray-700 mb-6 md:mb-8 leading-relaxed font-medium">
-            {{ article.excerpt }}
+          <p v-if="displayArticle.excerpt" class="text-lg sm:text-xl md:text-2xl lg:text-3xl text-gray-700 mb-6 md:mb-8 leading-relaxed font-medium">
+            {{ displayArticle.excerpt }}
           </p>
 
           <!-- تم حذف إحصائيات المقال -->
@@ -78,7 +78,7 @@
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
               </svg>
-              <span>{{ formatDate(article.published_at, 'full') }}</span>
+              <span>{{ formatDate(displayArticle.published_at, 'full') }}</span>
             </div>
           </div>
         </div>
@@ -86,8 +86,8 @@
         <!-- الصورة الرئيسية -->
         <div class="w-full">
           <img 
-            :src="getImageUrl(article.image)" 
-            :alt="article.title"
+            :src="getImageUrl(displayArticle.image)" 
+            :alt="displayArticle.title"
             loading="eager"
             class="w-full h-auto object-contain"
           />
@@ -96,8 +96,8 @@
         <!-- المحتوى -->
         <div class="p-4 sm:p-6 md:p-12 lg:p-16">
           <!-- مصدر الخبر -->
-          <div v-if="article.source" class="mb-8 pb-4 border-b border-gray-200">
-            <p class="text-lg font-medium text-cyan-600">{{ article.source }}</p>
+          <div v-if="displayArticle.source" class="mb-8 pb-4 border-b border-gray-200">
+            <p class="text-lg font-medium text-cyan-600">{{ displayArticle.source }}</p>
           </div>
 
           <!-- الملخص الذكي -->
@@ -112,8 +112,9 @@
 
           <div 
             class="prose prose-sm sm:prose-base md:prose-lg lg:prose-xl max-w-none text-right leading-loose article-content"
+            :class="{ 'ltr-content': locale === 'en' }"
             style="font-family: 'Azer', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;"
-            v-html="article.content"
+            v-html="displayArticle.content"
           ></div>
 
           <!-- Article Middle Advertisement -->
@@ -141,7 +142,7 @@
 
               <!-- تويتر/X -->
               <a 
-                :href="`https://twitter.com/intent/tweet?url=${encodeURIComponent(articleUrl)}&text=${encodeURIComponent(article.title)}`"
+                :href="`https://twitter.com/intent/tweet?url=${encodeURIComponent(articleUrl)}&text=${encodeURIComponent(displayArticle.title)}`"
                 target="_blank"
                 rel="noopener noreferrer"
                 class="flex items-center gap-2 px-4 py-2 bg-[#000000] hover:bg-[#333333] text-white rounded-lg transition-colors duration-200"
@@ -155,7 +156,7 @@
 
               <!-- واتساب -->
               <a 
-                :href="`https://api.whatsapp.com/send?text=${encodeURIComponent(article.title + ' - ' + articleUrl)}`"
+                :href="`https://api.whatsapp.com/send?text=${encodeURIComponent(displayArticle.title + ' - ' + articleUrl)}`"
                 target="_blank"
                 rel="noopener noreferrer"
                 class="flex items-center gap-2 px-4 py-2 bg-[#25D366] hover:bg-[#1da851] text-white rounded-lg transition-colors duration-200"
@@ -169,7 +170,7 @@
 
               <!-- تيليجرام -->
               <a 
-                :href="`https://t.me/share/url?url=${encodeURIComponent(articleUrl)}&text=${encodeURIComponent(article.title)}`"
+                :href="`https://t.me/share/url?url=${encodeURIComponent(articleUrl)}&text=${encodeURIComponent(displayArticle.title)}`"
                 target="_blank"
                 rel="noopener noreferrer"
                 class="flex items-center gap-2 px-4 py-2 bg-[#0088cc] hover:bg-[#0077b5] text-white rounded-lg transition-colors duration-200"
@@ -199,7 +200,7 @@
           </div>
 
           <!-- الكلمات الدلالية -->
-          <div v-if="article.keywords" class="mt-12 pt-8 border-t border-gray-200">
+          <div v-if="displayArticle.keywords" class="mt-12 pt-8 border-t border-gray-200">
             <h3 class="text-xl font-bold text-gray-900 mb-4">الكلمات الدلالية:</h3>
             <div class="flex flex-wrap gap-3">
               <NuxtLink 
@@ -238,6 +239,8 @@
 <script setup lang="ts">
 import AdvertisementZone from '~/components/AdvertisementZone.vue'
 
+const localePath = useLocalePath()
+const { getCategoryName } = useLocalizedContent()
 const route = useRoute()
 const articlesStore = useArticlesStore()
 const config = useRuntimeConfig()
@@ -305,6 +308,27 @@ const article = computed(() => {
   }
   
   return processedData
+})
+
+const { locale } = useI18n()
+
+// المحتوى المعروض بناءً على اللغة
+const displayArticle = computed(() => {
+  if (!article.value) return null
+  
+  const isEnglish = locale.value === 'en'
+  const hasTranslation = article.value.title_en && article.value.content_en
+  
+  if (isEnglish && hasTranslation) {
+    return {
+      ...article.value,
+      title: article.value.title_en,
+      content: article.value.content_en,
+      // يمكن إضافة المزيد من الحقول المترجمة هنا إذا وجدت
+    }
+  }
+  
+  return article.value
 })
 
 const loading = ref(false)
@@ -473,6 +497,12 @@ watch(slug, () => {
   direction: rtl;
   text-align: right;
   font-size: 1.375rem;
+}
+
+:deep(.prose.ltr-content) {
+  direction: ltr;
+  text-align: left;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
 }
 
 :deep(.prose h1) {

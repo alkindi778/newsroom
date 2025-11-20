@@ -1,6 +1,6 @@
 <template>
   <NuxtLink 
-    :to="`/opinions/${opinion.slug}`"
+    :to="localePath('/opinions/' + opinion.slug)"
     class="group block bg-gradient-to-br from-white to-gray-50 rounded-lg shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100"
   >
     <!-- الصورة فقط -->
@@ -74,6 +74,8 @@
 
 <script setup lang="ts">
 import type { Opinion } from '~/types'
+
+const localePath = useLocalePath()
 
 const props = defineProps<{
   opinion: Opinion

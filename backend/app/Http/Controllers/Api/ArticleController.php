@@ -19,7 +19,7 @@ class ArticleController extends Controller
     public function index(Request $request): JsonResponse
     {
         try {
-            $query = Article::with(['user:id,name', 'category:id,name,slug'])
+            $query = Article::with(['user:id,name', 'category:id,name,name_en,slug'])
                 ->where('is_published', true)
                 ->whereNotNull('published_at')
                 ->where('published_at', '<=', now());
@@ -88,6 +88,7 @@ class ArticleController extends Controller
                     'category' => $article->category ? [
                         'id' => $article->category->id,
                         'name' => $article->category->name,
+                        'name_en' => $article->category->name_en,
                         'slug' => $article->category->slug
                     ] : null
                 ];
@@ -121,7 +122,7 @@ class ArticleController extends Controller
     public function show(string $slug): JsonResponse
     {
         try {
-            $query = Article::with(['user:id,name', 'category:id,name,slug'])
+            $query = Article::with(['user:id,name', 'category:id,name,name_en,slug'])
                 ->where('is_published', true)
                 ->whereNotNull('published_at')
                 ->where('published_at', '<=', now());
@@ -171,6 +172,7 @@ class ArticleController extends Controller
                 'category' => $article->category ? [
                     'id' => $article->category->id,
                     'name' => $article->category->name,
+                    'name_en' => $article->category->name_en,
                     'slug' => $article->category->slug
                 ] : null,
                 // Related articles from same category
@@ -200,7 +202,7 @@ class ArticleController extends Controller
             return [];
         }
 
-        $relatedArticles = Article::with(['category:id,name,slug'])
+        $relatedArticles = Article::with(['category:id,name,name_en,slug'])
             ->where('category_id', $article->category_id)
             ->where('id', '!=', $article->id)
             ->where('is_published', true)
@@ -222,6 +224,7 @@ class ArticleController extends Controller
                 'category' => $article->category ? [
                     'id' => $article->category->id,
                     'name' => $article->category->name,
+                    'name_en' => $article->category->name_en,
                     'slug' => $article->category->slug
                 ] : null
             ];
@@ -237,7 +240,7 @@ class ArticleController extends Controller
             $limit = min($request->get('limit', 10), 20); // Max 20 articles
             
             // أولاً: جلب الأخبار المحددة للسلايدر
-            $sliderArticles = Article::with(['user:id,name', 'category:id,name,slug'])
+            $sliderArticles = Article::with(['user:id,name', 'category:id,name,name_en,slug'])
                 ->where('is_published', true)
                 ->where('show_in_slider', true)
                 ->whereNotNull('published_at')
@@ -251,7 +254,7 @@ class ArticleController extends Controller
                 $remainingCount = $limit - $sliderArticles->count();
                 $sliderIds = $sliderArticles->pluck('id')->toArray();
                 
-                $additionalArticles = Article::with(['user:id,name', 'category:id,name,slug'])
+                $additionalArticles = Article::with(['user:id,name', 'category:id,name,name_en,slug'])
                     ->where('is_published', true)
                     ->whereNotNull('published_at')
                     ->where('published_at', '<=', now())
@@ -291,6 +294,7 @@ class ArticleController extends Controller
                     'category' => $article->category ? [
                         'id' => $article->category->id,
                         'name' => $article->category->name,
+                        'name_en' => $article->category->name_en,
                         'slug' => $article->category->slug
                     ] : null
                 ];
@@ -317,7 +321,7 @@ class ArticleController extends Controller
         try {
             $limit = min($request->get('limit', 10), 20); // Max 100 articles
             
-            $articles = Article::with(['category:id,name,slug'])
+            $articles = Article::with(['category:id,name,name_en,slug'])
                 ->where('is_published', true)
                 ->whereNotNull('published_at')
                 ->where('published_at', '<=', now())
@@ -342,6 +346,7 @@ class ArticleController extends Controller
                     'category' => $article->category ? [
                         'id' => $article->category->id,
                         'name' => $article->category->name,
+                        'name_en' => $article->category->name_en,
                         'slug' => $article->category->slug
                     ] : null
                 ];
@@ -370,7 +375,7 @@ class ArticleController extends Controller
             $limit = min($request->get('limit', 10), 20);
             $period = $request->get('period', 'month'); // today, week, month
             
-            $query = Article::with(['category:id,name,slug'])
+            $query = Article::with(['category:id,name,name_en,slug'])
                 ->where('is_published', true)
                 ->whereNotNull('published_at')
                 ->where('published_at', '<=', now());
@@ -409,6 +414,7 @@ class ArticleController extends Controller
                     'category' => $article->category ? [
                         'id' => $article->category->id,
                         'name' => $article->category->name,
+                        'name_en' => $article->category->name_en,
                         'slug' => $article->category->slug
                     ] : null
                 ];
@@ -443,7 +449,7 @@ class ArticleController extends Controller
                 ], 400);
             }
 
-            $query = Article::with(['category:id,name,slug'])
+            $query = Article::with(['category:id,name,name_en,slug'])
                 ->where('is_published', true)
                 ->whereNotNull('published_at')
                 ->where('published_at', '<=', now())
@@ -475,6 +481,7 @@ class ArticleController extends Controller
                     'category' => $article->category ? [
                         'id' => $article->category->id,
                         'name' => $article->category->name,
+                        'name_en' => $article->category->name_en,
                         'slug' => $article->category->slug
                     ] : null
                 ];
@@ -511,7 +518,7 @@ class ArticleController extends Controller
         try {
             $limit = min($request->get('limit', 5), 10); // Max 10 slider articles
             
-            $articles = Article::with(['category:id,name,slug'])
+            $articles = Article::with(['category:id,name,name_en,slug'])
                 ->where('is_published', true)
                 ->where('show_in_slider', true)
                 ->whereNotNull('published_at')
@@ -536,6 +543,7 @@ class ArticleController extends Controller
                     'category' => $article->category ? [
                         'id' => $article->category->id,
                         'name' => $article->category->name,
+                        'name_en' => $article->category->name_en,
                         'slug' => $article->category->slug
                     ] : null
                 ];
@@ -564,7 +572,7 @@ class ArticleController extends Controller
         try {
             $limit = min($request->get('limit', 5), 10); // Max 10 breaking news
             
-            $articles = Article::with(['category:id,name,slug'])
+            $articles = Article::with(['category:id,name,name_en,slug'])
                 ->where('is_published', true)
                 ->where('is_breaking_news', true)
                 ->whereNotNull('published_at')
@@ -588,6 +596,7 @@ class ArticleController extends Controller
                     'category' => $article->category ? [
                         'id' => $article->category->id,
                         'name' => $this->decodeHtmlEntities($article->category->name),
+                        'name_en' => $article->category->name_en,
                         'slug' => $article->category->slug
                     ] : null
                 ];

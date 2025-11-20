@@ -100,5 +100,11 @@ export default {
       },
     },
   },
-  plugins: [],
+  plugins: [
+    // دعم RTL/LTR
+    function({ addVariant }) {
+      addVariant('rtl', 'html[dir="rtl"] &')
+      addVariant('ltr', 'html[dir="ltr"] &')
+    },
+  ],
 }

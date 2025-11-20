@@ -22,9 +22,12 @@ class Opinion extends Model implements HasMedia
 
     protected $fillable = [
         'title',
+        'title_en',
         'slug',
         'excerpt',
+        'excerpt_en',
         'content',
+        'content_en',
         'image',
         'writer_id',
         'is_published',

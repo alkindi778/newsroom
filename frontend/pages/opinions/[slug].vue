@@ -65,7 +65,7 @@
           <div class="flex items-center justify-between pb-6 border-b border-gray-200">
             <NuxtLink 
               v-if="opinion.writer" 
-              :to="`/writers/${opinion.writer.slug}`"
+              :to="localePath('/writers/' + opinion.writer.slug)"
               class="flex items-center gap-3 group"
             >
               <img 
@@ -233,7 +233,7 @@
       <div v-if="opinion.writer" class="mt-8 bg-gradient-to-br from-orange-50 to-white rounded-lg shadow-md p-6">
         <h3 class="text-xl font-bold text-gray-900 mb-4">عن الكاتب</h3>
         <div class="flex items-start gap-4">
-          <NuxtLink :to="`/writers/${opinion.writer.slug}`">
+          <NuxtLink :to="localePath('/writers/' + opinion.writer.slug)">
             <img 
               :src="getImageUrl(opinion.writer.image)" 
               :alt="opinion.writer.name"
@@ -242,7 +242,7 @@
             />
           </NuxtLink>
           <div class="flex-1">
-            <NuxtLink :to="`/writers/${opinion.writer.slug}`">
+            <NuxtLink :to="localePath('/writers/' + opinion.writer.slug)">
               <h4 class="text-lg font-bold text-gray-900 hover:text-orange-600 transition-colors">
                 {{ opinion.writer.name }}
               </h4>
@@ -254,7 +254,7 @@
               {{ opinion.writer.bio }}
             </p>
             <NuxtLink 
-              :to="`/writers/${opinion.writer.slug}`"
+              :to="localePath('/writers/' + opinion.writer.slug)"
               class="inline-block mt-3 text-orange-600 hover:text-orange-700 font-semibold text-sm"
             >
               عرض جميع مقالات الكاتب ←
@@ -272,6 +272,9 @@
 </template>
 
 <script setup lang="ts">
+import type { Opinion } from '~/types'
+
+const localePath = useLocalePath()
 const route = useRoute()
 const opinionsStore = useOpinionsStore()
 const config = useRuntimeConfig()
