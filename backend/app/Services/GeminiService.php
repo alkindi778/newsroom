@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Log;
 class GeminiService
 {
     private string $apiKey;
-    private string $apiUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent';
+    private string $apiUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent';
 
     public function __construct()
     {
@@ -52,7 +52,7 @@ class GeminiService
                     ],
                     'generationConfig' => [
                         'temperature' => 0.7,
-                        'maxOutputTokens' => 500,
+                        'maxOutputTokens' => 1000,
                     ]
                 ]);
 
