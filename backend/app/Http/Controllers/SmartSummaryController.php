@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Services\SmartSummaryService;
+use App\Repositories\SmartSummaryRepository;
 use App\Services\GeminiService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -11,12 +11,12 @@ use Illuminate\Support\Facades\Validator;
 
 class SmartSummaryController extends Controller
 {
-    private SmartSummaryService $smartSummaryService;
+    private SmartSummaryRepository $repository;
     private GeminiService $geminiService;
 
-    public function __construct(SmartSummaryService $smartSummaryService, GeminiService $geminiService)
+    public function __construct(SmartSummaryRepository $repository, GeminiService $geminiService)
     {
-        $this->smartSummaryService = $smartSummaryService;
+        $this->repository = $repository;
         $this->geminiService = $geminiService;
     }
     /**
@@ -25,7 +25,7 @@ class SmartSummaryController extends Controller
     public function getSummary(string $hash): JsonResponse
     {
         try {
-            $summary = $this->smartSummaryService->getSummary($hash);
+            $summary = $this->repository->getByHash($hash);
             
             if ($summary) {
                 return response()->json([
@@ -79,7 +79,7 @@ class SmartSummaryController extends Controller
             $contentHash = hash('sha256', $key);
             
             // التحقق من وجود ملخص محفوظ
-            $existingSummary = $this->smartSummaryService->getSummary($contentHash);
+            $existingSummary = $this->repository->getByHash($contentHash);
             if ($existingSummary) {
                 return response()->json([
                     'success' => true,
@@ -107,7 +107,7 @@ class SmartSummaryController extends Controller
                 'original_length' => strlen($content)
             ];
             
-            $savedSummary = $this->smartSummaryService->storeSummary($summaryData);
+            $savedSummary = $this->repository->createOrUpdate($summaryData);
 
             return response()->json([
                 'success' => true,
@@ -179,7 +179,7 @@ class SmartSummaryController extends Controller
                 ], 400);
             }
 
-            $summary = $this->smartSummaryService->storeSummary($request->all());
+            $summary = $this->repository->createOrUpdate($request->all());
 
             return response()->json([
                 'success' => true,
@@ -206,7 +206,7 @@ class SmartSummaryController extends Controller
     public function getStats(): JsonResponse
     {
         try {
-            $stats = $this->smartSummaryService->getStatistics();
+            $stats = $this->repository->getStatistics();
             
             return response()->json([
                 'success' => true,
@@ -228,7 +228,7 @@ class SmartSummaryController extends Controller
     public function cleanup(): JsonResponse
     {
         try {
-            $result = $this->smartSummaryService->cleanup();
+            $result = $this->repository->cleanup();
             
             return response()->json([
                 'success' => true,
@@ -251,7 +251,7 @@ class SmartSummaryController extends Controller
     public function getRecent(): JsonResponse
     {
         try {
-            $summaries = $this->smartSummaryService->getRecentSummaries();
+            $summaries = $this->repository->getRecentSummaries();
 
             return response()->json([
                 'success' => true,
