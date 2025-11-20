@@ -53,8 +53,10 @@ export interface Article {
 export interface Writer {
   id: number
   name: string
+  name_en?: string
   slug: string
   bio?: string
+  bio_en?: string
   image?: string
   image_url?: string
   thumbnail?: string
@@ -62,7 +64,10 @@ export interface Writer {
   email?: string
   phone?: string
   position?: string
+  position_en?: string
   specialty?: string
+  specialization?: string
+  specialization_en?: string
   social_links?: {
     twitter?: string
     facebook?: string
@@ -78,9 +83,12 @@ export interface Writer {
 export interface Opinion {
   id: number
   title: string
+  title_en?: string
   slug: string
   excerpt?: string
+  excerpt_en?: string
   content: string
+  content_en?: string
   image?: string
   image_url?: string
   thumbnail_url?: string

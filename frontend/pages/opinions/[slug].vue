@@ -24,7 +24,7 @@
           <li>/</li>
           <li><NuxtLink to="/opinions" class="hover:text-orange-600">مقالات الرأي</NuxtLink></li>
           <li>/</li>
-          <li class="text-gray-900 font-semibold truncate">{{ opinion.title }}</li>
+          <li class="text-gray-900 font-semibold truncate">{{ getOpinionTitle }}</li>
         </ol>
       </nav>
 
@@ -53,12 +53,12 @@
         <!-- العنوان -->
         <div class="p-8">
           <h1 class="text-4xl font-bold text-gray-900 mb-4 leading-tight">
-            {{ opinion.title }}
+            {{ getOpinionTitle }}
           </h1>
 
           <!-- المقتطف -->
-          <p v-if="opinion.excerpt" class="text-xl text-gray-600 mb-6 leading-relaxed">
-            {{ opinion.excerpt }}
+          <p v-if="getOpinionExcerpt" class="text-xl text-gray-600 font-medium leading-relaxed">
+            {{ getOpinionExcerpt }}
           </p>
 
           <!-- معلومات الكاتب -->
@@ -76,7 +76,7 @@
               />
               <div>
                 <p class="font-bold text-gray-900 group-hover:text-orange-600 transition-colors">
-                  {{ opinion.writer.name }}
+                  {{ getWriterName }}
                 </p>
                 <p v-if="opinion.writer.specialty" class="text-sm text-gray-600">
                   {{ opinion.writer.specialty }}
@@ -123,11 +123,7 @@
 
         <!-- المحتوى -->
         <div class="p-4 sm:p-6 md:p-8" :class="{ 'pt-12': !opinion.image }">
-          <div 
-            class="article-content"
-            style="font-family: 'Azer', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; white-space: pre-line;"
-            v-html="opinion.content"
-          ></div>
+          <div class="prose prose-lg max-w-none" v-html="getOpinionContent"></div>
 
           <!-- Opinion Middle Advertisement -->
           <div class="my-12">
@@ -244,7 +240,7 @@
           <div class="flex-1">
             <NuxtLink :to="localePath('/writers/' + opinion.writer.slug)">
               <h4 class="text-lg font-bold text-gray-900 hover:text-orange-600 transition-colors">
-                {{ opinion.writer.name }}
+                {{ getWriterName }}
               </h4>
             </NuxtLink>
             <p v-if="opinion.writer.specialty" class="text-sm text-gray-600 mb-2">
@@ -283,6 +279,28 @@ const apiBase = ((config as any).public?.apiBase || '/api/v1') as string
 const { getImageUrl } = useImageUrl()
 const { formatDate } = useDateFormat()
 const { setOpinionSeoMeta } = useAppSeoMeta()
+const { locale } = useI18n()
+
+// دوال الترجمة
+const getOpinionTitle = computed(() => {
+  if (!opinion.value) return ''
+  return locale.value === 'en' && opinion.value.title_en ? opinion.value.title_en : opinion.value.title
+})
+
+const getOpinionContent = computed(() => {
+  if (!opinion.value) return ''
+  return locale.value === 'en' && opinion.value.content_en ? opinion.value.content_en : opinion.value.content
+})
+
+const getOpinionExcerpt = computed(() => {
+  if (!opinion.value?.excerpt) return null
+  return locale.value === 'en' && opinion.value.excerpt_en ? opinion.value.excerpt_en : opinion.value.excerpt
+})
+
+const getWriterName = computed(() => {
+  if (!opinion.value?.writer) return ''
+  return locale.value === 'en' && opinion.value.writer.name_en ? opinion.value.writer.name_en : opinion.value.writer.name
+})
 
 const slug = computed(() => route.params.slug as string)
 const hasLiked = ref(false)

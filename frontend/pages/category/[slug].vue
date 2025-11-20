@@ -4,10 +4,10 @@
       <!-- Header -->
       <div class="mb-8">
         <h1 class="text-4xl font-bold text-gray-900 mb-2">
-          {{ category?.name || 'الأخبار' }}
+          {{ getCategoryName }}
         </h1>
         <p class="text-gray-600">
-          تصفح آخر الأخبار في قسم {{ category?.name }}
+          تصفح آخر الأخبار في قسم {{ getCategoryName }}
         </p>
       </div>
 
@@ -48,7 +48,7 @@
               </p>
               <!-- العنوان -->
               <h2 class="hero-title text-white font-bold">
-                {{ articles[0].title }}
+                {{ getArticleTitle(articles[0]) }}
               </h2>
             </div>
           </div>
@@ -71,7 +71,7 @@
               {{ articles[0].subtitle }}
             </p>
             <h2 class="text-white font-bold text-3xl leading-tight pr-4 border-r-4 border-white">
-              {{ articles[0].title }}
+              {{ getArticleTitle(articles[0]) }}
             </h2>
           </div>
         </div>
@@ -130,6 +130,19 @@ const config = useRuntimeConfig()
 const apiBase = ((config as any).public?.apiBase || '/api/v1') as string
 
 const { setCategorySeoMeta } = useAppSeoMeta()
+const { locale } = useI18n()
+
+// دالة للحصول على اسم القسم المترجم
+const getCategoryName = computed(() => {
+  if (!category.value) return 'الأخبار'
+  return locale.value === 'en' && category.value.name_en ? category.value.name_en : category.value.name
+})
+
+// دالة للحصول على عنوان المقال المترجم
+const getArticleTitle = (article: any) => {
+  if (!article) return ''
+  return locale.value === 'en' && article.title_en ? article.title_en : article.title
+}
 
 const currentPage = ref(1)
 const slug = computed(() => route.params.slug as string)

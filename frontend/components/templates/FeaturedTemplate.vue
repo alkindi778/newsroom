@@ -85,7 +85,7 @@
           />
           <div class="flex-1 p-3">
             <h4 class="font-bold text-sm line-clamp-2 group-hover:text-blue-600 transition-colors mb-2">
-              {{ article.title }}
+              {{ getArticleTitle(article) }}
             </h4>
             <div class="flex items-center gap-2 text-xs text-gray-500">
               <span>{{ formatDate(article.published_at) }}</span>
@@ -139,8 +139,14 @@ const props = withDefaults(defineProps<Props>(), {
 const { apiFetch } = useApi()
 const { getImageUrl } = useImageUrl()
 const { getArticleLink } = useArticleLink()
+const { locale } = useI18n()
 const articles = ref<Article[]>([])
 const loading = ref(true)
+
+// دالة للحصول على عنوان المقال المترجم
+const getArticleTitle = (article: Article) => {
+  return locale.value === 'en' && article.title_en ? article.title_en : article.title
+}
 
 const mainArticle = computed(() => articles.value[0])
 const sideArticles = computed(() => articles.value.slice(1, 7))

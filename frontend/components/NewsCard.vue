@@ -21,7 +21,7 @@
       </p>
       <!-- العنوان -->
       <h3 class="text-xl font-bold text-gray-900 line-clamp-3 leading-snug text-right mb-3">
-        {{ decodeHtmlEntities(article.title) }}
+        {{ decodeHtmlEntities(getArticleTitle) }}
       </h3>
 
       <!-- التاريخ والقسم -->
@@ -45,6 +45,12 @@ const { formatDate } = useDateFormat()
 const { getArticleLink } = useArticleLink()
 const { getCategoryName } = useLocalizedContent()
 const { decodeHtmlEntities } = useHtmlEntities()
+const { locale } = useI18n()
+
+// دالة للحصول على عنوان المقال المترجم
+const getArticleTitle = computed(() => {
+  return locale.value === 'en' && props.article.title_en ? props.article.title_en : props.article.title
+})
 
 // Debug: تحقق من اسم القسم
 watchEffect(() => {

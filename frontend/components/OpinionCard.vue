@@ -47,7 +47,7 @@
     <div class="p-4">
       <!-- العنوان -->
       <h3 class="text-xl font-bold text-gray-900 mb-3 line-clamp-2 group-hover:text-orange-600 transition-colors leading-tight">
-        {{ opinion.title }}
+        {{ getOpinionTitle }}
       </h3>
 
       <!-- الكاتب والتاريخ -->
@@ -62,7 +62,7 @@
               class="w-20 h-20 rounded-full border-3 border-orange-400"
             />
             <div>
-              <p class="text-lg font-bold text-gray-900">{{ opinion.writer?.name }}</p>
+              <p class="text-lg font-bold text-gray-900">{{ getWriterName }}</p>
               <time class="text-sm text-gray-500">{{ formatDate(opinion.published_at, 'relative') }}</time>
             </div>
           </div>
@@ -76,6 +76,7 @@
 import type { Opinion } from '~/types'
 
 const localePath = useLocalePath()
+const { locale } = useI18n()
 
 const props = defineProps<{
   opinion: Opinion
@@ -83,6 +84,17 @@ const props = defineProps<{
 
 const { getImageUrl } = useImageUrl()
 const { formatDate } = useDateFormat()
+
+// دالة للحصول على عنوان المقال المترجم
+const getOpinionTitle = computed(() => {
+  return locale.value === 'en' && props.opinion.title_en ? props.opinion.title_en : props.opinion.title
+})
+
+// دالة للحصول على اسم الكاتب المترجم
+const getWriterName = computed(() => {
+  if (!props.opinion.writer) return ''
+  return locale.value === 'en' && props.opinion.writer.name_en ? props.opinion.writer.name_en : props.opinion.writer.name
+})
 
 const formatNumber = (num: number): string => {
   if (num >= 1000000) return (num / 1000000).toFixed(1) + 'م'

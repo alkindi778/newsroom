@@ -64,9 +64,9 @@
               />
             </div>
             <h3 class="font-bold text-gray-900 group-hover:text-orange-600 transition-colors mb-1">
-              {{ writer.name }}
+              {{ getWriterName(writer) }}
             </h3>
-            <p v-if="writer.specialty" class="text-xs text-gray-500 mb-2">{{ writer.specialty }}</p>
+            <p v-if="getWriterSpecialty(writer)" class="text-xs text-gray-500 mb-2">{{ getWriterSpecialty(writer) }}</p>
             <div class="flex items-center justify-center gap-2 text-xs text-gray-600">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
@@ -113,6 +113,18 @@ const sortBy = ref('name')
 
 const { getImageUrl } = useImageUrl()
 const settingsStore = useSettingsStore()
+const { locale } = useI18n()
+
+// دالة للحصول على اسم الكاتب المترجم
+const getWriterName = (writer: any) => {
+  return locale.value === 'en' && writer.name_en ? writer.name_en : writer.name
+}
+
+// دالة للحصول على التخصص المترجم
+const getWriterSpecialty = (writer: any) => {
+  if (!writer.specialty && !writer.specialization && !writer.specialization_en) return null
+  return locale.value === 'en' && writer.specialization_en ? writer.specialization_en : (writer.specialization || writer.specialty)
+}
 
 // SEO Meta Tags - ديناميكي من Backend
 watchEffect(() => {

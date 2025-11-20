@@ -97,7 +97,7 @@
                 {{ article.subtitle }}
               </p>
               <h3 class="text-lg font-bold text-gray-900 line-clamp-2">
-                {{ article.title }}
+                {{ getArticleTitle(article) }}
               </h3>
             </NuxtLink>
           </article>
@@ -127,7 +127,7 @@
               {{ article.subtitle }}
             </p>
             <h3 class="text-sm md:text-base font-bold text-gray-900 line-clamp-2">
-              {{ article.title }}
+              {{ getArticleTitle(article) }}
             </h3>
           </NuxtLink>
         </article>
@@ -179,8 +179,14 @@ const props = withDefaults(defineProps<Props>(), {
 const { apiFetch } = useApi()
 const { getImageUrl } = useImageUrl()
 const { getArticleLink } = useArticleLink()
+const { locale } = useI18n()
 const articles = ref<Article[]>([])
 const loading = ref(true)
+
+// دالة للحصول على عنوان المقال المترجم
+const getArticleTitle = (article: Article) => {
+  return locale.value === 'en' && article.title_en ? article.title_en : article.title
+}
 
 const formatDate = (date: string) => {
   if (!date) return ''

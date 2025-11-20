@@ -69,7 +69,7 @@
           <!-- Video Title - Outside with Turquoise Background -->
           <div class="bg-teal-400 group-hover:bg-teal-500 transition-colors px-4 py-4">
             <h3 class="text-base font-bold text-white leading-relaxed line-clamp-2 min-h-[3rem]">
-              {{ video.title }}
+              {{ getVideoTitle(video) }}
             </h3>
           </div>
         </NuxtLink>
@@ -106,6 +106,9 @@
 interface Video {
   id: number
   title: string
+  title_en?: string
+  description?: string
+  description_en?: string
   slug: string
   thumbnail?: string
   thumbnail_placeholder?: string
@@ -123,6 +126,12 @@ const sectionTitle = ref<string>('')
 
 const { apiFetch } = useApi()
 const { getImageUrl } = useImageUrl()
+const { locale } = useI18n()
+
+// دالة للحصول على عنوان الفيديو المترجم
+const getVideoTitle = (video: Video) => {
+  return locale.value === 'en' && video.title_en ? video.title_en : video.title
+}
 
 // Track image load status
 const onImageLoad = (videoId: number) => {

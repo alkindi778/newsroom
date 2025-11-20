@@ -89,7 +89,7 @@
               </div>
             </div>
             <h4 class="font-bold text-lg mb-2 line-clamp-2 group-hover:text-blue-600 transition-colors">
-              {{ article.title }}
+              {{ getArticleTitle(article) }}
             </h4>
             <div class="text-sm text-gray-500">
               {{ formatDate(article.published_at) }}
@@ -122,7 +122,7 @@
             <!-- Content -->
             <div class="flex-1 min-w-0">
               <h5 class="font-bold text-sm line-clamp-3 group-hover:text-blue-600 transition-colors mb-2">
-                {{ article.title }}
+                {{ getArticleTitle(article) }}
               </h5>
               <div class="text-xs text-gray-500">
                 {{ formatDate(article.published_at) }}
@@ -181,8 +181,14 @@ import type { Article } from '~/types'
 const { apiFetch } = useApi()
 const { getImageUrl } = useImageUrl()
 const { getArticleLink } = useArticleLink()
+const { locale } = useI18n()
 const articles = ref<Article[]>([])
 const loading = ref(true)
+
+// دالة للحصول على عنوان المقال المترجم
+const getArticleTitle = (article: Article) => {
+  return locale.value === 'en' && article.title_en ? article.title_en : article.title
+}
 
 const mainArticle = computed(() => articles.value[0])
 const secondaryArticles = computed(() => articles.value.slice(1, 3))
