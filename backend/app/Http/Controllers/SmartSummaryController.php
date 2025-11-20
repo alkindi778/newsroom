@@ -25,7 +25,7 @@ class SmartSummaryController extends Controller
     public function getSummary(string $hash): JsonResponse
     {
         try {
-            $summary = $this->repository->getByHash($hash);
+            $summary = $this->repository->findByHash($hash);
             
             if ($summary) {
                 return response()->json([
@@ -79,7 +79,7 @@ class SmartSummaryController extends Controller
             $contentHash = hash('sha256', $key);
             
             // التحقق من وجود ملخص محفوظ
-            $existingSummary = $this->repository->getByHash($contentHash);
+            $existingSummary = $this->repository->findByHash($contentHash);
             if ($existingSummary) {
                 return response()->json([
                     'success' => true,
@@ -251,7 +251,7 @@ class SmartSummaryController extends Controller
     public function getRecent(): JsonResponse
     {
         try {
-            $summaries = $this->repository->getRecentSummaries();
+            $summaries = $this->repository->getRecent();
 
             return response()->json([
                 'success' => true,
