@@ -92,7 +92,7 @@ class SmartSummaryController extends Controller
             // حفظ الملخص
             $summaryData = [
                 'content_hash' => $contentHash,
-                'original_content_sample' => substr($content, 0, 500),
+                'original_content_sample' => mb_substr(strip_tags($content), 0, 500, 'UTF-8'),
                 'summary' => $summary,
                 'type' => $type,
                 'length' => $length,
