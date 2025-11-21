@@ -11,6 +11,7 @@ class SocialMediaPost extends Model
         'article_id',
         'video_id',
         'opinion_id',
+        'infographic_id',
         'platform',
         'external_id',
         'message',
@@ -51,6 +52,14 @@ class SocialMediaPost extends Model
     public function opinion(): BelongsTo
     {
         return $this->belongsTo(Opinion::class);
+    }
+
+    /**
+     * العلاقة مع الإنفوجرافيك
+     */
+    public function infographic(): BelongsTo
+    {
+        return $this->belongsTo(Infographic::class);
     }
 
     /**

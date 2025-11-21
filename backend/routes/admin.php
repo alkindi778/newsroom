@@ -356,15 +356,24 @@ Route::middleware(['auth', App\Http\Middleware\AdminMiddleware::class])->group(f
     });
 
     // Infographics Management
-    Route::prefix('infographics')->name('infographics.')->group(function () {
-        Route::get('/', [\App\Http\Controllers\Admin\InfographicController::class, 'index'])->name('index');
-        Route::get('/create', [\App\Http\Controllers\Admin\InfographicController::class, 'create'])->name('create');
-        Route::post('/', [\App\Http\Controllers\Admin\InfographicController::class, 'store'])->name('store');
-        Route::get('/{infographic}/edit', [\App\Http\Controllers\Admin\InfographicController::class, 'edit'])->name('edit');
-        Route::put('/{infographic}', [\App\Http\Controllers\Admin\InfographicController::class, 'update'])->name('update');
-        Route::delete('/{infographic}', [\App\Http\Controllers\Admin\InfographicController::class, 'destroy'])->name('destroy');
-        Route::patch('/{infographic}/toggle-status', [\App\Http\Controllers\Admin\InfographicController::class, 'toggleStatus'])->name('toggle-status');
-        Route::patch('/{infographic}/toggle-featured', [\App\Http\Controllers\Admin\InfographicController::class, 'toggleFeatured'])->name('toggle-featured');
+    Route::middleware(['permission:view_infographics'])->group(function () {
+        Route::get('infographics', [\App\Http\Controllers\Admin\InfographicController::class, 'index'])->name('infographics.index');
+    });
+    
+    Route::middleware(['permission:create_infographics'])->group(function () {
+        Route::get('infographics/create', [\App\Http\Controllers\Admin\InfographicController::class, 'create'])->name('infographics.create');
+        Route::post('infographics', [\App\Http\Controllers\Admin\InfographicController::class, 'store'])->name('infographics.store');
+    });
+    
+    Route::middleware(['permission:edit_infographics'])->group(function () {
+        Route::get('infographics/{infographic}/edit', [\App\Http\Controllers\Admin\InfographicController::class, 'edit'])->name('infographics.edit');
+        Route::put('infographics/{infographic}', [\App\Http\Controllers\Admin\InfographicController::class, 'update'])->name('infographics.update');
+        Route::patch('infographics/{infographic}/toggle-status', [\App\Http\Controllers\Admin\InfographicController::class, 'toggleStatus'])->name('infographics.toggle-status');
+        Route::patch('infographics/{infographic}/toggle-featured', [\App\Http\Controllers\Admin\InfographicController::class, 'toggleFeatured'])->name('infographics.toggle-featured');
+    });
+    
+    Route::middleware(['permission:delete_infographics'])->group(function () {
+        Route::delete('infographics/{infographic}', [\App\Http\Controllers\Admin\InfographicController::class, 'destroy'])->name('infographics.destroy');
     });
 
     // Advertisements Management
@@ -424,6 +433,7 @@ Route::middleware(['auth', App\Http\Middleware\AdminMiddleware::class])->group(f
         Route::post('/settings', [SocialMediaController::class, 'updateSettings'])->name('update-settings');
         Route::get('/posts', [SocialMediaController::class, 'posts'])->name('posts');
         Route::post('/articles/{article}/publish', [SocialMediaController::class, 'publishArticle'])->name('publish-article');
+        Route::post('/infographics/{infographic}/publish', [SocialMediaController::class, 'publishInfographic'])->name('publish-infographic');
         Route::post('/posts/{post}/retry', [SocialMediaController::class, 'retryPost'])->name('retry-post');
         Route::delete('/posts/{post}', [SocialMediaController::class, 'deletePost'])->name('delete-post');
     });

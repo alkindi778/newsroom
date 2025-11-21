@@ -198,6 +198,7 @@
                         @endif
                     </a>
                 </li>
+                @can('view_infographics')
                 <li>
                     <a href="{{ route('admin.infographics.index') }}" 
                        class="group flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 {{ request()->routeIs('admin.infographics.*') ? 'bg-gradient-to-l from-green-600 to-green-700 shadow-lg shadow-green-500/30' : 'hover:bg-white/5 hover:translate-x-[-4px]' }}">
@@ -212,6 +213,7 @@
                         @endif
                     </a>
                 </li>
+                @endcan
                 
                 @can('view_advertisements')
                 <!-- Advertisements Section -->

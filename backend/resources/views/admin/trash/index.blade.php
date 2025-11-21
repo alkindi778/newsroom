@@ -11,7 +11,7 @@
             <p class="text-sm sm:text-base text-gray-600">إدارة المحتوى المحذوف - يمكن استعادته أو حذفه نهائياً</p>
         </div>
         
-        @if((isset($articles) && $articles->count() > 0) || (isset($videos) && $videos->count() > 0) || (isset($opinions) && $opinions->count() > 0))
+        @if((isset($articles) && $articles->count() > 0) || (isset($videos) && $videos->count() > 0) || (isset($opinions) && $opinions->count() > 0) || (isset($infographics) && $infographics->count() > 0))
         <div class="flex flex-col sm:flex-row gap-2 w-full lg:w-auto">
             <button onclick="bulkAction('restore')" 
                     class="px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 shadow-md">
@@ -80,6 +80,20 @@
                 @endif
                 @if($type === 'opinions')
                     <div class="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-1/2 w-2 h-2 bg-amber-600 rounded-full"></div>
+                @endif
+            </a>
+            
+            <a href="{{ route('admin.trash.index', ['type' => 'infographics']) }}" 
+               class="group relative flex items-center gap-3 px-6 py-3 rounded-md text-sm font-medium transition-all duration-200 @if($type === 'infographics') bg-gradient-to-r from-green-600 to-green-700 text-white shadow-md @else text-gray-600 hover:bg-gray-50 hover:text-gray-900 @endif">
+                <i class="fas fa-chart-bar text-lg transition-transform duration-200 @if($type === 'infographics') @else group-hover:scale-110 @endif"></i>
+                <span>الإنفوجرافيك</span>
+                @if(isset($infographics))
+                    <span class="@if($type === 'infographics') bg-white/20 text-white border border-white/30 @else bg-gray-100 text-gray-700 border border-gray-200 @endif inline-flex items-center justify-center min-w-[24px] h-6 px-2 rounded-full text-xs font-bold transition-all duration-200">
+                        {{ $infographics->total() }}
+                    </span>
+                @endif
+                @if($type === 'infographics')
+                    <div class="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-1/2 w-2 h-2 bg-green-600 rounded-full"></div>
                 @endif
             </a>
         </div>
@@ -519,6 +533,87 @@
             </a>
         </div>
 
+        @elseif($type === 'infographics' && isset($infographics) && $infographics->count() > 0)
+        <!-- Infographics List -->
+        <div class="divide-y divide-gray-200">
+            @foreach($infographics as $infographic)
+            <div class="p-4 hover:bg-gray-50 transition-colors">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-4 space-x-reverse flex-1">
+                        <input type="checkbox" name="ids[]" value="{{ $infographic->id }}" 
+                               class="h-4 w-4 text-blue-600 border-gray-300 rounded">
+                        
+                        @if($infographic->image)
+                        <img src="{{ asset('storage/' . $infographic->image) }}" 
+                             alt="{{ $infographic->title }}"
+                             class="w-16 h-16 object-cover rounded-lg">
+                        @else
+                        <div class="w-16 h-16 bg-gray-200 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-chart-bar text-gray-400 text-xl"></i>
+                        </div>
+                        @endif
+                        
+                        <div class="flex-1">
+                            <h3 class="text-base font-medium text-gray-900">{{ $infographic->title }}</h3>
+                            @if($infographic->category)
+                            <p class="text-sm text-gray-500 mt-1">
+                                <i class="fas fa-folder text-gray-400"></i>
+                                {{ $infographic->category->name }}
+                            </p>
+                            @endif
+                            <p class="text-xs text-gray-400 mt-1">
+                                <i class="far fa-trash-alt"></i>
+                                حُذف في: {{ $infographic->deleted_at->format('Y-m-d H:i') }}
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center space-x-2 space-x-reverse">
+                        <form method="POST" action="{{ route('admin.trash.restore', $infographic->id) }}" class="inline">
+                            @csrf
+                            <button type="submit" 
+                                    class="px-3 py-1.5 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700">
+                                <i class="fas fa-undo ml-1"></i>
+                                استعادة
+                            </button>
+                        </form>
+                        
+                        <form method="POST" action="{{ route('admin.trash.force-delete', $infographic->id) }}" 
+                              class="inline" onsubmit="return confirm('هل أنت متأكد من الحذف النهائي؟')">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" 
+                                    class="px-3 py-1.5 bg-red-600 text-white text-sm rounded-lg hover:bg-red-700">
+                                <i class="fas fa-times ml-1"></i>
+                                حذف نهائي
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            @endforeach
+            
+            @if($infographics->hasPages())
+            <div class="px-4 py-4 border-t border-gray-200">
+                {{ $infographics->links() }}
+            </div>
+            @endif
+        </div>
+
+        @elseif($type === 'infographics')
+        <!-- Empty State - Infographics -->
+        <div class="text-center py-12">
+            <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-green-100 mb-4">
+                <i class="fas fa-chart-bar text-3xl text-green-600"></i>
+            </div>
+            <h3 class="text-lg font-medium text-gray-900 mb-2">لا توجد إنفوجرافيكات محذوفة</h3>
+            <p class="text-gray-500 mb-4">سلة المهملات فارغة من الإنفوجرافيكات</p>
+            <a href="{{ route('admin.infographics.index') }}" 
+               class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700">
+                العودة للإنفوجرافيك
+            </a>
+        </div>
+
         @else
         <!-- Empty State - General -->
         <div class="text-center py-12">
@@ -531,6 +626,8 @@
                     لا توجد فيديوهات محذوفة حالياً
                 @elseif($type === 'opinions')
                     لا توجد مقالات رأي محذوفة حالياً
+                @elseif($type === 'infographics')
+                    لا توجد إنفوجرافيكات محذوفة حالياً
                 @else
                     لا توجد أخبار محذوفة حالياً
                 @endif
@@ -545,6 +642,11 @@
                     <a href="{{ route('admin.opinions.index') }}" 
                        class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-amber-600 hover:bg-amber-700">
                         العودة لمقالات الرأي
+                    </a>
+                @elseif($type === 'infographics')
+                    <a href="{{ route('admin.infographics.index') }}" 
+                       class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700">
+                        العودة للإنفوجرافيك
                     </a>
                 @else
                     <a href="{{ route('admin.articles.index') }}" 

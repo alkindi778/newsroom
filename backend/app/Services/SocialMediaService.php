@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Article;
 use App\Models\Video;
 use App\Models\Opinion;
+use App\Models\Infographic;
 use App\Models\SocialMediaPost;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -558,6 +559,203 @@ class SocialMediaService
             'message' => $message,
             'status' => 'scheduled',
             'scheduled_for' => $opinion->scheduled_publish_at ?? now()->addHours(1),
+        ]);
+
+        return [
+            'success' => true,
+            'platform' => $platform,
+            'scheduled_for' => $post->scheduled_for,
+        ];
+    }
+
+    /**
+     * نشر الإنفوجرافيك على جميع المنصات المفعّلة
+     */
+    public function publishInfographic(Infographic $infographic, bool $schedule = false): array
+    {
+        $results = [];
+        $config = config('social-media');
+
+        foreach ($config['platforms'] as $platform => $settings) {
+            if (!$settings['enabled'] || !$settings['auto_publish']) {
+                continue;
+            }
+
+            try {
+                $message = $this->buildInfographicMessage($infographic, $platform);
+                
+                if ($schedule && isset($infographic->scheduled_publish_at)) {
+                    $results[$platform] = $this->scheduleInfographicPost($infographic, $platform, $message);
+                } else {
+                    $results[$platform] = $this->publishInfographicToPlatform($infographic, $platform, $message);
+                }
+            } catch (\Exception $e) {
+                Log::error("Social Media Infographic Error ({$platform}): " . $e->getMessage());
+                $results[$platform] = [
+                    'success' => false,
+                    'error' => $e->getMessage(),
+                ];
+            }
+        }
+
+        return $results;
+    }
+
+    /**
+     * بناء رسالة منشور الإنفوجرافيك
+     */
+    private function buildInfographicMessage(Infographic $infographic, string $platform): string
+    {
+        $title = $infographic->title;
+        $description = $infographic->description ?? '';
+        $link = $infographic->full_url;
+        $hashtags = $this->buildInfographicHashtags($infographic);
+
+        $message = "📊 {$title}\n\n";
+        if ($description) {
+            $message .= substr($description, 0, 150) . "...\n\n";
+        }
+        $message .= "🔗 {$link}\n\n";
+        $message .= $hashtags;
+
+        // تقليص الرسالة حسب حد المنصة
+        $config = config('social-media');
+        if ($platform === 'twitter' && strlen($message) > $config['global']['excerpt_length']) {
+            $message = substr($message, 0, $config['global']['excerpt_length'] - 3) . '...';
+        }
+
+        return $message;
+    }
+
+    /**
+     * بناء هاشتاجات الإنفوجرافيك
+     */
+    private function buildInfographicHashtags(Infographic $infographic): string
+    {
+        $config = config('social-media');
+        
+        if (!$config['global']['include_hashtags']) {
+            return '';
+        }
+
+        $hashtags = ['#إنفوجرافيك', '#Infographic'];
+
+        if ($config['global']['include_category'] && $infographic->category) {
+            $hashtags[] = '#' . str_replace(' ', '', $infographic->category->name);
+        }
+
+        // إضافة tags
+        if ($infographic->tags && is_array($infographic->tags)) {
+            foreach (array_slice($infographic->tags, 0, $config['global']['max_hashtags'] - 2) as $tag) {
+                $hashtags[] = '#' . str_replace(' ', '', trim($tag));
+            }
+        }
+
+        return implode(' ', $hashtags);
+    }
+
+    /**
+     * نشر الإنفوجرافيك على المنصة
+     */
+    private function publishInfographicToPlatform(Infographic $infographic, string $platform, string $message): array
+    {
+        $config = config('social-media.platforms.' . $platform);
+
+        switch ($platform) {
+            case 'telegram':
+                return $this->publishInfographicToTelegram($infographic, $message, $config);
+            case 'facebook':
+                return $this->publishInfographicToFacebook($infographic, $message, $config);
+            case 'twitter':
+                return $this->publishInfographicToTwitter($infographic, $message, $config);
+            default:
+                throw new \Exception("Unsupported platform: {$platform}");
+        }
+    }
+
+    /**
+     * نشر الإنفوجرافيك على Telegram
+     */
+    private function publishInfographicToTelegram(Infographic $infographic, string $message, array $config): array
+    {
+        $botToken = $config['bot_token'];
+        $channelId = $config['channel_id'];
+
+        if (!$botToken || !$channelId) {
+            throw new \Exception('Telegram configuration is incomplete');
+        }
+
+        // الحصول على مسار الصورة الكامل
+        $imagePath = storage_path('app/public/' . $infographic->image);
+        
+        if (!file_exists($imagePath)) {
+            throw new \Exception('Infographic image not found');
+        }
+
+        // نشر الصورة مع الرسالة على Telegram
+        $response = Http::attach(
+            'photo',
+            file_get_contents($imagePath),
+            basename($imagePath)
+        )->post("https://api.telegram.org/bot{$botToken}/sendPhoto", [
+            'chat_id' => $channelId,
+            'caption' => $message,
+            'parse_mode' => 'HTML',
+        ]);
+
+        if (!$response->successful()) {
+            throw new \Exception('Telegram API error: ' . $response->body());
+        }
+
+        $data = $response->json();
+
+        // حفظ السجل
+        $post = SocialMediaPost::create([
+            'infographic_id' => $infographic->id,
+            'platform' => 'telegram',
+            'external_id' => $data['result']['message_id'] ?? null,
+            'message' => $message,
+            'status' => 'published',
+            'published_at' => now(),
+            'response' => json_encode($data),
+        ]);
+
+        return [
+            'success' => true,
+            'platform' => 'telegram',
+            'external_id' => $data['result']['message_id'] ?? null,
+        ];
+    }
+
+    /**
+     * نشر الإنفوجرافيك على Facebook
+     */
+    private function publishInfographicToFacebook(Infographic $infographic, string $message, array $config): array
+    {
+        // TODO: Implement Facebook infographic publishing
+        return ['success' => false, 'error' => 'Facebook publishing not implemented yet'];
+    }
+
+    /**
+     * نشر الإنفوجرافيك على Twitter
+     */
+    private function publishInfographicToTwitter(Infographic $infographic, string $message, array $config): array
+    {
+        // TODO: Implement Twitter infographic publishing
+        return ['success' => false, 'error' => 'Twitter publishing not implemented yet'];
+    }
+
+    /**
+     * جدولة منشور إنفوجرافيك
+     */
+    private function scheduleInfographicPost(Infographic $infographic, string $platform, string $message): array
+    {
+        $post = SocialMediaPost::create([
+            'infographic_id' => $infographic->id,
+            'platform' => $platform,
+            'message' => $message,
+            'status' => 'scheduled',
+            'scheduled_for' => $infographic->scheduled_publish_at ?? now()->addHours(1),
         ]);
 
         return [

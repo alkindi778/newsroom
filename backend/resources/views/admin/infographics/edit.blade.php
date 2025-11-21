@@ -4,200 +4,204 @@
 @section('page-title', 'تعديل إنفوجرافيك')
 
 @section('content')
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-lg-10 mx-auto">
-            <!-- Header -->
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <h1 class="h3 mb-0 text-gray-800">تعديل: {{ $infographic->title }}</h1>
-                <a href="{{ route('admin.infographics.index') }}" class="btn btn-secondary">
-                    <i class="fas fa-arrow-right"></i> العودة
-                </a>
-            </div>
+<div class="p-6">
+    <!-- Header -->
+    <div class="flex justify-between items-center mb-6">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-900">تعديل: {{ $infographic->title }}</h1>
+            <p class="mt-1 text-sm text-gray-600">عدّل معلومات الإنفوجرافيك</p>
+        </div>
+        <a href="{{ route('admin.infographics.index') }}" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors">
+            <i class="fas fa-arrow-right"></i>
+            <span>عودة</span>
+        </a>
+    </div>
 
-            <!-- Form -->
-            <form action="{{ route('admin.infographics.update', $infographic) }}" method="POST" enctype="multipart/form-data">
-                @csrf
-                @method('PUT')
-                
-                <div class="card shadow mb-4">
-                    <div class="card-body">
-                        <!-- Current Image Preview -->
-                        <div class="form-group">
-                            <label>الصورة الحالية</label>
-                            <div class="mb-2">
-                                <img src="{{ asset('storage/' . $infographic->image) }}" 
-                                     alt="{{ $infographic->title }}" 
-                                     class="img-thumbnail" 
-                                     style="max-width: 300px;">
-                            </div>
-                        </div>
-
-                        <!-- Title (Arabic) -->
-                        <div class="form-group">
-                            <label for="title">العنوان (عربي) <span class="text-danger">*</span></label>
-                            <input type="text" 
-                                   class="form-control @error('title') is-invalid @enderror" 
-                                   id="title" 
-                                   name="title" 
-                                   value="{{ old('title', $infographic->title) }}" 
-                                   required>
-                            @error('title')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
-
-                        <!-- Title (English) -->
-                        <div class="form-group">
-                            <label for="title_en">العنوان (English)</label>
-                            <input type="text" 
-                                   class="form-control @error('title_en') is-invalid @enderror" 
-                                   id="title_en" 
-                                   name="title_en" 
-                                   value="{{ old('title_en', $infographic->title_en) }}">
-                            @error('title_en')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
-
-                        <!-- Description (Arabic) -->
-                        <div class="form-group">
-                            <label for="description">الوصف (عربي)</label>
-                            <textarea class="form-control @error('description') is-invalid @enderror" 
-                                      id="description" 
-                                      name="description" 
-                                      rows="3">{{ old('description', $infographic->description) }}</textarea>
-                            @error('description')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
-
-                        <!-- Description (English) -->
-                        <div class="form-group">
-                            <label for="description_en">الوصف (English)</label>
-                            <textarea class="form-control @error('description_en') is-invalid @enderror" 
-                                      id="description_en" 
-                                      name="description_en" 
-                                      rows="3">{{ old('description_en', $infographic->description_en) }}</textarea>
-                            @error('description_en')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
-
-                        <!-- New Image (Optional) -->
-                        <div class="form-group">
-                            <label for="image">صورة جديدة (اختياري)</label>
-                            <input type="file" 
-                                   class="form-control-file @error('image') is-invalid @enderror" 
-                                   id="image" 
-                                   name="image" 
-                                   accept="image/*">
-                            @error('image')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                            <small class="form-text text-muted">اترك فارغاً للإبقاء على الصورة الحالية</small>
-                        </div>
-
-                        <!-- Category -->
-                        <div class="form-group">
-                            <label for="category_id">القسم</label>
-                            <select class="form-control @error('category_id') is-invalid @enderror" 
-                                    id="category_id" 
-                                    name="category_id">
-                                <option value="">-- اختر قسم --</option>
-                                @foreach($categories as $category)
-                                    <option value="{{ $category->id }}" 
-                                            {{ old('category_id', $infographic->category_id) == $category->id ? 'selected' : '' }}>
-                                        {{ $category->name }}
-                                    </option>
-                                @endforeach
-                            </select>
-                            @error('category_id')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
-
-                        <!-- Slug -->
-                        <div class="form-group">
-                            <label for="slug">الرابط (Slug)</label>
-                            <input type="text" 
-                                   class="form-control @error('slug') is-invalid @enderror" 
-                                   id="slug" 
-                                   name="slug" 
-                                   value="{{ old('slug', $infographic->slug) }}">
-                            @error('slug')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
-
-                        <!-- Order -->
-                        <div class="form-group">
-                            <label for="order">الترتيب</label>
-                            <input type="number" 
-                                   class="form-control @error('order') is-invalid @enderror" 
-                                   id="order" 
-                                   name="order" 
-                                   value="{{ old('order', $infographic->order) }}" 
-                                   min="0">
-                            @error('order')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
-
-                        <!-- Tags -->
-                        <div class="form-group">
-                            <label for="tags">الوسوم (Tags)</label>
-                            <input type="text" 
-                                   class="form-control @error('tags') is-invalid @enderror" 
-                                   id="tags" 
-                                   name="tags" 
-                                   value="{{ old('tags', is_array($infographic->tags) ? implode(', ', $infographic->tags) : '') }}" 
-                                   placeholder="افصل بينها بفاصلة">
-                            @error('tags')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
-
-                        <!-- Status Checkboxes -->
-                        <div class="form-group">
-                            <div class="custom-control custom-checkbox mb-2">
-                                <input type="checkbox" 
-                                       class="custom-control-input" 
-                                       id="is_active" 
-                                       name="is_active" 
-                                       value="1" 
-                                       {{ old('is_active', $infographic->is_active) ? 'checked' : '' }}>
-                                <label class="custom-control-label" for="is_active">نشط</label>
-                            </div>
-
-                            <div class="custom-control custom-checkbox">
-                                <input type="checkbox" 
-                                       class="custom-control-input" 
-                                       id="is_featured" 
-                                       name="is_featured" 
-                                       value="1" 
-                                       {{ old('is_featured', $infographic->is_featured) ? 'checked' : '' }}>
-                                <label class="custom-control-label" for="is_featured">مميز</label>
-                            </div>
-                        </div>
-
-                        <!-- Stats -->
-                        <div class="alert alert-info">
-                            <strong>إحصائيات:</strong> 
-                            المشاهدات: {{ $infographic->views }} | 
-                            تاريخ الإنشاء: {{ $infographic->created_at->format('Y-m-d H:i') }}
-                        </div>
+    <!-- Form -->
+    <form action="{{ route('admin.infographics.update', $infographic) }}" method="POST" enctype="multipart/form-data">
+        @csrf
+        @method('PUT')
+        
+        <!-- Current Image Preview -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
+            <div class="p-6">
+                <div class="relative inline-block">
+                    <img src="{{ asset('storage/' . $infographic->image) }}" 
+                         alt="{{ $infographic->title }}" 
+                         class="rounded-lg shadow-md max-w-sm w-full h-auto">
+                    @php
+                        $filePath = public_path('storage/' . $infographic->image);
+                        $fileSize = file_exists($filePath) ? filesize($filePath) : 0;
+                    @endphp
+                    @if($fileSize > 0)
+                    <div class="absolute top-2 right-2 bg-white px-3 py-1 rounded-full text-xs font-medium text-gray-700 shadow-sm">
+                        {{ number_format($fileSize / 1024, 0) }} KB
                     </div>
+                    @endif
+                </div>
+            </div>
+        </div>
+        
+        <!-- Main Content Card -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+            <div class="p-6 space-y-6">
 
-                    <div class="card-footer">
-                        <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-save"></i> تحديث
-                        </button>
-                        <a href="{{ route('admin.infographics.index') }}" class="btn btn-secondary">إلغاء</a>
+                <!-- Title -->
+                <div>
+                    <label for="title" class="block text-sm font-medium text-gray-700 mb-2">
+                        العنوان <span class="text-red-500">*</span>
+                    </label>
+                    <input type="text" 
+                           id="title" 
+                           name="title" 
+                           value="{{ old('title', $infographic->title) }}" 
+                           required
+                           class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all @error('title') border-red-500 @enderror" 
+                           placeholder="أدخل عنوان الإنفوجرافيك">
+                    @error('title')
+                        <p class="mt-2 text-sm text-red-600 flex items-center gap-1">
+                            <i class="fas fa-exclamation-circle"></i>
+                            {{ $message }}
+                        </p>
+                    @enderror
+                    <p class="mt-2 text-xs text-blue-600 flex items-center gap-1">
+                        <i class="fas fa-robot"></i>
+                        سيتم ترجمته تلقائياً بالذكاء الاصطناعي
+                    </p>
+                </div>
+
+                <!-- Description -->
+                <div>
+                    <label for="description" class="block text-sm font-medium text-gray-700 mb-2">
+                        الوصف
+                    </label>
+                    <textarea id="description" 
+                              name="description" 
+                              rows="4"
+                              class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all @error('description') border-red-500 @enderror" 
+                              placeholder="أدخل وصفاً مختصراً للإنفوجرافيك">{{ old('description', $infographic->description) }}</textarea>
+                    @error('description')
+                        <p class="mt-2 text-sm text-red-600 flex items-center gap-1">
+                            <i class="fas fa-exclamation-circle"></i>
+                            {{ $message }}
+                        </p>
+                    @enderror
+                    <p class="mt-2 text-xs text-blue-600 flex items-center gap-1">
+                        <i class="fas fa-robot"></i>
+                        سيتم ترجمته تلقائياً بالذكاء الاصطناعي
+                    </p>
+                </div>
+
+                <!-- Image Upload using Media Picker -->
+                <x-admin.media-picker 
+                    field="image" 
+                    label="تغيير الصورة (اختياري)" 
+                    :value="old('image', $infographic->image)"
+                    collection="infographics"
+                    help="اترك فارغاً للإبقاء على الصورة الحالية، أو اختر صورة جديدة من المكتبة" />
+
+                <!-- Slug -->
+                <div>
+                    <label for="slug" class="block text-sm font-medium text-gray-700 mb-2">
+                        الرابط (Slug)
+                    </label>
+                    <input type="text" 
+                           id="slug" 
+                           name="slug" 
+                           value="{{ old('slug', $infographic->slug) }}"
+                           class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all @error('slug') border-red-500 @enderror" 
+                           placeholder="الرابط الفريد">
+                    @error('slug')
+                        <p class="mt-2 text-sm text-red-600 flex items-center gap-1">
+                            <i class="fas fa-exclamation-circle"></i>
+                            {{ $message }}
+                        </p>
+                    @enderror
+                </div>
+
+                <!-- Tags -->
+                <div>
+                    <label for="tags" class="block text-sm font-medium text-gray-700 mb-2">
+                        الوسوم (Tags)
+                    </label>
+                    <input type="text" 
+                           id="tags" 
+                           name="tags" 
+                           value="{{ old('tags', is_array($infographic->tags) ? implode(', ', $infographic->tags) : '') }}" 
+                           class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all @error('tags') border-red-500 @enderror" 
+                           placeholder="افصل بينها بفاصلة: سياسة، اقتصاد، رياضة">
+                    @error('tags')
+                        <p class="mt-2 text-sm text-red-600 flex items-center gap-1">
+                            <i class="fas fa-exclamation-circle"></i>
+                            {{ $message }}
+                        </p>
+                    @enderror
+                </div>
+
+                <!-- Status Checkboxes -->
+                <div class="flex flex-wrap gap-4">
+                    <label class="relative inline-flex items-center cursor-pointer group">
+                        <input type="checkbox" 
+                               id="is_active" 
+                               name="is_active" 
+                               value="1" 
+                               class="sr-only peer"
+                               {{ old('is_active', $infographic->is_active) ? 'checked' : '' }}>
+                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                        <span class="ms-3 text-sm font-medium text-gray-700 group-hover:text-gray-900">نشط</span>
+                    </label>
+
+                    <label class="relative inline-flex items-center cursor-pointer group">
+                        <input type="checkbox" 
+                               id="is_featured" 
+                               name="is_featured" 
+                               value="1" 
+                               class="sr-only peer"
+                               {{ old('is_featured', $infographic->is_featured) ? 'checked' : '' }}>
+                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-yellow-300 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-yellow-500"></div>
+                        <span class="ms-3 text-sm font-medium text-gray-700 group-hover:text-gray-900 flex items-center gap-1">
+                            <i class="fas fa-star"></i>
+                            مميز
+                        </span>
+                    </label>
+                </div>
+
+                <!-- Stats -->
+                <div class="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-r-lg">
+                    <div class="flex items-start">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-chart-line text-blue-500 text-xl"></i>
+                        </div>
+                        <div class="mr-3">
+                            <h3 class="text-sm font-medium text-blue-800">إحصائيات</h3>
+                            <div class="mt-2 text-sm text-blue-700">
+                                <p class="flex items-center gap-2">
+                                    <i class="fas fa-eye"></i>
+                                    <span class="font-semibold">المشاهدات:</span> 
+                                    {{ number_format($infographic->views) }}
+                                </p>
+                                <p class="flex items-center gap-2 mt-1">
+                                    <i class="fas fa-calendar"></i>
+                                    <span class="font-semibold">تاريخ الإنشاء:</span> 
+                                    {{ $infographic->created_at->format('Y-m-d H:i') }}
+                                </p>
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </form>
+
+                <!-- Action Buttons -->
+                <div class="flex items-center justify-end gap-3 pt-6 border-t border-gray-200">
+                    <a href="{{ route('admin.infographics.index') }}" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors">
+                        إلغاء
+                    </a>
+                    <button type="submit" class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg flex items-center gap-2 transition-colors">
+                        <i class="fas fa-save"></i>
+                        <span>تحديث الإنفوجرافيك</span>
+                    </button>
+                </div>
+            </div>
         </div>
-    </div>
+    </form>
 </div>
 @endsection

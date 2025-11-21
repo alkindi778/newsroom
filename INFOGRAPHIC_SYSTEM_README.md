@@ -83,7 +83,26 @@ cd backend
 php artisan migrate
 ```
 
-### 2. (اختياري) تشغيل Seeder لإضافة بيانات تجريبية
+### 2. إضافة الصلاحيات (Permissions)
+
+```bash
+php artisan db:seed --class=InfographicPermissionsSeeder
+```
+
+هذا سيقوم بإنشاء الصلاحيات التالية:
+- `view_infographics` - عرض قائمة الإنفوجرافيكات
+- `create_infographics` - إضافة إنفوجرافيك جديد
+- `edit_infographics` - تعديل الإنفوجرافيكات
+- `delete_infographics` - حذف الإنفوجرافيكات
+- `manage_infographics` - إدارة شاملة
+
+**توزيع الصلاحيات على الأدوار:**
+- **Super Admin**: جميع الصلاحيات
+- **Admin**: view, create, edit, manage
+- **Editor**: view, create, edit
+- **Reporter**: view فقط
+
+### 3. (اختياري) تشغيل Seeder لإضافة بيانات تجريبية
 
 ```bash
 php artisan db:seed --class=InfographicSeeder
@@ -91,7 +110,7 @@ php artisan db:seed --class=InfographicSeeder
 
 **ملاحظة:** ستحتاج إلى إضافة صور تجريبية في المجلد `storage/app/public/infographics/`
 
-### 3. إنشاء Symbolic Link للـ Storage (إذا لم يكن موجوداً)
+### 4. إنشاء Symbolic Link للـ Storage (إذا لم يكن موجوداً)
 
 ```bash
 php artisan storage:link
@@ -128,7 +147,110 @@ php artisan storage:link
 
 ---
 
-## 🔌 API Endpoints
+## � نظام الصلاحيات (Permissions System)
+
+### الصلاحيات المتاحة
+
+| الصلاحية | الوصف | الأدوار المسموحة |
+|---------|------|------------------|
+| `view_infographics` | عرض قائمة الإنفوجرافيكات | جميع الأدوار |
+| `create_infographics` | إنشاء إنفوجرافيك جديد | Super Admin, Admin, Editor |
+| `edit_infographics` | تعديل الإنفوجرافيكات | Super Admin, Admin, Editor |
+| `delete_infographics` | حذف الإنفوجرافيكات | Super Admin فقط |
+| `manage_infographics` | إدارة شاملة (Toggle Status/Featured) | Super Admin, Admin |
+
+### توزيع الصلاحيات على الأدوار
+
+#### 👑 Super Admin (مدير النظام)
+```
+✅ view_infographics
+✅ create_infographics
+✅ edit_infographics
+✅ delete_infographics
+✅ manage_infographics
+```
+
+#### 🔧 Admin (مشرف)
+```
+✅ view_infographics
+✅ create_infographics
+✅ edit_infographics
+❌ delete_infographics
+✅ manage_infographics
+```
+
+#### ✏️ Editor (محرر)
+```
+✅ view_infographics
+✅ create_infographics
+✅ edit_infographics
+❌ delete_infographics
+❌ manage_infographics
+```
+
+#### 📝 Reporter (مراسل)
+```
+✅ view_infographics
+❌ create_infographics
+❌ edit_infographics
+❌ delete_infographics
+❌ manage_infographics
+```
+
+### التحقق من الصلاحيات في الكود
+
+#### في Controllers:
+```php
+// في بداية الـ method
+$this->authorize('edit_infographics');
+
+// أو
+if (!auth()->user()->can('delete_infographics')) {
+    abort(403);
+}
+```
+
+#### في Blade Templates:
+```blade
+@can('create_infographics')
+    <a href="{{ route('admin.infographics.create') }}">إضافة إنفوجرافيك</a>
+@endcan
+
+@can('delete_infographics')
+    <button>حذف</button>
+@endcan
+```
+
+#### في Routes:
+```php
+Route::middleware(['permission:view_infographics'])->group(function () {
+    Route::get('infographics', [InfographicController::class, 'index']);
+});
+```
+
+### إضافة/تعديل الصلاحيات
+
+لإضافة صلاحية جديدة لمستخدم:
+```php
+$user = User::find(1);
+$user->givePermissionTo('view_infographics');
+```
+
+لإزالة صلاحية:
+```php
+$user->revokePermissionTo('delete_infographics');
+```
+
+للتحقق من الصلاحية:
+```php
+if ($user->hasPermissionTo('edit_infographics')) {
+    // المستخدم لديه الصلاحية
+}
+```
+
+---
+
+## �🔌 API Endpoints
 
 ### Public Endpoints
 

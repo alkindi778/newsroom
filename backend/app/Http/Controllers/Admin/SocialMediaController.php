@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\SocialMediaPost;
 use App\Models\Article;
+use App\Models\Infographic;
 use App\Services\SocialMediaService;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -79,6 +80,28 @@ class SocialMediaController extends Controller
     {
         try {
             $results = $this->socialMediaService->publishArticle($article);
+
+            $successCount = collect($results)->filter(fn($r) => $r['success'] ?? false)->count();
+            $failCount = collect($results)->filter(fn($r) => !($r['success'] ?? false))->count();
+
+            $message = "تم النشر على {$successCount} منصات";
+            if ($failCount > 0) {
+                $message .= " وفشل النشر على {$failCount} منصات";
+            }
+
+            return back()->with('success', $message);
+        } catch (\Exception $e) {
+            return back()->with('error', 'حدث خطأ: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * نشر إنفوجرافيك يدوياً
+     */
+    public function publishInfographic(Request $request, Infographic $infographic): RedirectResponse
+    {
+        try {
+            $results = $this->socialMediaService->publishInfographic($infographic);
 
             $successCount = collect($results)->filter(fn($r) => $r['success'] ?? false)->count();
             $failCount = collect($results)->filter(fn($r) => !($r['success'] ?? false))->count();

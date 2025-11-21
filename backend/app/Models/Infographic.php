@@ -5,11 +5,13 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
 
 class Infographic extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     protected $fillable = [
         'title',
@@ -42,6 +44,14 @@ class Infographic extends Model
     public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class);
+    }
+
+    /**
+     * العلاقة مع منشورات وسائل التواصل الاجتماعي
+     */
+    public function socialMediaPosts(): HasMany
+    {
+        return $this->hasMany(SocialMediaPost::class);
     }
 
     /**
@@ -114,5 +124,13 @@ class Infographic extends Model
     public function incrementViews(): void
     {
         $this->increment('views');
+    }
+
+    /**
+     * الحصول على رابط الإنفوجرافيك الكامل للموقع
+     */
+    public function getFullUrlAttribute(): string
+    {
+        return url('/infographics/' . $this->slug);
     }
 }

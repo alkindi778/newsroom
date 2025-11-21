@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Article;
 use App\Models\Video;
 use App\Models\Opinion;
+use App\Models\Infographic;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
@@ -17,10 +18,44 @@ class TrashController extends Controller
      */
     public function index(Request $request): View
     {
-        // Get type filter (articles, videos, or opinions)
+        // Get type filter (articles, videos, opinions, or infographics)
         $type = $request->get('type', 'articles');
         
-        if ($type === 'opinions') {
+        if ($type === 'infographics') {
+            // Infographics query
+            $query = Infographic::onlyTrashed()
+                ->with(['category:id,name'])
+                ->orderBy('deleted_at', 'desc');
+
+            // Search functionality
+            if ($request->filled('search')) {
+                $searchTerm = $request->search;
+                $query->where(function($q) use ($searchTerm) {
+                    $q->where('title', 'LIKE', "%{$searchTerm}%")
+                      ->orWhere('description', 'LIKE', "%{$searchTerm}%");
+                });
+            }
+
+            // Filter by category
+            if ($request->filled('category_id')) {
+                $query->where('category_id', $request->category_id);
+            }
+
+            // Filter by date range
+            if ($request->filled('date_from')) {
+                $query->whereDate('deleted_at', '>=', $request->date_from);
+            }
+            if ($request->filled('date_to')) {
+                $query->whereDate('deleted_at', '<=', $request->date_to);
+            }
+
+            $infographics = $query->paginate(10);
+            
+            // Get categories for filter
+            $categories = \App\Models\Category::select('id', 'name')->get();
+
+            return view('admin.trash.index', compact('infographics', 'categories', 'type'));
+        } elseif ($type === 'opinions') {
             // Opinions query
             $query = Opinion::onlyTrashed()
                 ->with(['writer:id,name'])
