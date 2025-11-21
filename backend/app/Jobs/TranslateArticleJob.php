@@ -27,18 +27,22 @@ class TranslateArticleJob implements ShouldQueue
         }
 
         try {
-            // ترجمة Title
-            if ($article->title && !$article->title_en) {
-                $article->title_en = $translationService->translateText($article->title);
+            // Skip if already translated
+            if ($article->title_en && $article->content_en) {
+                return;
             }
 
-            // ترجمة Content
-            if ($article->content && !$article->content_en) {
-                $article->content_en = $translationService->translateText($article->content);
+            // Translate Title + Content together for better quality
+            $translation = $translationService->translateContent($article->title, $article->content);
+            
+            if ($translation) {
+                $article->title_en = $translation['title_en'] ?? null;
+                $article->content_en = $translation['content_en'] ?? null;
+                $article->saveQuietly();
+                Log::info("Article translated: {$article->title}");
+            } else {
+                Log::warning("Translation failed for article: {$article->title}");
             }
-
-            $article->saveQuietly();
-            Log::info("Article translated: {$article->title}");
 
         } catch (\Exception $e) {
             Log::error("Failed to translate article {$this->articleId}: " . $e->getMessage());
