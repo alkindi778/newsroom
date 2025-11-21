@@ -47,6 +47,9 @@ class GeminiTranslationService
                         'topK' => config('translation.prompt.top_k', 40),
                         'topP' => config('translation.prompt.top_p', 0.95),
                         'maxOutputTokens' => config('translation.prompt.max_output_tokens', 8192),
+                    ],
+                    'thinkingConfig' => [
+                        'thinkingBudget' => 0,
                     ]
                 ]);
 
@@ -188,6 +191,9 @@ PROMPT;
                         'topK' => 40,
                         'topP' => 0.95,
                         'maxOutputTokens' => 1024,
+                    ],
+                    'thinkingConfig' => [
+                        'thinkingBudget' => 0,
                     ]
                 ]);
 
