@@ -122,14 +122,21 @@ const hasMore = computed(() => articlesStore.hasMore)
 
 // دوال الترجمة
 const getArticleTitle = (article: any) => {
-  const title = locale.value === 'en' && article.title_en ? article.title_en : article.title
-  console.log('getArticleTitle:', {
+  const isEnglish = locale.value === 'en'
+  const hasTranslation = !!article.title_en
+  const title = isEnglish && hasTranslation ? article.title_en : article.title
+  
+  console.log('🔤 getArticleTitle:', {
+    articleId: article.id,
     locale: locale.value,
-    hasTranslation: !!article.title_en,
+    isEnglish,
+    hasTranslation,
     title_en: article.title_en,
-    title_ar: article.title,
-    returning: title
+    title_ar: article.title?.substring(0, 50) + '...',
+    returning: title?.substring(0, 50) + '...',
+    willUseEnglish: isEnglish && hasTranslation
   })
+  
   return title
 }
 
@@ -139,14 +146,21 @@ const getArticleExcerpt = (article: any) => {
 }
 
 const getCategoryName = (category: any) => {
-  const name = locale.value === 'en' && category.name_en ? category.name_en : category.name
-  console.log('getCategoryName:', {
+  const isEnglish = locale.value === 'en'
+  const hasTranslation = !!category.name_en
+  const name = isEnglish && hasTranslation ? category.name_en : category.name
+  
+  console.log('🏷️ getCategoryName:', {
+    categoryId: category.id,
     locale: locale.value,
-    hasTranslation: !!category.name_en,
+    isEnglish,
+    hasTranslation,
     name_en: category.name_en,
     name_ar: category.name,
-    returning: name
+    returning: name,
+    willUseEnglish: isEnglish && hasTranslation
   })
+  
   return name
 }
 
@@ -178,8 +192,19 @@ const loadMore = async () => {
 }
 
 // Fetch articles on mount
-onMounted(() => {
-  articlesStore.fetchArticles({ per_page: 20 })
+onMounted(async () => {
+  await articlesStore.fetchArticles({ per_page: 20 })
+  
+  console.log('📰 Articles loaded on news index:', {
+    total: articlesStore.articles.length,
+    locale: locale.value,
+    firstArticle: articlesStore.articles[0] ? {
+      id: articlesStore.articles[0].id,
+      title: articlesStore.articles[0].title,
+      title_en: articlesStore.articles[0].title_en,
+      hasTranslation: !!articlesStore.articles[0].title_en
+    } : null
+  })
 })
 
 const settingsStore = useSettingsStore()
