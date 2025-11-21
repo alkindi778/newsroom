@@ -3,12 +3,12 @@
     <div class="container mx-auto px-4 py-8">
       <!-- Header -->
       <div class="mb-8">
-        <h1 class="text-3xl font-bold text-gray-900 mb-2">آخر الأخبار</h1>
-        <p class="text-gray-600">تابع آخر الأخبار والمستجدات</p>
+        <h1 class="text-3xl font-bold text-gray-900 mb-2">{{ locale === 'en' ? 'Latest News' : 'آخر الأخبار' }}</h1>
+        <p class="text-gray-600">{{ locale === 'en' ? 'Follow the latest news and updates' : 'تابع آخر الأخبار والمستجدات' }}</p>
       </div>
 
       <!-- Loading -->
-      <LoadingSpinner v-if="loading" type="dots" size="lg" text="جاري تحميل الأخبار..." />
+      <LoadingSpinner v-if="loading" type="dots" size="lg" :text="locale === 'en' ? 'Loading news...' : 'جاري تحميل الأخبار...'" />
 
       <!-- Articles List -->
       <div v-else-if="articles.length > 0" class="space-y-1">
@@ -22,7 +22,7 @@
               <div v-if="article.image || article.thumbnail" class="flex-shrink-0">
                 <img
                   :src="getImageUrl(article.thumbnail || article.image, 'thumbnail')"
-                  :alt="article.title"
+                  :alt="getArticleTitle(article)"
                   class="w-40 h-28 object-cover"
                   loading="lazy"
                 />
@@ -33,7 +33,7 @@
                 <!-- Category & Date -->
                 <div class="flex items-center gap-3 text-xs text-gray-500 mb-2">
                   <span v-if="article.category" class="text-red-600 font-semibold">
-                    {{ article.category.name }}
+                    {{ getCategoryName(article.category) }}
                   </span>
                   <span class="flex items-center gap-1">
                     <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -50,12 +50,12 @@
                 
                 <!-- Title -->
                 <h2 class="text-lg font-bold text-gray-900 mb-2 line-clamp-2 leading-tight">
-                  {{ article.title }}
+                  {{ getArticleTitle(article) }}
                 </h2>
 
                 <!-- Excerpt -->
                 <p v-if="article.excerpt" class="text-sm text-gray-600 line-clamp-2 leading-relaxed">
-                  {{ article.excerpt }}
+                  {{ getArticleExcerpt(article) }}
                 </p>
 
                 <!-- Stats -->
@@ -85,7 +85,7 @@
         <svg class="w-16 h-16 mx-auto text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
         </svg>
-        <p class="text-gray-600 text-lg">لا توجد أخبار حالياً</p>
+        <p class="text-gray-600 text-lg">{{ locale === 'en' ? 'No news available' : 'لا توجد أخبار حالياً' }}</p>
       </div>
 
       <!-- Pagination -->
@@ -101,7 +101,7 @@
       
       <!-- No more articles message -->
       <div v-if="articles.length > 0 && !loading && !hasMore" class="mt-8 text-center text-gray-500">
-        <p>لا توجد المزيد من الأخبار</p>
+        <p>{{ locale === 'en' ? 'No more news' : 'لا توجد المزيد من الأخبار' }}</p>
       </div>
     </div>
   </div>
@@ -114,13 +114,33 @@ const articlesStore = useArticlesStore()
 const { getImageUrl } = useImageUrl()
 const { formatDate } = useDateFormat()
 const { getArticleLink } = useArticleLink()
+const { locale } = useI18n()
 
 const articles = computed(() => articlesStore.articles)
 const loading = computed(() => articlesStore.loading)
 const hasMore = computed(() => articlesStore.hasMore)
 
+// دوال الترجمة
+const getArticleTitle = (article: any) => {
+  return locale.value === 'en' && article.title_en ? article.title_en : article.title
+}
+
+const getArticleExcerpt = (article: any) => {
+  // excerpt is not translated in the API, always use the original
+  return article.excerpt
+}
+
+const getCategoryName = (category: any) => {
+  return locale.value === 'en' && category.name_en ? category.name_en : category.name
+}
+
 // Format views
 const formatViews = (views: number): string => {
+  if (locale.value === 'en') {
+    if (views >= 1000000) return (views / 1000000).toFixed(1) + 'M views'
+    if (views >= 1000) return (views / 1000).toFixed(1) + 'K views'
+    return views.toLocaleString('en') + ' views'
+  }
   if (views >= 1000000) return (views / 1000000).toFixed(1) + ' مليون مشاهدة'
   if (views >= 1000) return (views / 1000).toFixed(1) + ' ألف مشاهدة'
   return views.toLocaleString('ar') + ' مشاهدة'
