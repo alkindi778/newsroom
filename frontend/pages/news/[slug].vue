@@ -124,7 +124,7 @@
 
           <!-- أزرار المشاركة -->
           <div class="mt-12 pt-8 border-t border-gray-200">
-            <h3 class="text-xl font-bold text-gray-900 mb-4">شارك الخبر:</h3>
+            <h3 class="text-xl font-bold text-gray-900 mb-4">{{ locale === 'en' ? 'Share Article:' : 'شارك الخبر:' }}</h3>
             <div class="flex flex-wrap items-center gap-3">
               <!-- فيسبوك -->
               <a 
@@ -194,14 +194,14 @@
                 <svg v-else class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                 </svg>
-                <span class="text-sm font-semibold">{{ copied ? 'تم النسخ!' : 'نسخ الرابط' }}</span>
+                <span class="text-sm font-semibold">{{ locale === 'en' ? (copied ? 'Copied!' : 'Copy Link') : (copied ? 'تم النسخ!' : 'نسخ الرابط') }}</span>
               </button>
             </div>
           </div>
 
           <!-- الكلمات الدلالية -->
           <div v-if="displayArticle.keywords" class="mt-12 pt-8 border-t border-gray-200">
-            <h3 class="text-xl font-bold text-gray-900 mb-4">الكلمات الدلالية:</h3>
+            <h3 class="text-xl font-bold text-gray-900 mb-4">{{ locale === 'en' ? 'Tags:' : 'الكلمات الدلالية:' }}</h3>
             <div class="flex flex-wrap gap-3">
               <NuxtLink 
                 v-for="keyword in keywords" 
