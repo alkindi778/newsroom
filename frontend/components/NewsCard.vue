@@ -49,16 +49,22 @@ const { locale } = useI18n()
 
 // دالة للحصول على عنوان المقال المترجم
 const getArticleTitle = computed(() => {
-  return locale.value === 'en' && props.article.title_en ? props.article.title_en : props.article.title
-})
-
-// Debug: تحقق من اسم القسم
-watchEffect(() => {
-  if (props.article.category) {
-    console.log('📰 NewsCard - Article:', props.article.title?.substring(0, 30))
-    console.log('📰 NewsCard - Category:', props.article.category)
-    console.log('📰 NewsCard - Category Name (getCategoryName):', getCategoryName(props.article.category))
-  }
+  const isEnglish = locale.value === 'en'
+  const hasTranslation = !!props.article.title_en
+  const title = isEnglish && hasTranslation ? props.article.title_en : props.article.title
+  
+  console.log('🗞️ NewsCard - getArticleTitle:', {
+    articleId: props.article.id,
+    locale: locale.value,
+    isEnglish,
+    hasTranslation,
+    title_en: props.article.title_en,
+    title_ar: props.article.title?.substring(0, 50) + '...',
+    returning: title?.substring(0, 50) + '...',
+    willUseEnglish: isEnglish && hasTranslation
+  })
+  
+  return title
 })
 </script>
 

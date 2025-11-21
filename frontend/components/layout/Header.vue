@@ -372,7 +372,7 @@ const toggleMobileSubmenu = (categoryId: number | string) => {
 }
 
 // Site Settings
-const siteName = computed(() => settingsStore.getSetting('site_name', 'غرفة الأخبار'))
+const siteName = computed(() => settingsStore.getSetting('site_name', ''))
 const siteLogo = computed(() => {
   const logo = settingsStore.getSetting('site_logo')
   if (!logo) return null

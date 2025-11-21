@@ -97,7 +97,7 @@ const categories = computed(() => categoriesStore.categories)
 const currentYear = new Date().getFullYear()
 
 // Site Settings
-const siteName = computed(() => settingsStore.getSetting('site_name', 'غرفة الأخبار'))
+const siteName = computed(() => settingsStore.getSetting('site_name', ''))
 const siteDescription = computed(() => settingsStore.getSetting('site_description', 'منصة إخبارية شاملة'))
 const socialFacebook = computed(() => settingsStore.getSetting('social_facebook'))
 const socialTwitter = computed(() => settingsStore.getSetting('social_twitter'))

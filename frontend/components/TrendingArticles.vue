@@ -70,7 +70,7 @@
             {{ article.subtitle }}
           </p>
           <h3 class="text-lg font-bold text-gray-900 group-hover:text-primary transition-colors line-clamp-2 leading-snug mb-4">
-            {{ article.title }}
+            {{ getArticleTitle(article) }}
           </h3>
           <div class="flex items-center justify-between text-sm text-gray-600 mt-auto pt-2">
             <span v-if="article.category" class="font-semibold">
@@ -95,7 +95,6 @@
 <script setup lang="ts">
 import type { Article } from '~/types'
 
-const { getCategoryName } = useLocalizedContent()
 const articlesStore = useArticlesStore()
 
 interface Props {
@@ -128,12 +127,44 @@ const { apiFetch } = useApi()
 const { getImageUrl } = useImageUrl()
 const settingsStore = useSettingsStore()
 const { getArticleLink } = useArticleLink()
+const { locale } = useI18n()
+const { getCategoryName: getLocalizedCategoryName } = useLocalizedContent()
 
 // Get site name from settings
-const siteName = computed(() => settingsStore.getSetting('site_name', 'غرفة الأخبار'))
+const siteName = computed(() => settingsStore.getSetting('site_name', ''))
+
+// Get translated article title
+const getArticleTitle = (article: Article) => {
+  const isEnglish = locale.value === 'en'
+  const hasTranslation = !!article.title_en
+  const title = isEnglish && hasTranslation ? article.title_en : article.title
+  
+  console.log('📊 TrendingArticles - getArticleTitle:', {
+    articleId: article.id,
+    locale: locale.value,
+    isEnglish,
+    hasTranslation,
+    title_en: article.title_en,
+    title_ar: article.title?.substring(0, 50) + '...',
+    returning: title?.substring(0, 50) + '...',
+    willUseEnglish: isEnglish && hasTranslation
+  })
+  
+  return title
+}
+
+// Get translated category name
+const getCategoryName = (category: any) => {
+  return getLocalizedCategoryName(category)
+}
 
 // Format views number
 const formatViews = (views: number): string => {
+  if (locale.value === 'en') {
+    if (views >= 1000000) return (views / 1000000).toFixed(1) + 'M views'
+    if (views >= 1000) return (views / 1000).toFixed(1) + 'K views'
+    return views.toLocaleString('en') + ' views'
+  }
   if (views >= 1000000) return (views / 1000000).toFixed(1) + ' مليون'
   if (views >= 1000) return (views / 1000).toFixed(1) + ' ألف'
   return views.toLocaleString('ar')
