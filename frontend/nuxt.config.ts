@@ -18,11 +18,7 @@ export default defineNuxtConfig({
     defaultLocale: 'ar',
     langDir: 'locales',
     strategy: 'prefix_except_default', // ar (default) -> /, en -> /en
-    detectBrowserLanguage: {
-      useCookie: true,
-      cookieKey: 'i18n_redirected',
-      redirectOn: 'root',
-    },
+    detectBrowserLanguage: false, // إيقاف الكشف التلقائي - دائماً العربية
     vueI18n: './i18n.config.ts' // ملف تكوين إضافي إذا لزم الأمر
   },
 
