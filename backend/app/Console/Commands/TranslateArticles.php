@@ -46,14 +46,6 @@ class TranslateArticles extends Command
             return Command::SUCCESS;
         }
         
-        // تأكيد من المستخدم
-        if ($total > 1000) {
-            if (!$this->confirm("This will translate {$total} articles. Continue?", true)) {
-                $this->info('Translation cancelled.');
-                return Command::SUCCESS;
-            }
-        }
-        
         $dispatched = 0;
         $bar = $this->output->createProgressBar($total);
         $bar->start();
