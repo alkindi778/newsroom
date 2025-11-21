@@ -12,8 +12,9 @@ class TranslateWriterJob implements ShouldQueue
 {
     use Queueable;
 
-    public $tries = 3;
+    public $tries = 10;
     public $timeout = 180;
+    public $backoff = [60, 300, 900];
 
     public function __construct(public int $writerId) {}
 
