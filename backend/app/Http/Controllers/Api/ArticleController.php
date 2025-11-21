@@ -157,6 +157,7 @@ class ArticleController extends Controller
                 'content' => $this->fixContentImageUrls($article->content),
                 'content_en' => $article->content_en,
                 'excerpt' => $this->decodeHtmlEntities($article->excerpt) ?? ($article->content ? mb_substr(strip_tags($article->content), 0, 150) . '...' : ''),
+                'excerpt_en' => $article->content_en ? mb_substr(strip_tags($article->content_en), 0, 150) . '...' : null,
                 'image' => $article->image_path,
                 'thumbnail' => $article->thumbnail_path,
                 'meta_description' => $this->decodeHtmlEntities($article->meta_description),
