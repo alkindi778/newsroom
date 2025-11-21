@@ -335,11 +335,12 @@ const displayArticle = computed(() => {
       ...article.value,
       title: article.value.title_en,
       content: article.value.content_en,
-      // يمكن إضافة المزيد من الحقول المترجمة هنا إذا وجدت
+      excerpt: article.value.excerpt_en || article.value.excerpt,
     }
     console.log('✅ Using English translation:', {
       title: translatedArticle.title?.substring(0, 50) + '...',
-      contentLength: translatedArticle.content?.length
+      contentLength: translatedArticle.content?.length,
+      hasExcerptEn: !!article.value.excerpt_en
     })
     return translatedArticle
   }
