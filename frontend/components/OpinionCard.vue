@@ -96,9 +96,12 @@ const getWriterName = computed(() => {
   return locale.value === 'en' && props.opinion.writer.name_en ? props.opinion.writer.name_en : props.opinion.writer.name
 })
 
+const { t } = useI18n()
+
 const formatNumber = (num: number): string => {
-  if (num >= 1000000) return (num / 1000000).toFixed(1) + 'م'
-  if (num >= 1000) return (num / 1000).toFixed(1) + 'ألف'
+  const isEnglish = locale.value === 'en'
+  if (num >= 1000000) return (num / 1000000).toFixed(1) + (isEnglish ? 'M' : 'م')
+  if (num >= 1000) return (num / 1000).toFixed(1) + (isEnglish ? 'K' : 'ألف')
   return num.toString()
 }
 </script>
