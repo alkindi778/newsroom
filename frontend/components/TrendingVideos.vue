@@ -29,7 +29,7 @@
         <NuxtLink
           v-for="video in videos"
           :key="video.id"
-          :to="`/videos/${video.slug}`"
+          :to="localePath(`/videos/${video.slug}`)"
           class="group cursor-pointer overflow-hidden shadow-lg hover:shadow-xl transition-shadow"
         >
           <!-- Video Background Image -->
@@ -88,10 +88,10 @@
         <div class="flex items-center gap-4">
           <div class="flex-1 h-px bg-white/30"></div>
           <NuxtLink
-            to="/videos"
+            :to="localePath('/videos')"
             class="inline-flex items-center gap-2 px-6 py-2 border border-white text-white font-semibold whitespace-nowrap rounded-md"
           >
-            <span>المزيد</span>
+            <span>{{ locale === 'en' ? 'More' : 'المزيد' }}</span>
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
             </svg>
@@ -127,10 +127,19 @@ const sectionTitle = ref<string>('')
 const { apiFetch } = useApi()
 const { getImageUrl } = useImageUrl()
 const { locale } = useI18n()
+const localePath = useLocalePath()
 
 // دالة للحصول على عنوان الفيديو المترجم
 const getVideoTitle = (video: Video) => {
-  return locale.value === 'en' && video.title_en ? video.title_en : video.title
+  const result = locale.value === 'en' && video.title_en ? video.title_en : video.title
+  console.log('getVideoTitle:', {
+    locale: locale.value,
+    isEnglish: locale.value === 'en',
+    videoId: video.id,
+    hasTranslation: video.title_en,
+    willReturn: result
+  })
+  return result
 }
 
 // Track image load status
@@ -177,6 +186,14 @@ const fetchTrendingVideos = async () => {
     
     if (response?.success && response?.data) {
       videos.value = response.data
+      console.log('Videos fetched from API:', {
+        count: videos.value.length,
+        firstVideo: videos.value[0] ? {
+          id: videos.value[0].id,
+          title: videos.value[0].title,
+          title_en: videos.value[0].title_en
+        } : null
+      })
       // Set section title from API
       if (response.section_title) {
         sectionTitle.value = response.section_title
@@ -201,6 +218,13 @@ const fetchTrendingVideos = async () => {
 // Load on mount
 onMounted(() => {
   fetchTrendingVideos()
+})
+
+// Watch locale changes and refetch
+watch(locale, () => {
+  console.log('Locale changed to:', locale.value)
+  // No need to refetch, just let Vue re-render with new titles
+  // The getVideoTitle computed will automatically use the correct language
 })
 </script>
 

@@ -93,20 +93,27 @@ class GeminiTranslationService
     protected function buildTranslationPrompt(string $title, string $content): string
     {
         return <<<PROMPT
-You are a professional Arabic-to-English translator specializing in news articles and journalistic content.
+You are a professional Arabic-to-English translator with 30+ years of experience specializing in news articles, journalistic content, and media translation.
 
 # Task
-Translate the following Arabic news article to English accurately and professionally.
+Translate the following Arabic news article/content to English with FULL PROFESSIONAL TRANSLATION.
 
-# Important Rules
+# Critical Translation Requirements
+1. **COMPLETE TRANSLATION**: Translate EVERYTHING - DO NOT abbreviate, shorten, summarize, or omit ANY content
+2. **PROFESSIONAL QUALITY**: Use high-quality journalistic English with proper grammar and style
+3. **PRESERVE MEANING**: Maintain the exact meaning, tone, and nuance of the original Arabic text
+4. **FULL LENGTH**: The English translation must be as complete and detailed as the Arabic original
+5. Preserve all HTML tags exactly as they appear - DO NOT modify, remove, or translate HTML tags
+6. Maintain the exact structure and formatting of the content
+7. Translate only the text content, not HTML attributes or tags
+8. Use professional journalistic English terminology
+9. Ensure cultural context is appropriate for English readers while maintaining authenticity
+10. Keep proper nouns in their original form or use standard English transliterations
+
+# Output Format Requirements
 1. Return ONLY a valid JSON object with no additional text, markdown, or code blocks
 2. The JSON must have exactly two keys: "title_en" and "content_en"
-3. Preserve all HTML tags exactly as they appear - DO NOT modify, remove, or translate HTML tags
-4. Maintain the exact structure and formatting of the content
-5. Translate only the text content, not HTML attributes or tags
-6. Use professional journalistic English
-7. Ensure cultural context is appropriate for English readers
-8. Keep proper nouns in their original form or use standard English transliterations
+3. Both translations must be COMPLETE and PROFESSIONAL
 
 # Input Data
 Title (Arabic): {$title}
@@ -114,9 +121,9 @@ Title (Arabic): {$title}
 Content (Arabic): {$content}
 
 # Expected Output Format
-{"title_en":"English translation of the title","content_en":"English translation of the content with all HTML preserved"}
+{"title_en":"FULL professional English translation of the complete title","content_en":"FULL professional English translation of the complete content with all HTML preserved and all details translated"}
 
-Return only the JSON object, nothing else.
+Return only the JSON object with COMPLETE translations, nothing else.
 PROMPT;
     }
 
@@ -223,25 +230,26 @@ PROMPT;
 You are a professional translator with 30+ years of experience specializing in Arabic-to-English translation for news websites and media outlets.
 
 # Task
-Translate the following Arabic category/section name to English.
+Translate the following Arabic text to English professionally and accurately.
 
 # Critical Requirements
-1. Keep it SHORT and PROFESSIONAL (maximum 2-3 words)
-2. Use standard journalistic English terminology
-3. Maintain the exact meaning while being concise
-4. Use title case (capitalize first letter of each main word)
-5. Return ONLY the translated text, no explanations or quotes
+1. Provide a COMPLETE and PROFESSIONAL translation
+2. DO NOT abbreviate, shorten, or summarize - translate EVERYTHING
+3. Use standard journalistic English terminology
+4. Maintain the exact meaning and tone
+5. Use title case for titles (capitalize first letter of each main word)
+6. Return ONLY the translated text, no explanations or quotes
+7. For video titles, article titles, or long texts: translate FULLY without cutting any words
 
 # Examples
-- "أخبار محلية" → "Local News"
-- "أخبار عربية وعالمية" → "International News"
-- "حوارات وتحليلات" → "Analysis"
-- "صحيفة انتقالي العاصمة" → "Capital Journal"
+- "كنوز مصر المفقودة: الملكة الفرعونية المحاربة" → "Lost Treasures of Egypt: The Warrior Pharaoh Queen"
+- "الدحيح | اكتشاف مقبرة توت" → "Al-Dahih | Discovery of Tutankhamun's Tomb"
+- "نفرتيتي.. سر القبر المفقود" → "Nefertiti: The Secret of the Lost Tomb"
 
 # Arabic Text to Translate
 {$text}
 
-# English Translation (2-3 words maximum):
+# Full Professional English Translation:
 PROMPT;
     }
 

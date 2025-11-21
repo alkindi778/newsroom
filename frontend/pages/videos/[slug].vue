@@ -20,11 +20,11 @@
       <!-- Breadcrumb -->
       <nav class="mb-4 md:mb-6 text-xs sm:text-sm px-2 sm:px-0">
         <ol class="flex items-center gap-1 sm:gap-2 text-gray-600">
-          <li><NuxtLink to="/" class="hover:text-blue-600">الرئيسية</NuxtLink></li>
+          <li><NuxtLink :to="localePath('/')" class="hover:text-blue-600">{{ locale === 'en' ? 'Home' : 'الرئيسية' }}</NuxtLink></li>
           <li>/</li>
-          <li><NuxtLink to="/videos" class="hover:text-blue-600">الفيديوهات</NuxtLink></li>
+          <li><NuxtLink :to="localePath('/videos')" class="hover:text-blue-600">{{ locale === 'en' ? 'Videos' : 'الفيديوهات' }}</NuxtLink></li>
           <li>/</li>
-          <li class="text-gray-900 font-semibold truncate">{{ video.title }}</li>
+          <li class="text-gray-900 font-semibold truncate">{{ getVideoTitle(video) }}</li>
         </ol>
       </nav>
 
@@ -34,7 +34,7 @@
         <div class="relative w-full bg-black" style="padding-bottom: 56.25%;">
           <iframe
             :src="video.embed_url"
-            :title="video.title"
+            :title="getVideoTitle(video)"
             frameborder="0"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
             allowfullscreen
@@ -46,7 +46,7 @@
         <div class="p-4 sm:p-6 md:p-8">
           <!-- Title -->
           <h1 class="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-4 leading-tight">
-            {{ video.title }}
+            {{ getVideoTitle(video) }}
           </h1>
 
           <!-- Meta Info -->
@@ -78,8 +78,8 @@
           </div>
 
           <!-- Description -->
-          <div v-if="video.description" class="prose prose-lg max-w-none text-right leading-relaxed text-gray-700">
-            <p style="white-space: pre-line;">{{ video.description }}</p>
+          <div v-if="getVideoDescription(video)" class="prose prose-lg max-w-none text-right leading-relaxed text-gray-700">
+            <p style="white-space: pre-line;">{{ getVideoDescription(video) }}</p>
           </div>
 
           <!-- Action Buttons -->
@@ -109,18 +109,18 @@
 
       <!-- Related Videos -->
       <section v-if="relatedVideos.length > 0" class="mt-12">
-        <h2 class="text-2xl font-bold text-gray-900 mb-6">فيديوهات ذات صلة</h2>
+        <h2 class="text-2xl font-bold text-gray-900 mb-6">{{ locale === 'en' ? 'Related Videos' : 'فيديوهات ذات صلة' }}</h2>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
           <NuxtLink
             v-for="relatedVideo in relatedVideos"
             :key="relatedVideo.id"
-            :to="`/videos/${relatedVideo.slug}`"
+            :to="localePath(`/videos/${relatedVideo.slug}`)"
             class="group"
           >
             <div class="relative overflow-hidden bg-gray-900 rounded-lg">
               <img
                 :src="relatedVideo.thumbnail"
-                :alt="relatedVideo.title"
+                :alt="getVideoTitle(relatedVideo)"
                 loading="lazy"
                 class="w-full h-48 object-cover transition-transform duration-300 group-hover:scale-105"
               />
@@ -130,7 +130,7 @@
               </div>
             </div>
             <h3 class="mt-2 text-base font-semibold text-gray-900 line-clamp-2 group-hover:text-blue-600 transition-colors">
-              {{ relatedVideo.title }}
+              {{ getVideoTitle(relatedVideo) }}
             </h3>
           </NuxtLink>
         </div>
@@ -150,6 +150,17 @@ const relatedVideos = ref<any[]>([])
 
 const { apiFetch } = useApi()
 const { formatDate } = useDateFormat()
+const { locale } = useI18n()
+const localePath = useLocalePath()
+
+// دوال للحصول على النصوص المترجمة
+const getVideoTitle = (video: any) => {
+  return locale.value === 'en' && video.title_en ? video.title_en : video.title
+}
+
+const getVideoDescription = (video: any) => {
+  return locale.value === 'en' && video.description_en ? video.description_en : video.description
+}
 
 // Format numbers
 const formatNumber = (num: number) => {
@@ -217,7 +228,7 @@ const likeVideo = async () => {
 const shareVideo = () => {
   if (navigator.share) {
     navigator.share({
-      title: video.value.title,
+      title: getVideoTitle(video.value),
       url: window.location.href
     })
   } else {
@@ -231,20 +242,23 @@ const shareVideo = () => {
 watchEffect(() => {
   if (video.value) {
     const siteUrl = (config as any).public?.siteUrl || (process.client ? window.location.origin : '')
+    const title = getVideoTitle(video.value)
+    const description = getVideoDescription(video.value) || ''
+    
     useHead({
-      title: `${video.value.title} - غرفة الأخبار`,
+      title: title,
       meta: [
-        { name: 'description', content: video.value.meta_description || video.value.description || '' },
+        { name: 'description', content: video.value.meta_description || description },
         { name: 'keywords', content: video.value.meta_keywords || '' },
-        { property: 'og:title', content: video.value.title },
-        { property: 'og:description', content: video.value.description || '' },
+        { property: 'og:title', content: title },
+        { property: 'og:description', content: description },
         { property: 'og:image', content: video.value.thumbnail },
         { property: 'og:url', content: `${siteUrl}/videos/${video.value.slug}` },
         { property: 'og:type', content: 'video.other' },
         { property: 'og:video', content: video.value.video_url },
         { name: 'twitter:card', content: 'player' },
-        { name: 'twitter:title', content: video.value.title },
-        { name: 'twitter:description', content: video.value.description || '' },
+        { name: 'twitter:title', content: title },
+        { name: 'twitter:description', content: description },
         { name: 'twitter:image', content: video.value.thumbnail },
         { name: 'twitter:player', content: video.value.embed_url }
       ]

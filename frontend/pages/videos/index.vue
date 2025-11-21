@@ -8,8 +8,8 @@
         </svg>
       </div>
       <div>
-        <h1 class="text-4xl font-bold text-gray-900 mb-1">{{ sectionTitle }}</h1>
-        <p class="text-gray-600">شاهد أحدث الفيديوهات والتقارير الإخبارية</p>
+        <h1 class="text-4xl font-bold text-gray-900 mb-1">{{ pageTitle }}</h1>
+        <p class="text-gray-600">{{ pageDescription }}</p>
       </div>
     </div>
 
@@ -25,7 +25,7 @@
         class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
         @change="() => fetchVideos()"
       >
-        <option value="">جميع الأنواع</option>
+        <option value="">{{ locale === 'en' ? 'All Types' : 'جميع الأنواع' }}</option>
         <option value="youtube">YouTube</option>
         <option value="vimeo">Vimeo</option>
       </select>
@@ -35,20 +35,20 @@
         class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
         @change="() => fetchVideos()"
       >
-        <option value="recent">الأحدث</option>
-        <option value="popular">الأكثر مشاهدة</option>
+        <option value="recent">{{ locale === 'en' ? 'Most Recent' : 'الأحدث' }}</option>
+        <option value="popular">{{ locale === 'en' ? 'Most Viewed' : 'الأكثر مشاهدة' }}</option>
       </select>
     </div>
 
     <!-- Loading State -->
-    <LoadingSpinner v-if="loading" type="dots" size="lg" text="جاري التحميل..." />
+    <LoadingSpinner v-if="loading" type="dots" size="lg" :text="locale === 'en' ? 'Loading...' : 'جاري التحميل...'" />
 
     <!-- Videos Grid -->
     <div v-else-if="videos.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
       <NuxtLink
         v-for="video in videos"
         :key="video.id"
-        :to="`/videos/${video.slug}`"
+        :to="localePath(`/videos/${video.slug}`)"
         class="group cursor-pointer"
       >
         <!-- Thumbnail -->
@@ -68,7 +68,7 @@
           <img
             :src="video.thumbnail_placeholder || 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'"
             :data-src="video.thumbnail"
-            :alt="video.title"
+            :alt="getVideoTitle(video)"
             loading="lazy"
             class="lazy-image w-full h-56 object-cover transition-all duration-500 group-hover:scale-105"
             :class="{ 'opacity-0': !imageLoaded[video.id], 'opacity-100': imageLoaded[video.id] }"
@@ -95,7 +95,7 @@
         <!-- Video Info -->
         <div class="mt-3">
           <h3 class="text-base font-bold text-gray-900 line-clamp-2 group-hover:text-blue-600 transition-colors leading-tight">
-            {{ video.title }}
+            {{ getVideoTitle(video) }}
           </h3>
           <p class="text-sm text-gray-500 mt-1">{{ formatDate(video.published_at, 'relative') }}</p>
         </div>
@@ -107,8 +107,8 @@
       <svg class="w-16 h-16 mx-auto text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
       </svg>
-      <h3 class="text-xl font-semibold text-gray-900 mb-2">لا توجد فيديوهات</h3>
-      <p class="text-gray-600">لم يتم العثور على فيديوهات متاحة حالياً</p>
+      <h3 class="text-xl font-semibold text-gray-900 mb-2">{{ locale === 'en' ? 'No Videos' : 'لا توجد فيديوهات' }}</h3>
+      <p class="text-gray-600">{{ locale === 'en' ? 'No videos are currently available' : 'لم يتم العثور على فيديوهات متاحة حالياً' }}</p>
     </div>
 
     <!-- Pagination -->
@@ -140,10 +140,29 @@ const pagination = ref<any>(null)
 const selectedType = ref('')
 const sortBy = ref('recent')
 const imageLoaded = ref<Record<number, boolean>>({})
-const sectionTitle = ref<string>('فيديو العربية')
+const sectionTitle = ref<string>('')
 
 const { apiFetch } = useApi()
 const { formatDate } = useDateFormat()
+const { locale } = useI18n()
+const localePath = useLocalePath()
+
+// عنوان ووصف القسم المترجم
+const pageTitle = computed(() => {
+  if (sectionTitle.value) return sectionTitle.value
+  return locale.value === 'en' ? 'Videos' : 'فيديو الانتقالي'
+})
+
+const pageDescription = computed(() => {
+  return locale.value === 'en' 
+    ? 'Watch the latest videos and news reports'
+    : 'شاهد أحدث الفيديوهات والتقارير الإخبارية'
+})
+
+// دالة للحصول على عنوان الفيديو المترجم
+const getVideoTitle = (video: any) => {
+  return locale.value === 'en' && video.title_en ? video.title_en : video.title
+}
 
 // Format numbers
 const formatNumber = (num: number) => {
@@ -240,13 +259,11 @@ const goToPage = (page: number) => {
 }
 
 // SEO - will be updated after fetching videos
-const pageTitle = computed(() => `${sectionTitle.value} - غرفة الأخبار`)
-
 useHead({
   title: pageTitle,
   meta: [
-    { name: 'description', content: 'شاهد أحدث الفيديوهات والتقارير الإخبارية من غرفة الأخبار' },
-    { name: 'keywords', content: 'فيديوهات, أخبار, تقارير, العربية' }
+    { name: 'description', content: pageDescription },
+    { name: 'keywords', content: locale.value === 'en' ? 'videos, news, reports' : 'فيديوهات, أخبار, تقارير' }
   ]
 })
 
