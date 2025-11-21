@@ -14,9 +14,12 @@ class OpinionResource extends JsonResource
         return [
             'id' => $this->id,
             'title' => $this->title,
+            'title_en' => $this->title_en,
             'slug' => $this->slug,
             'excerpt' => $this->when(isset($this->excerpt), $this->excerpt),
+            'excerpt_en' => $this->when(isset($this->excerpt_en), $this->excerpt_en),
             'content' => $this->content,  // Always return content
+            'content_en' => $this->content_en,
             'image' => $this->image_url,  // استخدام accessor من Media Library
             'thumbnail' => $this->thumbnail_url,  // إضافة thumbnail
             'is_published' => (bool) $this->is_published,

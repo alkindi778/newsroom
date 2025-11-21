@@ -15,7 +15,8 @@
         "loading": "Loading...",
         "error": "Something went wrong",
         "no_results": "No results found",
-        "search_placeholder": "Search for..."
+        "search_placeholder": "Search for...",
+        "featured": "Featured"
     },
     "nav": {
         "news": "News",
@@ -43,6 +44,12 @@
             "month": "Month"
         },
         "noArticles": "No articles available"
+    },
+    "infographic": {
+        "label": "Infographic",
+        "view": "View Infographic",
+        "noData": "No infographics available",
+        "willDisplay": "Infographics will be displayed here when available"
     },
     "footer": {
         "quick_links": "Quick Links",

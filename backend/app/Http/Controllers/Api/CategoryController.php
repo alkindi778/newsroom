@@ -87,10 +87,12 @@ class CategoryController extends Controller
                 return [
                     'id' => $article->id,
                     'title' => $article->title,
+                    'title_en' => $article->title_en,
                     'subtitle' => $article->subtitle,
                     'source' => $article->source,
                     'slug' => $article->slug,
                     'content' => $article->content,
+                    'content_en' => $article->content_en,
                     'excerpt' => $article->excerpt ?? ($article->content ? mb_substr(strip_tags($article->content), 0, 150) . '...' : ''),
                     'image' => $article->image_path,
                     'thumbnail' => $article->thumbnail_path,

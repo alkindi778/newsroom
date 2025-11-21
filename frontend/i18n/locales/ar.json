@@ -15,7 +15,8 @@
         "loading": "جاري التحميل...",
         "error": "حدث خطأ ما",
         "no_results": "لا توجد نتائج",
-        "search_placeholder": "ابحث عن..."
+        "search_placeholder": "ابحث عن...",
+        "featured": "مميز"
     },
     "nav": {
         "news": "أخبار",
@@ -43,6 +44,12 @@
             "month": "الشهر"
         },
         "noArticles": "لا توجد أخبار متاحة"
+    },
+    "infographic": {
+        "label": "إنفوجرافيك",
+        "view": "عرض الإنفوجرافيك",
+        "noData": "لا توجد إنفوجرافيكات متاحة حالياً",
+        "willDisplay": "سيتم عرض الإنفوجرافيكات هنا عند توفرها"
     },
     "footer": {
         "quick_links": "روابط سريعة",

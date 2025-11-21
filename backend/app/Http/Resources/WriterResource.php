@@ -14,10 +14,14 @@ class WriterResource extends JsonResource
         return [
             'id' => $this->id,
             'name' => $this->name,
+            'name_en' => $this->name_en,
             'slug' => $this->slug,
             'bio' => $this->bio,
+            'bio_en' => $this->bio_en,
             'position' => $this->position ?? null,
+            'position_en' => $this->position_en ?? null,
             'specialty' => $this->specialization ?? null,
+            'specialization_en' => $this->specialization_en ?? null,
             'image' => $this->image_url,  // استخدام accessor من Media Library
             'thumbnail' => $this->thumbnail_url,  // إضافة thumbnail
             'social_links' => [

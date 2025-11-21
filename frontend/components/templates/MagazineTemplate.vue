@@ -51,7 +51,7 @@
             <!-- Content -->
             <div class="absolute bottom-0 left-0 right-0 p-8 text-white">
               <h3 class="text-3xl font-bold mb-3 line-clamp-2">
-                {{ mainArticle.title }}
+                {{ getArticleTitle(mainArticle) }}
               </h3>
               <p v-if="mainArticle.excerpt" class="text-gray-200 mb-4 line-clamp-2">
                 {{ mainArticle.excerpt }}
@@ -59,7 +59,7 @@
               <div class="flex items-center gap-4 text-sm">
                 <span>{{ formatDate(mainArticle.published_at) }}</span>
                 <span>•</span>
-                <span>{{ formatNumber(mainArticle.views || 0) }} مشاهدة</span>
+                <span>{{ formatNumber(mainArticle.views || 0) }} {{ $t('article.views') }}</span>
               </div>
             </div>
           </div>
