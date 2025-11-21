@@ -30,7 +30,7 @@
       <!-- العنوان -->
       <NuxtLink :to="getArticleLink(article)">
         <h2 class="text-3xl md:text-4xl font-bold mb-4 line-clamp-3 hover:text-primary transition-colors cursor-pointer">
-          {{ article.title }}
+          {{ getArticleTitle(article) }}
         </h2>
       </NuxtLink>
 
@@ -87,6 +87,7 @@ import type { Article } from '~/types'
 
 const localePath = useLocalePath()
 const { getCategoryName } = useLocalizedContent()
+const { locale } = useI18n()
 
 const props = defineProps<{
   article: Article
@@ -95,6 +96,24 @@ const props = defineProps<{
 const { getImageUrl } = useImageUrl()
 const { formatDate } = useDateFormat()
 const { getArticleLink } = useArticleLink()
+
+// دالة ترجمة العنوان
+const getArticleTitle = (article: Article) => {
+  const isEnglish = locale.value === 'en'
+  const hasTranslation = article.title_en && article.title_en.trim() !== ''
+  
+  console.log('⭐ FeaturedNews - getArticleTitle:', {
+    articleId: article.id,
+    locale: locale.value,
+    isEnglish,
+    hasTranslation,
+    title_en: article.title_en,
+    title_ar: article.title,
+    willReturn: (isEnglish && hasTranslation) ? article.title_en : article.title
+  })
+  
+  return (isEnglish && hasTranslation) ? article.title_en : article.title
+}
 
 const formatNumber = (num: number): string => {
   if (num >= 1000000) return (num / 1000000).toFixed(1) + 'م'

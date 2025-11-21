@@ -35,7 +35,7 @@
                 <span class="inline-block w-1 h-1 md:w-1.5 md:h-1.5 bg-primary rounded-full animate-ping"></span>
                 <span class="font-medium text-xs md:text-sm">
                   <span v-if="article.subtitle" class="text-primary ml-1">{{ article.subtitle }} ●</span>
-                  {{ article.title }}
+                  {{ getArticleTitle(article) }}
                 </span>
               </NuxtLink>
             </template>
@@ -73,10 +73,12 @@
 import { ref, onMounted, onUnmounted, computed } from 'vue'
 
 const { getArticleLink } = useArticleLink()
+const { locale } = useI18n()
 
 interface TickerArticle {
   id: number
   title: string
+  title_en?: string
   subtitle?: string
   slug: string
   published_at: string
@@ -93,6 +95,14 @@ const tickerContent = ref<HTMLElement | null>(null)
 const isClient = ref(false)
 
 const { apiFetch } = useApi()
+
+// دالة ترجمة العنوان
+const getArticleTitle = (article: TickerArticle) => {
+  const isEnglish = locale.value === 'en'
+  const hasTranslation = article.title_en && article.title_en.trim() !== ''
+  
+  return (isEnglish && hasTranslation) ? article.title_en : article.title
+}
 
 // تكرار الأخبار ثلاث مرات للحصول على حلقة سلسة ومتواصلة بدون حدود
 const displayArticles = computed(() => {

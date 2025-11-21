@@ -21,7 +21,7 @@
       </p>
       <!-- العنوان -->
       <h3 class="text-2xl font-bold text-gray-900 line-clamp-3 leading-snug text-right mb-3">
-        {{ article.title }}
+        {{ getArticleTitle(article) }}
       </h3>
 
       <!-- التاريخ والقسم -->
@@ -44,6 +44,25 @@ const { getImageUrl } = useImageUrl()
 const { formatDate } = useDateFormat()
 const { getArticleLink } = useArticleLink()
 const { getCategoryName } = useLocalizedContent()
+const { locale } = useI18n()
+
+// دالة ترجمة العنوان
+const getArticleTitle = (article: Article) => {
+  const isEnglish = locale.value === 'en'
+  const hasTranslation = article.title_en && article.title_en.trim() !== ''
+  
+  console.log('🔍 SearchResultCard - getArticleTitle:', {
+    articleId: article.id,
+    locale: locale.value,
+    isEnglish,
+    hasTranslation,
+    title_en: article.title_en,
+    title_ar: article.title,
+    willReturn: (isEnglish && hasTranslation) ? article.title_en : article.title
+  })
+  
+  return (isEnglish && hasTranslation) ? article.title_en : article.title
+}
 </script>
 
 <style scoped>
