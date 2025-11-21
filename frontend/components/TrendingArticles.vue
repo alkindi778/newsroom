@@ -6,13 +6,13 @@
         <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"/>
         <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd"/>
       </svg>
-      الأكثر قراءة
+      {{ $t('trending.title') }}
     </div>
     
     <!-- Description Box -->
     <div class="bg-gray-100 px-4 py-3 border-b border-gray-300 flex items-center justify-between">
       <p class="text-gray-700 text-sm">
-        تم اختيار مواضيع <span class="font-bold">"{{ siteName }}"</span> الأكثر قراءة بناءً على إجمالي عدد المشاهدات اليومية. اقرأ المواضيع الأكثر شعبية كل يوم من هنا.
+        {{ $t('trending.description', { siteName: siteName }) }}
       </p>
       
       <!-- Tabs Inline -->
@@ -28,14 +28,14 @@
               : 'bg-white text-gray-600 hover:bg-gray-200'
           ]"
         >
-          <span v-if="activeTab === tab.value">●</span> {{ tab.label }}
+          <span v-if="activeTab === tab.value">●</span> {{ $t(`trending.tabs.${tab.value}`) }}
         </button>
       </div>
     </div>
 
     <!-- Loading -->
     <div v-if="loading" class="p-8 text-center">
-      <LoadingSpinner type="dots" size="sm" text="جاري التحميل..." color="primary" />
+      <LoadingSpinner type="dots" size="sm" :text="$t('common.loading')" color="primary" />
     </div>
 
     <!-- Articles Grid -->
@@ -76,7 +76,7 @@
             <span v-if="article.category" class="font-semibold">
               {{ getCategoryName(article.category) }}
             </span>
-            <span class="text-gray-500">{{ formatViews(article.views) }} مشاهدة</span>
+            <span class="text-gray-500">{{ formatViews(article.views) }} {{ $t('article.views') }}</span>
           </div>
         </div>
       </NuxtLink>
@@ -87,7 +87,7 @@
       <svg class="w-12 h-12 mx-auto mb-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
       </svg>
-      <p>لا توجد أخبار متاحة</p>
+      <p>{{ $t('trending.noArticles') }}</p>
     </div>
   </div>
 </template>

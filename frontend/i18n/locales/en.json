@@ -31,7 +31,18 @@
         "comments": "Comments",
         "author": "Author",
         "date": "Date",
-        "source": "Source"
+        "source": "Source",
+        "views": "views"
+    },
+    "trending": {
+        "title": "Most Read",
+        "description": "The most read topics from \"{siteName}\" are selected based on total daily views. Read the most popular topics every day from here.",
+        "tabs": {
+            "today": "Today",
+            "week": "Week",
+            "month": "Month"
+        },
+        "noArticles": "No articles available"
     },
     "footer": {
         "quick_links": "Quick Links",
