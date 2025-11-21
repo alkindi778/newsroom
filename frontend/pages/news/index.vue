@@ -122,7 +122,15 @@ const hasMore = computed(() => articlesStore.hasMore)
 
 // دوال الترجمة
 const getArticleTitle = (article: any) => {
-  return locale.value === 'en' && article.title_en ? article.title_en : article.title
+  const title = locale.value === 'en' && article.title_en ? article.title_en : article.title
+  console.log('getArticleTitle:', {
+    locale: locale.value,
+    hasTranslation: !!article.title_en,
+    title_en: article.title_en,
+    title_ar: article.title,
+    returning: title
+  })
+  return title
 }
 
 const getArticleExcerpt = (article: any) => {
@@ -131,7 +139,15 @@ const getArticleExcerpt = (article: any) => {
 }
 
 const getCategoryName = (category: any) => {
-  return locale.value === 'en' && category.name_en ? category.name_en : category.name
+  const name = locale.value === 'en' && category.name_en ? category.name_en : category.name
+  console.log('getCategoryName:', {
+    locale: locale.value,
+    hasTranslation: !!category.name_en,
+    name_en: category.name_en,
+    name_ar: category.name,
+    returning: name
+  })
+  return name
 }
 
 // Format views
