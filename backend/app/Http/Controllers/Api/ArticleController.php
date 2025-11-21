@@ -150,10 +150,12 @@ class ArticleController extends Controller
             $transformedArticle = [
                 'id' => $article->id,
                 'title' => $this->decodeHtmlEntities($article->title),
+                'title_en' => $article->title_en,
                 'subtitle' => $this->decodeHtmlEntities($article->subtitle),
                 'source' => $this->decodeHtmlEntities($article->source),
                 'slug' => $article->slug,
                 'content' => $this->fixContentImageUrls($article->content),
+                'content_en' => $article->content_en,
                 'excerpt' => $this->decodeHtmlEntities($article->excerpt) ?? ($article->content ? mb_substr(strip_tags($article->content), 0, 150) . '...' : ''),
                 'image' => $article->image_path,
                 'thumbnail' => $article->thumbnail_path,
