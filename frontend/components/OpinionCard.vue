@@ -1,6 +1,6 @@
 <template>
   <NuxtLink 
-    :to="localePath('/opinions/' + opinion.slug)"
+    :to="getOpinionLink(opinion)"
     class="group block bg-gradient-to-br from-white to-gray-50 rounded-lg shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100"
   >
     <!-- الصورة فقط -->
@@ -84,6 +84,7 @@ const props = defineProps<{
 
 const { getImageUrl } = useImageUrl()
 const { formatDate } = useDateFormat()
+const { getOpinionLink } = useArticleLink()
 
 // دالة للحصول على عنوان المقال المترجم
 const getOpinionTitle = computed(() => {

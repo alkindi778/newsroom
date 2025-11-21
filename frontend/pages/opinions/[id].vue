@@ -1,0 +1,569 @@
+<template>
+  <div class="container mx-auto px-4 py-8">
+    <!-- Loading State -->
+    <LoadingSpinner v-if="loading" type="bars" size="lg" fullScreen text="جاري تحميل المقال..." color="secondary" />
+
+    <!-- Error State -->
+    <div v-else-if="error" class="text-center py-12">
+      <svg class="w-16 h-16 mx-auto text-red-500 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+      </svg>
+      <h2 class="text-2xl font-bold text-gray-900 mb-2">حدث خطأ</h2>
+      <p class="text-gray-600 mb-4">{{ error }}</p>
+      <NuxtLink to="/opinions" class="text-orange-600 hover:text-orange-700 font-semibold">
+        العودة لمقالات الرأي
+      </NuxtLink>
+    </div>
+
+    <!-- Opinion Content -->
+    <div v-else-if="opinion" class="max-w-4xl mx-auto">
+      <!-- Breadcrumb -->
+      <nav class="mb-6 text-sm">
+        <ol class="flex items-center gap-2 text-gray-600">
+          <li><NuxtLink to="/" class="hover:text-orange-600">الرئيسية</NuxtLink></li>
+          <li>/</li>
+          <li><NuxtLink to="/opinions" class="hover:text-orange-600">مقالات الرأي</NuxtLink></li>
+          <li>/</li>
+          <li class="text-gray-900 font-semibold truncate">{{ getOpinionTitle }}</li>
+        </ol>
+      </nav>
+
+      <!-- Homepage Top Advertisement (will also show here) -->
+      <div class="my-8">
+        <AdvertisementZone position="homepage_top" page="opinion" :auto-rotate="false" :show-dots="false" />
+      </div>
+
+      <!-- Opinion Top Advertisement -->
+      <div class="my-8">
+        <AdvertisementZone position="article_top" page="opinion" :auto-rotate="false" :show-dots="false" />
+      </div>
+
+      <!-- Opinion Header -->
+      <article class="bg-white rounded-lg shadow-lg overflow-hidden">
+        <!-- Badge مميز -->
+        <div v-if="opinion.is_featured" class="inline-block">
+          <span class="bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-4 py-2 rounded-br-lg font-bold text-sm flex items-center gap-2">
+            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+            </svg>
+            مقال مميز
+          </span>
+        </div>
+
+        <!-- العنوان -->
+        <div class="p-8">
+          <h1 class="text-4xl font-bold text-gray-900 mb-4 leading-tight">
+            {{ getOpinionTitle }}
+          </h1>
+
+          <!-- المقتطف -->
+          <p v-if="getOpinionExcerpt" class="text-xl text-gray-600 font-medium leading-relaxed">
+            {{ getOpinionExcerpt }}
+          </p>
+
+          <!-- معلومات الكاتب -->
+          <div class="flex items-center justify-between pb-6 border-b border-gray-200">
+            <NuxtLink 
+              v-if="opinion.writer" 
+              :to="localePath('/writers/' + opinion.writer.slug)"
+              class="flex items-center gap-3 group"
+            >
+              <img 
+                :src="getImageUrl(opinion.writer.image)" 
+                :alt="opinion.writer.name"
+                loading="lazy"
+                class="w-16 h-16 rounded-full border-2 border-orange-400 group-hover:border-orange-600 transition-colors"
+              />
+              <div>
+                <p class="font-bold text-gray-900 group-hover:text-orange-600 transition-colors">
+                  {{ getWriterName }}
+                </p>
+                <p v-if="opinion.writer.specialty" class="text-sm text-gray-600">
+                  {{ opinion.writer.specialty }}
+                </p>
+                <time class="text-xs text-gray-500">
+                  {{ formatDate(opinion.published_at, 'full') }}
+                </time>
+              </div>
+            </NuxtLink>
+
+            <!-- الإحصائيات -->
+            <div class="flex items-center gap-4 text-sm text-gray-600">
+              <div class="flex items-center gap-1">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                </svg>
+                <span>{{ (opinion.views || 0).toLocaleString('ar') }}</span>
+              </div>
+              <button 
+                @click="handleLike"
+                :disabled="hasLiked"
+                class="flex items-center gap-1 hover:text-red-500 transition-colors disabled:opacity-50"
+                :class="{ 'text-red-500': hasLiked }"
+              >
+                <svg class="w-5 h-5" :class="{ 'fill-current': hasLiked }" :fill="hasLiked ? 'currentColor' : 'none'" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+                </svg>
+                <span>{{ (opinion.likes || 0).toLocaleString('ar') }}</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- الصورة الرئيسية -->
+        <div v-if="opinion.image" class="relative h-96">
+          <img 
+            :src="getImageUrl(opinion.image)" 
+            :alt="opinion.title"
+            loading="eager"
+            class="w-full h-full object-cover"
+          />
+        </div>
+
+        <!-- المحتوى -->
+        <div class="p-4 sm:p-6 md:p-8" :class="{ 'pt-12': !opinion.image }">
+          <div class="prose prose-lg max-w-none" v-html="getOpinionContent"></div>
+
+          <!-- Opinion Middle Advertisement -->
+          <div class="my-12">
+            <AdvertisementZone position="article_middle" page="opinion" :auto-rotate="false" :show-dots="false" />
+          </div>
+
+          <!-- أزرار المشاركة -->
+          <div class="mt-12 pt-8 border-t border-gray-200">
+            <h3 class="text-xl font-bold text-gray-900 mb-4">شارك المقال:</h3>
+            <div class="flex flex-wrap items-center gap-3">
+              <!-- فيسبوك -->
+              <a 
+                :href="`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(opinionUrl)}`"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="flex items-center gap-2 px-4 py-2 bg-[#1877F2] hover:bg-[#145dbf] text-white rounded-lg transition-colors duration-200"
+                title="شارك على فيسبوك"
+              >
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                </svg>
+                <span class="text-sm font-semibold">فيسبوك</span>
+              </a>
+
+              <!-- تويتر/X -->
+              <a 
+                :href="`https://twitter.com/intent/tweet?url=${encodeURIComponent(opinionUrl)}&text=${encodeURIComponent(opinion.title)}`"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="flex items-center gap-2 px-4 py-2 bg-[#000000] hover:bg-[#333333] text-white rounded-lg transition-colors duration-200"
+                title="شارك على X"
+              >
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                </svg>
+                <span class="text-sm font-semibold">X</span>
+              </a>
+
+              <!-- واتساب -->
+              <a 
+                :href="`https://api.whatsapp.com/send?text=${encodeURIComponent(opinion.title + ' - ' + opinionUrl)}`"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="flex items-center gap-2 px-4 py-2 bg-[#25D366] hover:bg-[#1da851] text-white rounded-lg transition-colors duration-200"
+                title="شارك على واتساب"
+              >
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+                </svg>
+                <span class="text-sm font-semibold">واتساب</span>
+              </a>
+
+              <!-- تيليجرام -->
+              <a 
+                :href="`https://t.me/share/url?url=${encodeURIComponent(opinionUrl)}&text=${encodeURIComponent(opinion.title)}`"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="flex items-center gap-2 px-4 py-2 bg-[#0088cc] hover:bg-[#0077b5] text-white rounded-lg transition-colors duration-200"
+                title="شارك على تيليجرام"
+              >
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
+                </svg>
+                <span class="text-sm font-semibold">تيليجرام</span>
+              </a>
+
+              <!-- نسخ الرابط -->
+              <button 
+                @click="copyOpinionUrl"
+                class="flex items-center gap-2 px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors duration-200"
+                title="نسخ الرابط"
+              >
+                <svg v-if="!copied" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                </svg>
+                <svg v-else class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                </svg>
+                <span class="text-sm font-semibold">{{ copied ? 'تم النسخ!' : 'نسخ الرابط' }}</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- الكلمات الدلالية -->
+          <div v-if="opinion.keywords" class="mt-8 pt-8 border-t border-gray-200">
+            <h3 class="text-lg font-bold text-gray-900 mb-3">الكلمات الدلالية:</h3>
+            <div class="flex flex-wrap gap-2">
+              <NuxtLink 
+                v-for="keyword in keywords" 
+                :key="keyword"
+                :to="`/search?q=${encodeURIComponent(keyword)}`"
+                class="px-3 py-1 bg-orange-100 hover:bg-orange-600 hover:text-white rounded-full text-sm text-orange-700 transition-all duration-200 cursor-pointer inline-block"
+              >
+                #{{ keyword }}
+              </NuxtLink>
+            </div>
+          </div>
+
+        </div>
+      </article>
+
+      <!-- معلومات الكاتب -->
+      <div v-if="opinion.writer" class="mt-8 bg-gradient-to-br from-orange-50 to-white rounded-lg shadow-md p-6">
+        <h3 class="text-xl font-bold text-gray-900 mb-4">عن الكاتب</h3>
+        <div class="flex items-start gap-4">
+          <NuxtLink :to="localePath('/writers/' + opinion.writer.slug)">
+            <img 
+              :src="getImageUrl(opinion.writer.image)" 
+              :alt="opinion.writer.name"
+              loading="lazy"
+              class="w-20 h-20 rounded-full border-2 border-orange-400"
+            />
+          </NuxtLink>
+          <div class="flex-1">
+            <NuxtLink :to="localePath('/writers/' + opinion.writer.slug)">
+              <h4 class="text-lg font-bold text-gray-900 hover:text-orange-600 transition-colors">
+                {{ getWriterName }}
+              </h4>
+            </NuxtLink>
+            <p v-if="opinion.writer.specialty" class="text-sm text-gray-600 mb-2">
+              {{ opinion.writer.specialty }}
+            </p>
+            <p v-if="opinion.writer.bio" class="text-gray-700 text-sm">
+              {{ opinion.writer.bio }}
+            </p>
+            <NuxtLink 
+              :to="localePath('/writers/' + opinion.writer.slug)"
+              class="inline-block mt-3 text-orange-600 hover:text-orange-700 font-semibold text-sm"
+            >
+              عرض جميع مقالات الكاتب ←
+            </NuxtLink>
+          </div>
+        </div>
+      </div>
+
+      <!-- Opinion Bottom Advertisement -->
+      <div class="my-8">
+        <AdvertisementZone position="article_bottom" page="opinion" :auto-rotate="false" :show-dots="false" />
+      </div>
+    </div>
+  </div>
+</template>
+
+<script setup lang="ts">
+import type { Opinion } from '~/types'
+
+const localePath = useLocalePath()
+const route = useRoute()
+const opinionsStore = useOpinionsStore()
+const config = useRuntimeConfig()
+const apiBase = ((config as any).public?.apiBase || '/api/v1') as string
+
+const { getImageUrl } = useImageUrl()
+const { formatDate } = useDateFormat()
+const { setOpinionSeoMeta } = useAppSeoMeta()
+const { locale } = useI18n()
+
+// دوال الترجمة
+const getOpinionTitle = computed(() => {
+  if (!opinion.value) return ''
+  return locale.value === 'en' && opinion.value.title_en ? opinion.value.title_en : opinion.value.title
+})
+
+const getOpinionContent = computed(() => {
+  if (!opinion.value) return ''
+  return locale.value === 'en' && opinion.value.content_en ? opinion.value.content_en : opinion.value.content
+})
+
+const getOpinionExcerpt = computed(() => {
+  if (!opinion.value?.excerpt) return null
+  return locale.value === 'en' && opinion.value.excerpt_en ? opinion.value.excerpt_en : opinion.value.excerpt
+})
+
+const getWriterName = computed(() => {
+  if (!opinion.value?.writer) return ''
+  return locale.value === 'en' && opinion.value.writer.name_en ? opinion.value.writer.name_en : opinion.value.writer.name
+})
+
+const opinionId = computed(() => route.params.id as string)
+const hasLiked = ref(false)
+
+// جلب مقال الرأي مع SSR
+const { data: opinionData, error: fetchError } = await useAsyncData(
+  `opinion-${opinionId.value}`,
+  async () => {
+    const response = await $fetch<any>(`${apiBase}/opinions/${opinionId.value}`)
+    return response?.data || null
+  },
+  {
+    watch: [opinionId]
+  }
+)
+
+const opinion = computed(() => opinionData.value)
+const loading = ref(false)
+const error = computed(() => fetchError.value?.message || null)
+
+// الكلمات الدلالية
+const keywords = computed(() => {
+  if (!opinion.value?.keywords) return []
+  return opinion.value.keywords.split(',').map((k: string) => k.trim())
+})
+
+// رابط المقال
+const opinionUrl = computed(() => {
+  if (process.client) {
+    return window.location.href
+  }
+  // في حالة SSR، نستخدم siteUrl من config أو نبني الرابط النسبي
+  const siteUrl = (config as any).public?.siteUrl || ''
+  return siteUrl ? `${siteUrl}/opinions/${opinionId.value}` : `/opinions/${opinionId.value}`
+})
+
+// حالة نسخ الرابط
+const copied = ref(false)
+
+// دالة نسخ رابط المقال
+const copyOpinionUrl = async () => {
+  if (process.client && navigator.clipboard) {
+    try {
+      await navigator.clipboard.writeText(opinionUrl.value)
+      copied.value = true
+      setTimeout(() => {
+        copied.value = false
+      }, 2000)
+    } catch (err) {
+      console.error('Failed to copy:', err)
+    }
+  }
+}
+
+// الإعجاب بالمقال
+const handleLike = async () => {
+  if (opinion.value && !hasLiked.value) {
+    await opinionsStore.likeOpinion(opinion.value.id)
+    hasLiked.value = true
+  }
+}
+
+// SEO Meta Tags - يتم تحديثها عند تغيير مقال الرأي
+watchEffect(() => {
+  if (opinion.value) {
+    setOpinionSeoMeta(opinion.value)
+  }
+})
+
+// إعادة تعيين الإعجاب عند تغيير الصفحة
+watch(opinionId, () => {
+  hasLiked.value = false
+  if (process.client) {
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+})
+</script>
+
+<style scoped>
+/* تنسيق المحتوى */
+.article-content {
+  color: #1f2937;
+  line-height: 2;
+  text-align: justify;
+  direction: rtl;
+  font-size: 1.125rem;
+  max-width: 100%;
+  word-wrap: break-word;
+}
+
+:deep(.article-content h1) {
+  font-size: 1.875rem;
+  font-weight: 800;
+  color: #111827;
+  margin-top: 2.5rem;
+  margin-bottom: 1.25rem;
+  line-height: 1.3;
+}
+
+:deep(.article-content h2) {
+  font-size: 1.625rem;
+  font-weight: 700;
+  color: #111827;
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+  line-height: 1.4;
+}
+
+:deep(.article-content h3) {
+  font-size: 1.375rem;
+  font-weight: 700;
+  color: #374151;
+  margin-top: 1.75rem;
+  margin-bottom: 0.875rem;
+  line-height: 1.5;
+}
+
+:deep(.article-content p) {
+  margin-bottom: 1.5rem;
+  font-size: 1.125rem;
+  line-height: 2;
+  color: #1f2937;
+  text-align: justify;
+}
+
+:deep(.article-content strong) {
+  font-weight: 700;
+  color: #111827;
+}
+
+:deep(.article-content em) {
+  font-style: italic;
+  color: #374151;
+}
+
+:deep(.article-content a) {
+  color: #ea580c;
+  text-decoration: underline;
+  transition: color 0.2s;
+}
+
+:deep(.article-content a:hover) {
+  color: #c2410c;
+}
+
+:deep(.article-content ul),
+:deep(.article-content ol) {
+  margin-right: 1.5rem;
+  margin-bottom: 1.5rem;
+  line-height: 2;
+}
+
+:deep(.article-content ul) {
+  list-style-type: disc;
+}
+
+:deep(.article-content ol) {
+  list-style-type: decimal;
+}
+
+:deep(.article-content li) {
+  margin-bottom: 0.5rem;
+  padding-right: 0.5rem;
+}
+
+:deep(.article-content blockquote) {
+  border-right: 4px solid #ea580c;
+  padding-right: 1.5rem;
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+  margin: 2rem 0;
+  background: linear-gradient(to left, #fff7ed, transparent);
+  font-style: italic;
+  font-size: 1.125rem;
+  color: #4b5563;
+}
+
+:deep(.article-content img) {
+  border-radius: 0.75rem;
+  margin: 2rem auto;
+  max-width: 100%;
+  height: auto;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+:deep(.article-content pre) {
+  background-color: #1f2937;
+  color: #f3f4f6;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  overflow-x: auto;
+  margin: 1.5rem 0;
+}
+
+:deep(.article-content code) {
+  background-color: #f3f4f6;
+  color: #ea580c;
+  padding: 0.2rem 0.4rem;
+  border-radius: 0.25rem;
+  font-size: 0.9em;
+}
+
+:deep(.article-content table) {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 2rem 0;
+}
+
+:deep(.article-content th),
+:deep(.article-content td) {
+  border: 1px solid #e5e7eb;
+  padding: 0.75rem;
+  text-align: right;
+}
+
+:deep(.article-content th) {
+  background-color: #f9fafb;
+  font-weight: 700;
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  :deep(.article-content) {
+    line-height: 1.9;
+  }
+
+  :deep(.article-content h1) {
+    font-size: 1.5rem;
+    margin-top: 1.5rem;
+    margin-bottom: 1rem;
+  }
+
+  :deep(.article-content h2) {
+    font-size: 1.375rem;
+    margin-top: 1.5rem;
+    margin-bottom: 0.875rem;
+  }
+
+  :deep(.article-content h3) {
+    font-size: 1.25rem;
+    margin-top: 1.25rem;
+    margin-bottom: 0.75rem;
+  }
+
+  :deep(.article-content p) {
+    font-size: 1rem;
+    margin-bottom: 1.25rem;
+    line-height: 1.9;
+  }
+
+  :deep(.article-content blockquote) {
+    padding-right: 1rem;
+    font-size: 1rem;
+    margin: 1.5rem 0;
+  }
+
+  :deep(.article-content ul),
+  :deep(.article-content ol) {
+    margin-right: 1rem;
+  }
+
+  :deep(.article-content img) {
+    margin: 1.5rem auto;
+  }
+}
+</style>

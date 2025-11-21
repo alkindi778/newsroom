@@ -14,5 +14,10 @@ export const useArticleLink = () => {
     return localePath(`/news/${article.slug}`)
   }
 
-  return { getArticleLink }
+  // Opinion link - always use ID
+  const getOpinionLink = (opinion: any) => {
+    return localePath(`/opinions/${opinion.id}`)
+  }
+
+  return { getArticleLink, getOpinionLink }
 }
