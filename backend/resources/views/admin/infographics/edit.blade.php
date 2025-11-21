@@ -96,7 +96,7 @@
                 <x-admin.media-picker 
                     field="image" 
                     label="تغيير الصورة (اختياري)" 
-                    :value="old('image', $infographic->image)"
+                    :value="old('image', $infographic->image ? asset('storage/' . $infographic->image) : '')"
                     collection="infographics"
                     help="اترك فارغاً للإبقاء على الصورة الحالية، أو اختر صورة جديدة من المكتبة" />
 

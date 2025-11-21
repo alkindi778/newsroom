@@ -46,10 +46,16 @@
         "noArticles": "No articles available"
     },
     "infographic": {
+        "title": "Infographics",
         "label": "Infographic",
-        "view": "View Infographic",
+        "view": "View",
+        "view_full": "View Infographic",
+        "viewMore": "View More",
         "noData": "No infographics available",
-        "willDisplay": "Infographics will be displayed here when available"
+        "willDisplay": "Infographics will be displayed here when available",
+        "description": "Visual and interactive content",
+        "loading": "Loading infographics...",
+        "allLoaded": "All infographics loaded"
     },
     "footer": {
         "quick_links": "Quick Links",

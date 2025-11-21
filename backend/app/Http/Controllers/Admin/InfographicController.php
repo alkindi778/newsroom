@@ -42,7 +42,7 @@ class InfographicController extends Controller
             'title_en' => 'nullable|string|max:255',
             'description' => 'nullable|string',
             'description_en' => 'nullable|string',
-            'image' => 'required|image|mimes:jpeg,jpg,png,gif,webp|max:5120',
+            'image' => 'required|string',
             'slug' => 'nullable|string|unique:infographics,slug',
             'category_id' => 'nullable|exists:categories,id',
             'is_featured' => 'boolean',
@@ -51,12 +51,15 @@ class InfographicController extends Controller
             'tags' => 'nullable|string',
         ]);
 
-        // رفع الصورة
-        if ($request->hasFile('image')) {
-            $image = $request->file('image');
-            $imagePath = $image->store('infographics', 'public');
-            $validated['image'] = $imagePath;
+        // Media Picker يرسل path - قد يكون full URL أو relative path
+        $imagePath = $request->input('image');
+        
+        // إذا كان full URL، استخرج الـ path فقط
+        if (str_contains($imagePath, '/storage/')) {
+            $imagePath = str_replace('/storage/', '', parse_url($imagePath, PHP_URL_PATH));
         }
+        
+        $validated['image'] = $imagePath;
 
         // توليد slug إذا لم يكن موجوداً
         if (empty($validated['slug'])) {
@@ -97,7 +100,7 @@ class InfographicController extends Controller
             'title_en' => 'nullable|string|max:255',
             'description' => 'nullable|string',
             'description_en' => 'nullable|string',
-            'image' => 'nullable|image|mimes:jpeg,jpg,png,gif,webp|max:5120',
+            'image' => 'nullable|string',
             'slug' => 'nullable|string|unique:infographics,slug,' . $infographic->id,
             'category_id' => 'nullable|exists:categories,id',
             'is_featured' => 'boolean',
@@ -106,15 +109,15 @@ class InfographicController extends Controller
             'tags' => 'nullable|string',
         ]);
 
-        // رفع صورة جديدة إذا كانت موجودة
-        if ($request->hasFile('image')) {
-            // حذف الصورة القديمة
-            if ($infographic->image && Storage::disk('public')->exists($infographic->image)) {
-                Storage::disk('public')->delete($infographic->image);
+        // Media Picker يرسل path - قد يكون full URL أو relative path
+        if ($request->filled('image')) {
+            $imagePath = $request->input('image');
+            
+            // إذا كان full URL، استخرج الـ path فقط
+            if (str_contains($imagePath, '/storage/')) {
+                $imagePath = str_replace('/storage/', '', parse_url($imagePath, PHP_URL_PATH));
             }
-
-            $image = $request->file('image');
-            $imagePath = $image->store('infographics', 'public');
+            
             $validated['image'] = $imagePath;
         }
 
