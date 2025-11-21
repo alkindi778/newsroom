@@ -12,7 +12,7 @@ export default defineNuxtConfig({
   // إعدادات الترجمة
   i18n: {
     locales: [
-      { code: 'ar', iso: 'ar-YE', file: 'ar.json', name: 'العربية', dir: 'rtl' },
+      { code: 'ar', iso: 'ar', file: 'ar.json', name: 'العربية', dir: 'rtl' },
       { code: 'en', iso: 'en-US', file: 'en.json', name: 'English', dir: 'ltr' }
     ],
     defaultLocale: 'ar',
