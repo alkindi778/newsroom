@@ -39,6 +39,12 @@ class TranslateArticleJob implements ShouldQueue
             if ($translation) {
                 $article->title_en = $translation['title_en'] ?? null;
                 $article->content_en = $translation['content_en'] ?? null;
+                
+                // Translate subtitle if exists
+                if ($article->subtitle && !$article->subtitle_en) {
+                    $article->subtitle_en = $translationService->translateText($article->subtitle);
+                }
+                
                 $article->saveQuietly();
                 Log::info("Article translated: {$article->title}");
             } else {
