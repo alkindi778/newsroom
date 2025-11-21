@@ -46,7 +46,7 @@ class HomepageSectionController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'slug' => 'required|string|max:255|unique:homepage_sections',
-            'type' => 'required|in:slider,breaking_news,latest_news,category_news,trending,opinions,videos,newspaper_issues',
+            'type' => 'required|in:slider,breaking_news,latest_news,category_news,trending,opinions,videos,newspaper_issues,infographic',
             'title' => 'nullable|string|max:255',
             'subtitle' => 'nullable|string|max:255',
             'category_id' => 'nullable|exists:categories,id',

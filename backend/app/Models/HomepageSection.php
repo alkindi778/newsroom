@@ -70,6 +70,7 @@ class HomepageSection extends Model
             'opinions' => 'مقالات الرأي',
             'videos' => 'الفيديوهات',
             'newspaper_issues' => 'إصدارات الصحف',
+            'infographic' => 'إنفوجرافيك',
         ];
     }
 

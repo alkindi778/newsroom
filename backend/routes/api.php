@@ -103,6 +103,14 @@ Route::prefix('v1')->group(function () {
     Route::post('/newspaper-issues/{id}/download', [NewspaperIssueController::class, 'incrementDownload'])->whereNumber('id');
     Route::get('/newspaper-issues/{slug}', [NewspaperIssueController::class, 'show']);
 
+    // Infographics (Public)
+    Route::get('/infographics', [\App\Http\Controllers\Api\InfographicController::class, 'index']);
+    Route::get('/infographics/featured', [\App\Http\Controllers\Api\InfographicController::class, 'featured']);
+    Route::get('/infographics/latest', [\App\Http\Controllers\Api\InfographicController::class, 'latest']);
+    Route::get('/infographics/popular', [\App\Http\Controllers\Api\InfographicController::class, 'popular']);
+    Route::get('/infographics/{slug}', [\App\Http\Controllers\Api\InfographicController::class, 'show']);
+    Route::get('/infographics/{slug}/related', [\App\Http\Controllers\Api\InfographicController::class, 'related']);
+
     // Site Settings (Public)
     Route::get('/settings', [\App\Http\Controllers\Api\SiteSettingsController::class, 'index']);
     Route::get('/settings/group/{group}', [\App\Http\Controllers\Api\SiteSettingsController::class, 'getByGroup']);

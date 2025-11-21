@@ -13,6 +13,7 @@ import SectionsSliderSection from '~/components/sections/SliderSection.vue'
 import SectionsLatestNewsSection from '~/components/sections/LatestNewsSection.vue'
 import SectionsCategoryNewsSection from '~/components/sections/CategoryNewsSection.vue'
 import SectionsOpinionsSection from '~/components/sections/OpinionsSection.vue'
+import SectionsInfographicSection from '~/components/sections/InfographicSection.vue'
 import TrendingArticles from '~/components/TrendingArticles.vue'
 import TrendingVideos from '~/components/TrendingVideos.vue'
 import SectionsNewspaperIssuesSection from '~/components/sections/NewspaperIssuesSection.vue'
@@ -45,6 +46,7 @@ const componentMap: Record<string, Component> = {
   'opinions': SectionsOpinionsSection,
   'videos': TrendingVideos,
   'newspaper_issues': SectionsNewspaperIssuesSection,
+  'infographic': SectionsInfographicSection,
 }
 
 const sectionComponent = computed(() => {

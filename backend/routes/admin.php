@@ -355,6 +355,18 @@ Route::middleware(['auth', App\Http\Middleware\AdminMiddleware::class])->group(f
         Route::post('homepage-sections/update-order', [\App\Http\Controllers\Admin\HomepageSectionController::class, 'updateOrder'])->name('homepage-sections.update-order');
     });
 
+    // Infographics Management
+    Route::prefix('infographics')->name('infographics.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Admin\InfographicController::class, 'index'])->name('index');
+        Route::get('/create', [\App\Http\Controllers\Admin\InfographicController::class, 'create'])->name('create');
+        Route::post('/', [\App\Http\Controllers\Admin\InfographicController::class, 'store'])->name('store');
+        Route::get('/{infographic}/edit', [\App\Http\Controllers\Admin\InfographicController::class, 'edit'])->name('edit');
+        Route::put('/{infographic}', [\App\Http\Controllers\Admin\InfographicController::class, 'update'])->name('update');
+        Route::delete('/{infographic}', [\App\Http\Controllers\Admin\InfographicController::class, 'destroy'])->name('destroy');
+        Route::patch('/{infographic}/toggle-status', [\App\Http\Controllers\Admin\InfographicController::class, 'toggleStatus'])->name('toggle-status');
+        Route::patch('/{infographic}/toggle-featured', [\App\Http\Controllers\Admin\InfographicController::class, 'toggleFeatured'])->name('toggle-featured');
+    });
+
     // Advertisements Management
     Route::middleware(['permission:view_advertisements'])->group(function () {
         Route::get('advertisements', [AdvertisementController::class, 'index'])->name('advertisements.index');

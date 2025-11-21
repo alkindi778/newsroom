@@ -12,8 +12,9 @@ class TranslateArticleJob implements ShouldQueue
 {
     use Queueable;
 
-    public $tries = 3;
+    public $tries = 10; // محاولات أكثر
     public $timeout = 180;
+    public $backoff = [60, 300, 900]; // إعادة المحاولة بعد 1 دقيقة، 5 دقائق، 15 دقيقة
 
     public function __construct(public int $articleId) {}
 
