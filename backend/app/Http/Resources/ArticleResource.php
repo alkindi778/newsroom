@@ -35,8 +35,8 @@ class ArticleResource extends JsonResource
             'subtitle' => $this->subtitle,
             'source' => $this->source,
             'slug' => $this->slug,
-            'content' => $this->when($request->routeIs('api.v1.articles.show'), $this->content),
-            'content_en' => $this->when($request->routeIs('api.v1.articles.show'), $this->content_en),
+            'content' => $this->content,
+            'content_en' => $this->content_en,
             'excerpt' => $this->summary ?? $this->generateExcerpt(),
             'image' => $this->image_path,  // accessor مع fallback للصور القديمة والجديدة
             'thumbnail' => $this->thumbnail_path,  // thumbnail مع fallback
