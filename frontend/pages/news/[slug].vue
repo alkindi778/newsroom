@@ -319,14 +319,35 @@ const displayArticle = computed(() => {
   const isEnglish = locale.value === 'en'
   const hasTranslation = article.value.title_en && article.value.content_en
   
+  console.log('📰 displayArticle computed:', {
+    locale: locale.value,
+    isEnglish,
+    hasTranslation,
+    articleId: article.value.id,
+    title_ar: article.value.title?.substring(0, 50) + '...',
+    title_en: article.value.title_en?.substring(0, 50) + '...',
+    content_en_length: article.value.content_en?.length || 0,
+    willUseTranslation: isEnglish && hasTranslation
+  })
+  
   if (isEnglish && hasTranslation) {
-    return {
+    const translatedArticle = {
       ...article.value,
       title: article.value.title_en,
       content: article.value.content_en,
       // يمكن إضافة المزيد من الحقول المترجمة هنا إذا وجدت
     }
+    console.log('✅ Using English translation:', {
+      title: translatedArticle.title?.substring(0, 50) + '...',
+      contentLength: translatedArticle.content?.length
+    })
+    return translatedArticle
   }
+  
+  console.log('🔴 Using Arabic (no translation or not English):', {
+    title: article.value.title?.substring(0, 50) + '...',
+    reason: !isEnglish ? 'Not English locale' : 'No translation available'
+  })
   
   return article.value
 })
