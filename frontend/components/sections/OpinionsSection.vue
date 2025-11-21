@@ -2,7 +2,7 @@
   <section v-if="featuredOpinions.length > 0" class="mb-12">
     <div class="mb-6">
       <NuxtLink to="/opinions" class="flex items-center gap-2">
-        <h2 class="text-3xl font-bold text-gray-900">مقالات الرأي</h2>
+        <h2 class="text-3xl font-bold text-gray-900">{{ $t('common.opinions') }}</h2>
         <svg class="w-6 h-6 text-gray-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
         </svg>
@@ -35,7 +35,7 @@
           to="/opinions"
           class="inline-flex items-center gap-2 px-6 py-2 border border-gray-900 text-gray-900 font-semibold whitespace-nowrap rounded-md"
         >
-          <span>المزيد</span>
+          <span>{{ $t('common.read_more') }}</span>
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
           </svg>

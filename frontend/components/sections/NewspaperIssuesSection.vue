@@ -94,7 +94,7 @@
                 to="/newspaper-issues"
                 class="inline-flex items-center gap-2 px-6 py-2 border border-white text-white font-semibold whitespace-nowrap rounded-md hover:bg-white/10 transition-colors"
               >
-                <span>المزيد</span>
+                <span>{{ $t('common.read_more') }}</span>
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
                 </svg>

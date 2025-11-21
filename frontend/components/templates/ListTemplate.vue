@@ -65,7 +65,7 @@
                 {{ articles[2].subtitle }}
               </p>
               <h2 class="text-lg md:text-2xl font-bold text-gray-900 line-clamp-2">
-                {{ articles[2].title }}
+                {{ getArticleTitle(articles[2]) }}
               </h2>
               <p class="hidden md:block text-base text-gray-600 leading-relaxed line-clamp-5">
                 {{ getExcerpt(articles[2]) }}
