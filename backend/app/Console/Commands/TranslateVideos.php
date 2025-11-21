@@ -8,26 +8,41 @@ use Illuminate\Console\Command;
 
 class TranslateVideos extends Command
 {
-    protected $signature = 'videos:translate {--force : Force translation even if already translated}';
-    protected $description = 'Translate all videos to English';
+    protected $signature = 'videos:translate {--force : Force translation even if already translated} {--limit= : Maximum number of videos to translate}';
+    protected $description = 'Translate videos to English';
 
     public function handle()
     {
         $this->info('Starting videos translation...');
         
-        $videos = Video::all();
+        $query = Video::query();
         $force = $this->option('force');
+        $limit = $this->option('limit');
+        
+        // إذا لم يكن force، نجلب فقط غير المترجمة
+        if (!$force) {
+            $query->where(function($q) {
+                $q->whereNull('title_en')->orWhereNull('description_en');
+            });
+        }
+        
+        // إذا كان هناك حد، نطبقه
+        if ($limit) {
+            $query->limit((int) $limit);
+        }
+        
+        $videos = $query->get();
         
         $this->info("Found {$videos->count()} videos to translate.");
+        
+        if ($videos->isEmpty()) {
+            $this->info('No videos need translation.');
+            return Command::SUCCESS;
+        }
         
         $dispatched = 0;
         
         foreach ($videos as $video) {
-            if (!$force && $video->title_en && $video->description_en) {
-                $this->line("Skipping '{$video->title}' (already translated)");
-                continue;
-            }
-            
             TranslateVideoJob::dispatch($video->id);
             $dispatched++;
             $this->info("✓ Queued: {$video->title}");
