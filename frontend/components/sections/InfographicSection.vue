@@ -33,7 +33,7 @@
             <img 
               v-if="item.image" 
               :src="getImageUrl(item.image)" 
-              :alt="item.title || 'إنفوجرافيك'"
+              :alt="item.title || $t('infographic.label')"
               class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
               loading="lazy"
             />
@@ -44,7 +44,7 @@
             <!-- Title Overlay -->
             <div class="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/90 to-transparent translate-y-full group-hover:translate-y-0 transition-transform duration-300">
               <h3 class="text-white text-lg font-bold mb-2 line-clamp-2">
-                {{ item.title || 'إنفوجرافيك' }}
+                {{ item.title || $t('infographic.label') }}
               </h3>
               <p v-if="item.description" class="text-gray-200 text-sm line-clamp-2">
                 {{ item.description }}
