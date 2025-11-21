@@ -66,7 +66,7 @@ tail -f /var/log/newsroom-translate.log
 ### إنشاء ملف PM2 Ecosystem:
 ```bash
 cd /var/www/newsroom/backend
-nano ecosystem.config.js
+nano ecosystem.config.cjs
 ```
 
 ### المحتوى:
@@ -92,7 +92,7 @@ module.exports = {
 
 ### تشغيل Queue Worker:
 ```bash
-pm2 start ecosystem.config.js
+pm2 start ecosystem.config.cjs
 pm2 save
 pm2 startup
 ```
