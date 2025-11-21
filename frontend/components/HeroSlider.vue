@@ -47,7 +47,7 @@
                       {{ article.subtitle }}
                     </p>
                     <h2 class="text-white text-lg sm:text-xl lg:text-2xl font-bold leading-snug lg:leading-tight hover:text-gray-200 transition-colors line-clamp-2 lg:line-clamp-none">
-                      {{ article.title }}
+                      {{ getArticleTitle(article) }}
                     </h2>
                   </NuxtLink>
                 </div>
@@ -115,6 +115,25 @@ const props = defineProps<{
 
 const { getImageUrl } = useImageUrl()
 const { getArticleLink } = useArticleLink()
+const { locale } = useI18n()
+
+// دالة ترجمة العنوان
+const getArticleTitle = (article: Article) => {
+  const isEnglish = locale.value === 'en'
+  const hasTranslation = article.title_en && article.title_en.trim() !== ''
+  
+  console.log('🎬 HeroSlider - getArticleTitle:', {
+    articleId: article.id,
+    locale: locale.value,
+    isEnglish,
+    hasTranslation,
+    title_en: article.title_en,
+    title_ar: article.title,
+    willReturn: (isEnglish && hasTranslation) ? article.title_en : article.title
+  })
+  
+  return (isEnglish && hasTranslation) ? article.title_en : article.title
+}
 
 const activeIndex = ref(0)
 let autoPlayInterval: NodeJS.Timeout | null = null

@@ -21,7 +21,7 @@
                 :to="getArticleLink(currentNews as any)"
                 class="text-white hover:text-gray-200 transition-colors duration-200 font-bold text-sm md:text-3xl truncate"
               >
-                {{ currentNews.title }}
+                {{ getArticleTitle(currentNews) }}
               </NuxtLink>
             </div>
             <div v-else class="text-white text-sm md:text-3xl">جاري التحميل...</div>
@@ -68,8 +68,28 @@
 
 <script setup lang="ts">
 const { getArticleLink } = useArticleLink()
+const { locale } = useI18n()
 const config = useRuntimeConfig()
 const apiBase = ((config as any).public?.apiBase || '/api/v1') as string
+
+// دالة ترجمة العنوان
+const getArticleTitle = (article: any) => {
+  if (!article) return ''
+  const isEnglish = locale.value === 'en'
+  const hasTranslation = article.title_en && article.title_en.trim() !== ''
+  
+  console.log('🚨 BreakingNewsBar - getArticleTitle:', {
+    articleId: article.id,
+    locale: locale.value,
+    isEnglish,
+    hasTranslation,
+    title_en: article.title_en,
+    title_ar: article.title,
+    willReturn: (isEnglish && hasTranslation) ? article.title_en : article.title
+  })
+  
+  return (isEnglish && hasTranslation) ? article.title_en : article.title
+}
 
 // استخدام ref بدلاً من await لتجنب مشاكل SSR
 const breakingNews = ref<any[]>([])

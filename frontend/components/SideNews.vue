@@ -23,7 +23,7 @@
           {{ article.subtitle }}
         </p>
         <h3 class="text-gray-900 text-sm lg:text-xl font-bold leading-tight line-clamp-2 lg:line-clamp-3">
-          {{ article.title }}
+          {{ getArticleTitle(article) }}
         </h3>
         
         <!-- التاريخ (اختياري) -->
@@ -46,6 +46,25 @@ const props = defineProps<{
 const { getImageUrl } = useImageUrl()
 const { formatDate } = useDateFormat()
 const { getArticleLink } = useArticleLink()
+const { locale } = useI18n()
+
+// دالة ترجمة العنوان
+const getArticleTitle = (article: Article) => {
+  const isEnglish = locale.value === 'en'
+  const hasTranslation = article.title_en && article.title_en.trim() !== ''
+  
+  console.log('📊 SideNews - getArticleTitle:', {
+    articleId: article.id,
+    locale: locale.value,
+    isEnglish,
+    hasTranslation,
+    title_en: article.title_en,
+    title_ar: article.title,
+    willReturn: (isEnglish && hasTranslation) ? article.title_en : article.title
+  })
+  
+  return (isEnglish && hasTranslation) ? article.title_en : article.title
+}
 </script>
 
 <style scoped>
