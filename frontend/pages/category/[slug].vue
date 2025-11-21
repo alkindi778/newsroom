@@ -141,7 +141,23 @@ const getCategoryName = computed(() => {
 // دالة للحصول على عنوان المقال المترجم
 const getArticleTitle = (article: any) => {
   if (!article) return ''
-  return locale.value === 'en' && article.title_en ? article.title_en : article.title
+  
+  const isEnglish = locale.value === 'en'
+  const hasTranslation = !!article.title_en
+  const title = isEnglish && hasTranslation ? article.title_en : article.title
+  
+  console.log('📁 Category Page - getArticleTitle:', {
+    articleId: article.id,
+    locale: locale.value,
+    isEnglish,
+    hasTranslation,
+    title_en: article.title_en,
+    title_ar: article.title?.substring(0, 50) + '...',
+    returning: title?.substring(0, 50) + '...',
+    willUseEnglish: isEnglish && hasTranslation
+  })
+  
+  return title
 }
 
 const currentPage = ref(1)
