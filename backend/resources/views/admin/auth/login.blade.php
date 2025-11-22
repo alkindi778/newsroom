@@ -36,7 +36,7 @@
                    required 
                    autofocus
                    class="block w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500 @error('email') border-red-500 @enderror"
-                   placeholder="admin@newsroom.com">
+                   placeholder="admin@example.com">
         </div>
         
         <!-- Password Field -->

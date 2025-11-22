@@ -23,6 +23,9 @@ use App\Observers\HomepageSectionObserver;
 use App\Observers\VideoObserver;
 use App\Observers\WriterObserver;
 use App\Observers\OpinionObserver;
+use App\Models\SiteSetting;
+use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Schema;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -43,6 +46,19 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // تحديث اسم التطبيق من الإعدادات
+        if (Schema::hasTable('site_settings')) {
+            try {
+                $siteTitle = SiteSetting::where('key', 'site_title')->value('value');
+                if ($siteTitle) {
+                    Config::set('app.name', $siteTitle);
+                    Config::set('mail.from.name', $siteTitle);
+                }
+            } catch (\Exception $e) {
+                // تجاهل الأخطاء في حالة عدم اكتمال التثبيت
+            }
+        }
+
         // تسجيل Article Observer للترجمة التلقائية
         Article::observe(ArticleObserver::class);
         
