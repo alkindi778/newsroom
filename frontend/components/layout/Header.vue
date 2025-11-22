@@ -11,13 +11,13 @@
             </div>
           </ClientOnly>
 
-          <!-- روابط سريعة -->
-          <div class="hidden md:flex items-center gap-6">
-            <NuxtLink :to="localePath('/about')" class="hover:text-gray-300 transition-colors">{{ $t('common.about_us') }}</NuxtLink>
-            <NuxtLink :to="localePath('/contact')" class="hover:text-gray-300 transition-colors">{{ $t('common.contact_us') }}</NuxtLink>
+          <!-- روابط سريعة - مرئية في كل الأجهزة -->
+          <div class="flex items-center gap-3 md:gap-6 text-[10px] md:text-xs">
+            <NuxtLink :to="localePath('/about')" class="hover:text-gray-300 transition-colors whitespace-nowrap">{{ $t('common.about_us') }}</NuxtLink>
+            <NuxtLink :to="localePath('/contact')" class="hover:text-gray-300 transition-colors whitespace-nowrap">{{ $t('common.contact_us') }}</NuxtLink>
             <a href="/rss" target="_blank" rel="noopener" class="flex items-center gap-1 hover:text-primary-200 transition-colors">
               <span>RSS</span>
-              <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 md:w-4 md:h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M4 4a16 16 0 0116 16M4 11a9 9 0 019 9M6 18a2 2 0 11-4 0 2 2 0 014 0z" />
               </svg>
             </a>
@@ -59,8 +59,8 @@
             </svg>
           </button>
 
-          <!-- البحث -->
-          <button @click="toggleSearch" class="p-1.5 sm:p-2 hover:bg-gray-100 rounded-full transition-colors">
+          <!-- البحث - للديسكتوب فقط -->
+          <button @click="toggleSearch" class="hidden md:block p-1.5 sm:p-2 hover:bg-gray-100 rounded-full transition-colors">
             <svg class="w-4 h-4 sm:w-5 sm:h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
             </svg>
@@ -189,6 +189,11 @@
     <Transition name="slide-down">
       <div v-if="showMobileMenu" class="md:hidden bg-white border-t border-gray-200 shadow-lg">
         <div class="container mx-auto px-3 py-4">
+          <!-- البحث في الموبايل -->
+          <div class="mb-4 pb-4 border-b border-gray-200">
+            <SearchBar />
+          </div>
+
           <nav>
             <ul class="space-y-1">
               <li>
@@ -298,15 +303,6 @@
               </li>
             </ul>
           </nav>
-
-          <!-- روابط إضافية للموبايل -->
-          <div class="mt-4 pt-4 border-t border-gray-200">
-            <div class="flex flex-col gap-2 text-sm">
-              <NuxtLink :to="localePath('/about')" class="text-gray-600 hover:text-gray-900 px-3.5 py-2" @click="closeMobileMenu">{{ $t('common.about_us') }}</NuxtLink>
-              <NuxtLink :to="localePath('/contact')" class="text-gray-600 hover:text-gray-900 px-3.5 py-2" @click="closeMobileMenu">{{ $t('common.contact_us') }}</NuxtLink>
-              <a href="/rss" target="_blank" rel="noopener" class="text-gray-600 hover:text-gray-900 px-3.5 py-2">RSS</a>
-            </div>
-          </div>
         </div>
       </div>
     </Transition>
