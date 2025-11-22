@@ -1,48 +1,59 @@
 @extends('admin.layouts.auth')
 
-@section('title', 'Forgot Password')
+@section('title', 'نسيت كلمة المرور')
+@section('subtitle', 'استعادة كلمة المرور')
 
 @section('content')
-<div class="auth-container">
-    <div class="auth-card">
-        <div class="auth-header">
-            <h2>Forgot Password</h2>
-            <p>Forgot your password? No problem. Just let us know your email address and we will email you a password reset link.</p>
-        </div>
+<div class="space-y-6">
+    <!-- Header -->
+    <div class="text-center mb-6">
+        <h2 class="text-2xl font-semibold text-gray-900">نسيت كلمة المرور؟</h2>
+        <p class="text-gray-600 text-sm mt-2">
+            لا مشكلة. أدخل بريدك الإلكتروني وسنرسل لك رابطاً لإعادة تعيين كلمة المرور.
+        </p>
+    </div>
 
-        @if (session('status'))
-            <div class="alert alert-success">
+    @if (session('status'))
+        <div class="bg-green-50 border border-green-200 p-3 rounded-lg">
+            <p class="text-sm text-green-800">
                 {{ session('status') }}
-            </div>
-        @endif
-
-        <form method="POST" action="{{ route('password.email') }}">
-            @csrf
-
-            <div class="form-group">
-                <label for="email">Email Address</label>
-                <input id="email" 
-                       type="email" 
-                       name="email" 
-                       class="form-control @error('email') is-invalid @enderror" 
-                       value="{{ old('email') }}" 
-                       required 
-                       autofocus>
-                @error('email')
-                    <div class="invalid-feedback">{{ $message }}</div>
-                @enderror
-            </div>
-
-            <div class="form-group text-center">
-                <button type="submit" class="btn btn-primary btn-block">
-                    Email Password Reset Link
-                </button>
-            </div>
-        </form>
-
-        <div class="auth-footer">
-            <a href="{{ route('admin.login') }}">Back to Login</a>
+            </p>
         </div>
+    @endif
+
+    <form method="POST" action="{{ route('password.email') }}" class="space-y-6">
+        @csrf
+
+        <div>
+            <label for="email" class="block text-sm font-medium text-gray-700 mb-1">
+                البريد الإلكتروني
+            </label>
+            <input type="email" 
+                   id="email" 
+                   name="email" 
+                   value="{{ old('email') }}" 
+                   required 
+                   autofocus
+                   class="block w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500 @error('email') border-red-500 @enderror"
+                   placeholder="admin@newsroom.com">
+            @error('email')
+                <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+            @enderror
+        </div>
+
+        <div>
+            <button type="submit" 
+                    class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors">
+                إرسال رابط إعادة التعيين
+            </button>
+        </div>
+    </form>
+
+    <div class="text-center mt-6">
+        <a href="{{ route('login') }}" class="text-sm text-blue-600 hover:text-blue-800">
+            <i class="fas fa-arrow-right ml-1"></i>
+            العودة لتسجيل الدخول
+        </a>
     </div>
 </div>
 @endsection
