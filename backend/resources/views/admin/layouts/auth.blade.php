@@ -34,14 +34,12 @@
                     $logo = $settingsGeneral['site_logo'] ?? '';
                 @endphp
                 @if($logo)
-                    <img src="{{ asset('storage/' . $logo) }}" alt="{{ $siteName }}" class="h-16 w-auto mx-auto mb-4">
+                    <img src="{{ asset('storage/' . $logo) }}" alt="{{ $siteName }}" class="h-16 w-auto mx-auto">
                 @else
-                    <div class="inline-flex items-center justify-center w-16 h-16 bg-blue-600 rounded-lg mb-4">
+                    <div class="inline-flex items-center justify-center w-16 h-16 bg-blue-600 rounded-lg">
                         <i class="fas fa-newspaper text-2xl text-white"></i>
                     </div>
                 @endif
-                <h1 class="text-2xl font-bold text-gray-900">{{ $siteName }}</h1>
-                <p class="text-gray-600 text-sm mt-1">@yield('subtitle', 'لوحة التحكم')</p>
             </div>
             
             <!-- Login Card -->
