@@ -84,12 +84,13 @@ class ImportVideosFromDump extends Command
                 $videoType = 'youtube';
 
                 // إنشاء الفيديو الجديد
+                // ملاحظة: لا نحفظ thumbnail لأن Model يجلبها تلقائياً من YouTube
                 $video = Video::create([
                     'title' => $oldVideo['title'],
                     'slug' => Str::slug($oldVideo['title']),
                     'description' => $oldVideo['brief'],
                     'video_url' => $oldVideo['url'],
-                    'thumbnail' => $oldVideo['image_name'] ? 'videos/' . $oldVideo['image_name'] : null,
+                    'thumbnail' => null, // سيتم جلبها تلقائياً من YouTube عبر video_id
                     'video_type' => $videoType,
                     'video_id' => $videoId,
                     'views' => $oldVideo['counts'] ?? 0,
