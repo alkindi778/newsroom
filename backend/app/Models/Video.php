@@ -137,7 +137,7 @@ class Video extends Model
 
         // Generate thumbnail from video type
         if ($this->video_type === 'youtube' && $this->video_id) {
-            return "https://img.youtube.com/vi/{$this->video_id}/maxresdefault.jpg";
+            return \App\Services\YouTubeThumbnailService::getBestThumbnail($this->video_id);
         }
 
         if ($this->video_type === 'vimeo' && $this->video_id) {

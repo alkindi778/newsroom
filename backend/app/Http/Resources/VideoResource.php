@@ -62,7 +62,7 @@ class VideoResource extends JsonResource
     {
         // Generate low quality placeholder based on video type
         if ($this->video_type === 'youtube' && $this->video_id) {
-            return "https://img.youtube.com/vi/{$this->video_id}/default.jpg"; // Low quality (120x90)
+            return "https://img.youtube.com/vi/{$this->video_id}/default.jpg"; // Always available
         }
 
         if ($this->video_type === 'vimeo' && $this->video_id) {
@@ -81,13 +81,7 @@ class VideoResource extends JsonResource
         $srcset = [];
 
         if ($this->video_type === 'youtube' && $this->video_id) {
-            return [
-                'small' => "https://img.youtube.com/vi/{$this->video_id}/default.jpg", // 120x90
-                'medium' => "https://img.youtube.com/vi/{$this->video_id}/mqdefault.jpg", // 320x180
-                'high' => "https://img.youtube.com/vi/{$this->video_id}/hqdefault.jpg", // 480x360
-                'standard' => "https://img.youtube.com/vi/{$this->video_id}/sddefault.jpg", // 640x480
-                'maxres' => "https://img.youtube.com/vi/{$this->video_id}/maxresdefault.jpg", // 1280x720
-            ];
+            return \App\Services\YouTubeThumbnailService::getThumbnailSrcset($this->video_id);
         }
 
         if ($this->video_type === 'vimeo' && $this->video_id) {
