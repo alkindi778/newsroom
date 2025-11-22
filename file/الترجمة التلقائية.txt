@@ -1,0 +1,1 @@
+php artisan tinker --execute="\$t=\App\Models\Article::whereNotNull('title_en')->count();echo \"✅ المترجمة: \$t / 7386 (\".(round(\$t/7386*100,1)).\"%)\\n\";"
