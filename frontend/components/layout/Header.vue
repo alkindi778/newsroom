@@ -49,15 +49,21 @@
 
         <!-- الأدوات على اليمين -->
         <div class="flex items-center gap-1 sm:gap-2 md:gap-3">
-          <!-- القائمة للموبايل -->
-          <button 
-            @click="toggleMobileMenu"
-            class="md:hidden p-1.5 sm:p-2 hover:bg-gray-100 rounded-full transition-colors"
-          >
-            <svg class="w-5 h-5 sm:w-6 sm:h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
-            </svg>
-          </button>
+          <!-- الموبايل: ترتيب عمودي -->
+          <div class="md:hidden flex flex-col gap-1">
+            <!-- القائمة للموبايل -->
+            <button 
+              @click="toggleMobileMenu"
+              class="p-1.5 sm:p-2 hover:bg-gray-100 rounded-full transition-colors"
+            >
+              <svg class="w-5 h-5 sm:w-6 sm:h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+              </svg>
+            </button>
+            
+            <!-- Language Switcher للموبايل -->
+            <LanguageSwitcher />
+          </div>
 
           <!-- البحث - للديسكتوب فقط -->
           <button @click="toggleSearch" class="hidden md:block p-1.5 sm:p-2 hover:bg-gray-100 rounded-full transition-colors">
@@ -66,10 +72,10 @@
             </svg>
           </button>
 
-          <!-- زر مباشر -->
-          
-          <!-- Language Switcher -->
-          <LanguageSwitcher />
+          <!-- Language Switcher للديسكتوب -->
+          <div class="hidden md:block">
+            <LanguageSwitcher />
+          </div>
         </div>
       </div>
     </div>
