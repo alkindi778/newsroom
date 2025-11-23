@@ -5,9 +5,13 @@
 
 @section('content')
 <div class="space-y-6">
+  
+    <!-- Quick Actions -->
+    @include('admin.dashboard.quick-actions')
+
     <!-- Quick Stats -->
     @include('admin.dashboard.stats')
-    
+ 
     <!-- Activity Chart -->
     @include('admin.dashboard.activity-chart')
     

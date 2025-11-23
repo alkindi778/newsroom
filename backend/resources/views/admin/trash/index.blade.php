@@ -39,12 +39,13 @@
     </div>
 
     <!-- Tabs -->
-    <div class="mb-6">
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-1 inline-flex gap-1">
+    <div class="mb-6 overflow-x-auto">
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-1 inline-flex gap-1 min-w-full lg:min-w-0">
             <a href="{{ route('admin.trash.index', ['type' => 'articles']) }}" 
-               class="group relative flex items-center gap-3 px-6 py-3 rounded-md text-sm font-medium transition-all duration-200 @if($type === 'articles') bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-md @else text-gray-600 hover:bg-gray-50 hover:text-gray-900 @endif">
-                <i class="fas fa-newspaper text-lg transition-transform duration-200 @if($type === 'articles') @else group-hover:scale-110 @endif"></i>
-                <span>الأخبار</span>
+               class="group relative flex items-center gap-2 px-3 py-2 sm:px-6 sm:py-3 rounded-md text-xs sm:text-sm font-medium transition-all duration-200 whitespace-nowrap @if($type === 'articles') bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-md @else text-gray-600 hover:bg-gray-50 hover:text-gray-900 @endif">
+                <i class="fas fa-newspaper text-sm sm:text-lg transition-transform duration-200 @if($type === 'articles') @else group-hover:scale-110 @endif"></i>
+                <span class="hidden sm:inline">الأخبار</span>
+                <span class="inline sm:hidden">أخبار</span>
                 @if(isset($articles))
                     <span class="@if($type === 'articles') bg-white/20 text-white border border-white/30 @else bg-gray-100 text-gray-700 border border-gray-200 @endif inline-flex items-center justify-center min-w-[24px] h-6 px-2 rounded-full text-xs font-bold transition-all duration-200">
                         {{ $articles->total() }}
@@ -56,9 +57,10 @@
             </a>
             
             <a href="{{ route('admin.trash.index', ['type' => 'videos']) }}" 
-               class="group relative flex items-center gap-3 px-6 py-3 rounded-md text-sm font-medium transition-all duration-200 @if($type === 'videos') bg-gradient-to-r from-purple-600 to-purple-700 text-white shadow-md @else text-gray-600 hover:bg-gray-50 hover:text-gray-900 @endif">
-                <i class="fas fa-video text-lg transition-transform duration-200 @if($type === 'videos') @else group-hover:scale-110 @endif"></i>
-                <span>الفيديوهات</span>
+               class="group relative flex items-center gap-2 px-3 py-2 sm:px-6 sm:py-3 rounded-md text-xs sm:text-sm font-medium transition-all duration-200 whitespace-nowrap @if($type === 'videos') bg-gradient-to-r from-purple-600 to-purple-700 text-white shadow-md @else text-gray-600 hover:bg-gray-50 hover:text-gray-900 @endif">
+                <i class="fas fa-video text-sm sm:text-lg transition-transform duration-200 @if($type === 'videos') @else group-hover:scale-110 @endif"></i>
+                <span class="hidden sm:inline">الفيديوهات</span>
+                <span class="inline sm:hidden">فيديو</span>
                 @if(isset($videos))
                     <span class="@if($type === 'videos') bg-white/20 text-white border border-white/30 @else bg-gray-100 text-gray-700 border border-gray-200 @endif inline-flex items-center justify-center min-w-[24px] h-6 px-2 rounded-full text-xs font-bold transition-all duration-200">
                         {{ $videos->total() }}
@@ -70,9 +72,10 @@
             </a>
             
             <a href="{{ route('admin.trash.index', ['type' => 'opinions']) }}" 
-               class="group relative flex items-center gap-3 px-6 py-3 rounded-md text-sm font-medium transition-all duration-200 @if($type === 'opinions') bg-gradient-to-r from-amber-600 to-amber-700 text-white shadow-md @else text-gray-600 hover:bg-gray-50 hover:text-gray-900 @endif">
-                <i class="fas fa-pen-fancy text-lg transition-transform duration-200 @if($type === 'opinions') @else group-hover:scale-110 @endif"></i>
-                <span>مقالات الرأي</span>
+               class="group relative flex items-center gap-2 px-3 py-2 sm:px-6 sm:py-3 rounded-md text-xs sm:text-sm font-medium transition-all duration-200 whitespace-nowrap @if($type === 'opinions') bg-gradient-to-r from-amber-600 to-amber-700 text-white shadow-md @else text-gray-600 hover:bg-gray-50 hover:text-gray-900 @endif">
+                <i class="fas fa-pen-fancy text-sm sm:text-lg transition-transform duration-200 @if($type === 'opinions') @else group-hover:scale-110 @endif"></i>
+                <span class="hidden sm:inline">مقالات الرأي</span>
+                <span class="inline sm:hidden">مقالات</span>
                 @if(isset($opinions))
                     <span class="@if($type === 'opinions') bg-white/20 text-white border border-white/30 @else bg-gray-100 text-gray-700 border border-gray-200 @endif inline-flex items-center justify-center min-w-[24px] h-6 px-2 rounded-full text-xs font-bold transition-all duration-200">
                         {{ $opinions->total() }}
@@ -84,9 +87,10 @@
             </a>
             
             <a href="{{ route('admin.trash.index', ['type' => 'infographics']) }}" 
-               class="group relative flex items-center gap-3 px-6 py-3 rounded-md text-sm font-medium transition-all duration-200 @if($type === 'infographics') bg-gradient-to-r from-green-600 to-green-700 text-white shadow-md @else text-gray-600 hover:bg-gray-50 hover:text-gray-900 @endif">
-                <i class="fas fa-chart-bar text-lg transition-transform duration-200 @if($type === 'infographics') @else group-hover:scale-110 @endif"></i>
-                <span>الإنفوجرافيك</span>
+               class="group relative flex items-center gap-2 px-3 py-2 sm:px-6 sm:py-3 rounded-md text-xs sm:text-sm font-medium transition-all duration-200 whitespace-nowrap @if($type === 'infographics') bg-gradient-to-r from-green-600 to-green-700 text-white shadow-md @else text-gray-600 hover:bg-gray-50 hover:text-gray-900 @endif">
+                <i class="fas fa-chart-bar text-sm sm:text-lg transition-transform duration-200 @if($type === 'infographics') @else group-hover:scale-110 @endif"></i>
+                <span class="hidden sm:inline">الإنفوجرافيك</span>
+                <span class="inline sm:hidden">إنفو</span>
                 @if(isset($infographics))
                     <span class="@if($type === 'infographics') bg-white/20 text-white border border-white/30 @else bg-gray-100 text-gray-700 border border-gray-200 @endif inline-flex items-center justify-center min-w-[24px] h-6 px-2 rounded-full text-xs font-bold transition-all duration-200">
                         {{ $infographics->total() }}
