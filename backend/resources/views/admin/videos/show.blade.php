@@ -44,14 +44,12 @@
                     @elseif($video->video_type === 'facebook')
                         <iframe src="{{ $video->embed_url }}" 
                                 title="{{ $video->title }}" 
-                                frameborder="0" 
-                                class="w-full h-96"
-                                style="border:none;overflow:hidden" 
+                                class="w-full" 
+                                style="border:none;overflow:hidden;min-height:500px;" 
                                 scrolling="no" 
                                 frameborder="0" 
-                                allowTransparency="true" 
-                                allow="encrypted-media" 
-                                allowFullScreen="true">
+                                allowfullscreen="true" 
+                                allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share">
                         </iframe>
                     @else
                         <video controls class="w-full h-96">

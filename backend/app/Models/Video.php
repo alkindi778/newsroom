@@ -169,10 +169,10 @@ class Video extends Model
 
         if ($this->video_type === 'facebook') {
             // Facebook embed requires full URL encoded
-            // Use plugins/post.php which works for both videos and reels
-            // Use the original video_url to ensure support for all link types (watch, share, reel)
+            // Use plugins/post.php which works for videos, reels, and shares
+            // Reference: https://developers.facebook.com/docs/plugins/embedded-posts
             $videoUrl = urlencode($this->video_url);
-            return "https://www.facebook.com/plugins/post.php?href={$videoUrl}&show_text=0&width=500";
+            return "https://www.facebook.com/plugins/post.php?href={$videoUrl}&show_text=false";
         }
 
         return $this->video_url;
