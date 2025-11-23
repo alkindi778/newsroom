@@ -78,14 +78,42 @@
       </div>
 
       <!-- Pagination -->
-      <div v-if="hasMore" class="text-center mt-8">
+      <div v-if="pagination && pagination.last_page > 1" class="flex justify-center gap-1.5 sm:gap-2 flex-wrap mt-8">
+        <!-- Previous Page -->
         <button
-          @click="loadMore"
-          :disabled="loading"
-          class="bg-orange-600 hover:bg-orange-700 disabled:bg-gray-400 text-white px-8 py-3 rounded-full font-semibold transition-colors"
+          @click="goToPage(pagination.current_page - 1)"
+          :disabled="pagination.current_page === 1"
+          class="px-3 py-2 rounded-lg bg-white border border-gray-200 text-gray-600 hover:bg-orange-50 hover:border-orange-200 hover:text-orange-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
-          <span v-if="!loading">تحميل المزيد</span>
-          <span v-else>جاري التحميل...</span>
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+          </svg>
+        </button>
+
+        <!-- Page Numbers -->
+        <button
+          v-for="page in displayedPages"
+          :key="page"
+          @click="goToPage(page)"
+          :class="[
+            'px-4 py-2 rounded-lg font-medium transition-all duration-200',
+            pagination.current_page === page
+              ? 'bg-orange-600 text-white shadow-md'
+              : 'bg-white border border-gray-200 text-gray-600 hover:bg-orange-50 hover:border-orange-200 hover:text-orange-600'
+          ]"
+        >
+          {{ page }}
+        </button>
+
+        <!-- Next Page -->
+        <button
+          @click="goToPage(pagination.current_page + 1)"
+          :disabled="pagination.current_page === pagination.last_page"
+          class="px-3 py-2 rounded-lg bg-white border border-gray-200 text-gray-600 hover:bg-orange-50 hover:border-orange-200 hover:text-orange-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+        >
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+          </svg>
         </button>
       </div>
     </div>
@@ -106,7 +134,7 @@ const writersStore = useWritersStore()
 
 const writers = computed(() => writersStore.writers)
 const loading = computed(() => writersStore.loading)
-const hasMore = computed(() => writersStore.hasMore)
+const pagination = computed(() => writersStore.pagination)
 
 const searchQuery = ref('')
 const sortBy = ref('name')
@@ -143,16 +171,57 @@ watchEffect(() => {
 })
 
 // جلب الكُتاب
-const fetchWriters = async (append = false) => {
+const fetchWriters = async (page = 1) => {
   const params = {
     search: searchQuery.value || undefined,
     sort: sortBy.value,
     per_page: 24,
-    page: append ? writersStore.pagination.current_page + 1 : 1
+    page: page
   }
   
   await writersStore.fetchWriters(params)
 }
+
+// دوال التعامل مع الصفحات
+const goToPage = (page: number | string) => {
+  const pageNumber = typeof page === 'number' ? page : parseInt(page)
+  if (!isNaN(pageNumber) && pageNumber >= 1 && pagination.value && pageNumber <= pagination.value.last_page) {
+    fetchWriters(pageNumber)
+  }
+}
+
+// عرض أرقام الصفحات (مع حذف الصفحات الوسيطة عند الحاجة)
+const displayedPages = computed(() => {
+  if (!pagination.value) return []
+  
+  const current = pagination.value.current_page
+  const last = pagination.value.last_page
+  const delta = 2 // عدد الصفحات التي تظهر قبل وبعد الصفحة الحالية
+  
+  let range: number[] = []
+  let rangeWithDots: (number | string)[] = []
+  let l: number | undefined
+
+  for (let i = 1; i <= last; i++) {
+    if (i === 1 || i === last || (i >= current - delta && i <= current + delta)) {
+      range.push(i)
+    }
+  }
+
+  range.forEach((i) => {
+    if (l) {
+      if (i - l === 2) {
+        rangeWithDots.push(l + 1)
+      } else if (i - l !== 1) {
+        rangeWithDots.push('...')
+      }
+    }
+    rangeWithDots.push(i)
+    l = i
+  })
+
+  return rangeWithDots
+})
 
 // البحث مع تأخير
 let searchTimeout: NodeJS.Timeout | null = null
@@ -163,21 +232,16 @@ const debouncedSearch = () => {
   }, 500)
 }
 
-// تحميل المزيد
-const loadMore = () => {
-  fetchWriters(true)
-}
-
 // مسح الفلاتر
 const clearFilters = () => {
   searchQuery.value = ''
   sortBy.value = 'name'
-  fetchWriters()
+  fetchWriters(1)
 }
 
 // جلب البيانات عند التحميل
 onMounted(() => {
-  fetchWriters()
+  fetchWriters(1)
 })
 </script>
 

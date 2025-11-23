@@ -237,6 +237,14 @@ class VideoService
             ];
         }
 
+        // Facebook pattern
+        if (preg_match('/(?:facebook\.com\/(?:[^\/]+\/videos\/|video\.php\?v=|watch\/\?v=|share\/v\/|share\/r\/|reel\/)|fb\.watch\/)([^"&?\/\s]+)/i', $url, $match)) {
+            return [
+                'type' => 'facebook',
+                'id' => $match[1]
+            ];
+        }
+
         // Default to local
         return [
             'type' => 'local',

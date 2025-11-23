@@ -89,19 +89,43 @@
       </div>
 
       <!-- Pagination -->
-      <div v-if="articles.length > 0 && !loading && hasMore" class="mt-8 flex justify-center">
+      <div v-if="pagination && pagination.last_page > 1" class="flex justify-center gap-1.5 sm:gap-2 flex-wrap mt-8">
+        <!-- Previous Page -->
         <button
-          @click="loadMore"
-          :disabled="loading"
-          class="px-6 py-3 bg-red-600 hover:bg-red-700 text-white font-semibold rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          @click="goToPage(pagination.current_page - 1)"
+          :disabled="pagination.current_page === 1"
+          class="px-3 py-2 rounded-lg bg-white border border-gray-200 text-gray-600 hover:bg-red-50 hover:border-red-200 hover:text-red-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
-          تحميل المزيد
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+          </svg>
         </button>
-      </div>
-      
-      <!-- No more articles message -->
-      <div v-if="articles.length > 0 && !loading && !hasMore" class="mt-8 text-center text-gray-500">
-        <p>{{ locale === 'en' ? 'No more news' : 'لا توجد المزيد من الأخبار' }}</p>
+
+        <!-- Page Numbers -->
+        <button
+          v-for="page in displayedPages"
+          :key="page"
+          @click="goToPage(page)"
+          :class="[
+            'px-4 py-2 rounded-lg font-medium transition-all duration-200',
+            pagination.current_page === page
+              ? 'bg-red-600 text-white shadow-md'
+              : 'bg-white border border-gray-200 text-gray-600 hover:bg-red-50 hover:border-red-200 hover:text-red-600'
+          ]"
+        >
+          {{ page }}
+        </button>
+
+        <!-- Next Page -->
+        <button
+          @click="goToPage(pagination.current_page + 1)"
+          :disabled="pagination.current_page === pagination.last_page"
+          class="px-3 py-2 rounded-lg bg-white border border-gray-200 text-gray-600 hover:bg-red-50 hover:border-red-200 hover:text-red-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+        >
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+          </svg>
+        </button>
       </div>
     </div>
   </div>
@@ -118,7 +142,7 @@ const { locale } = useI18n()
 
 const articles = computed(() => articlesStore.articles)
 const loading = computed(() => articlesStore.loading)
-const hasMore = computed(() => articlesStore.hasMore)
+const pagination = computed(() => articlesStore.pagination)
 
 // دوال الترجمة
 const getArticleTitle = (article: any) => {
@@ -176,20 +200,49 @@ const formatViews = (views: number): string => {
   return views.toLocaleString('ar') + ' مشاهدة'
 }
 
-// Load more articles
-const loadMore = async () => {
-  const nextPage = articlesStore.pagination.current_page + 1
-  console.log('Loading page:', nextPage)
-  console.log('Current pagination:', articlesStore.pagination)
-  
-  await articlesStore.fetchArticles({ 
-    page: nextPage,
-    per_page: 20
-  })
-  
-  console.log('After load - total articles:', articlesStore.articles.length)
-  console.log('Has more:', articlesStore.hasMore)
+// دوال التعامل مع الصفحات
+const goToPage = async (page: number | string) => {
+  const pageNumber = typeof page === 'number' ? page : parseInt(page)
+  if (!isNaN(pageNumber) && pageNumber >= 1 && pagination.value && pageNumber <= pagination.value.last_page) {
+    await articlesStore.fetchArticles({ 
+      page: pageNumber,
+      per_page: 20
+    })
+  }
 }
+
+// عرض أرقام الصفحات (مع حذف الصفحات الوسيطة عند الحاجة)
+const displayedPages = computed(() => {
+  if (!pagination.value) return []
+  
+  const current = pagination.value.current_page
+  const last = pagination.value.last_page
+  const delta = 2 // عدد الصفحات التي تظهر قبل وبعد الصفحة الحالية
+  
+  let range: number[] = []
+  let rangeWithDots: (number | string)[] = []
+  let l: number | undefined
+
+  for (let i = 1; i <= last; i++) {
+    if (i === 1 || i === last || (i >= current - delta && i <= current + delta)) {
+      range.push(i)
+    }
+  }
+
+  range.forEach((i) => {
+    if (l) {
+      if (i - l === 2) {
+        rangeWithDots.push(l + 1)
+      } else if (i - l !== 1) {
+        rangeWithDots.push('...')
+      }
+    }
+    rangeWithDots.push(i)
+    l = i
+  })
+
+  return rangeWithDots
+})
 
 // Fetch articles on mount
 onMounted(async () => {

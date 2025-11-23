@@ -120,7 +120,7 @@
         <div v-else-if="opinions.length > 0">
           <div class="mb-4 text-xs sm:text-sm text-gray-600 text-center md:text-right">
             عرض <span class="font-bold text-gray-900">{{ opinions.length }}</span> من أصل 
-            <span class="font-bold text-gray-900">{{ totalOpinions }}</span> مقال
+            <span class="font-bold text-gray-900">{{ pagination.total }}</span> مقال
           </div>
           
           <!-- مقالات مع صور -->
@@ -158,19 +158,42 @@
           </div>
 
           <!-- Pagination -->
-          <div v-if="totalPages > 1" class="flex justify-center gap-1.5 sm:gap-2 flex-wrap">
+          <div v-if="pagination && pagination.last_page > 1" class="flex justify-center gap-1.5 sm:gap-2 flex-wrap mt-6">
+            <!-- Previous Page -->
             <button
-              v-for="page in totalPages"
+              @click="goToPage(pagination.current_page - 1)"
+              :disabled="pagination.current_page === 1"
+              class="px-3 py-2 rounded-lg bg-white border border-gray-200 text-gray-600 hover:bg-orange-50 hover:border-orange-200 hover:text-orange-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+              </svg>
+            </button>
+
+            <!-- Page Numbers -->
+            <button
+              v-for="page in displayedPages"
               :key="page"
               @click="goToPage(page)"
               :class="[
                 'px-3 sm:px-4 py-1.5 sm:py-2 rounded text-sm sm:text-base font-semibold transition-colors',
-                currentPage === page
-                  ? 'bg-orange-600 text-white'
-                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                pagination.current_page === page
+                  ? 'bg-orange-600 text-white shadow-md'
+                  : 'bg-white border border-gray-200 text-gray-600 hover:bg-orange-50 hover:border-orange-200 hover:text-orange-600'
               ]"
             >
               {{ page }}
+            </button>
+
+            <!-- Next Page -->
+            <button
+              @click="goToPage(pagination.current_page + 1)"
+              :disabled="pagination.current_page === pagination.last_page"
+              class="px-3 py-2 rounded-lg bg-white border border-gray-200 text-gray-600 hover:bg-orange-50 hover:border-orange-200 hover:text-orange-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+              </svg>
             </button>
           </div>
         </div>
@@ -225,10 +248,12 @@ const opinions = ref<Opinion[]>([])
 const loading = ref(false)
 const loadingOpinions = ref(false)
 const error = ref<string | null>(null)
-const currentPage = ref(1)
-const totalPages = ref(1)
-const totalOpinions = ref(0)
-const perPage = 12
+const pagination = ref({
+  current_page: 1,
+  last_page: 1,
+  total: 0,
+  per_page: 12
+})
 
 const hasSocialLinks = computed(() => {
   return writer.value?.social_links?.facebook || 
@@ -276,17 +301,20 @@ const fetchWriterOpinions = async (page: number = 1) => {
   
   try {
     const response = await apiFetch<any>(
-      `/writers/${writer.value.id}/opinions?page=${page}&per_page=${perPage}&status=published&sort_by=published_at&sort_dir=desc`
+      `/writers/${writer.value.id}/opinions?page=${page}&per_page=${pagination.value.per_page}&status=published&sort_by=published_at&sort_dir=desc`
     )
     
     if (response && response.data) {
       opinions.value = response.data
       
-      // Update pagination data
-      if (response.pagination) {
-        currentPage.value = response.pagination.current_page
-        totalPages.value = response.pagination.last_page
-        totalOpinions.value = response.pagination.total
+      // Update pagination data from Laravel response
+      if (response.meta) {
+        pagination.value = {
+          current_page: response.meta.current_page,
+          last_page: response.meta.last_page,
+          total: response.meta.total,
+          per_page: response.meta.per_page
+        }
       }
     } else if (Array.isArray(response)) {
       opinions.value = response
@@ -298,12 +326,46 @@ const fetchWriterOpinions = async (page: number = 1) => {
   }
 }
 
-// الانتقال لصفحة معينة
-const goToPage = (page: number) => {
-  currentPage.value = page
-  fetchWriterOpinions(page)
-  window.scrollTo({ top: 500, behavior: 'smooth' })
+// دوال التعامل مع الصفحات
+const goToPage = async (page: number | string) => {
+  const pageNumber = typeof page === 'number' ? page : parseInt(page)
+  if (!isNaN(pageNumber) && pageNumber >= 1 && pageNumber <= pagination.value.last_page) {
+    await fetchWriterOpinions(pageNumber)
+  }
 }
+
+// عرض أرقام الصفحات (مع حذف الصفحات الوسيطة عند الحاجة)
+const displayedPages = computed(() => {
+  if (!pagination.value) return []
+  
+  const current = pagination.value.current_page
+  const last = pagination.value.last_page
+  const delta = 2 // عدد الصفحات التي تظهر قبل وبعد الصفحة الحالية
+  
+  let range: number[] = []
+  let rangeWithDots: (number | string)[] = []
+  let l: number | undefined
+
+  for (let i = 1; i <= last; i++) {
+    if (i === 1 || i === last || (i >= current - delta && i <= current + delta)) {
+      range.push(i)
+    }
+  }
+
+  range.forEach((i) => {
+    if (l) {
+      if (i - l === 2) {
+        rangeWithDots.push(l + 1)
+      } else if (i - l !== 1) {
+        rangeWithDots.push('...')
+      }
+    }
+    rangeWithDots.push(i)
+    l = i
+  })
+
+  return rangeWithDots
+})
 
 // SEO Meta Tags - يتم تحديثها عند تغيير الكاتب
 watchEffect(() => {

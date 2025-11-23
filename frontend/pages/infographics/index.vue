@@ -136,21 +136,44 @@
         <p class="text-gray-600 text-lg">{{ t('infographic.noData') }}</p>
       </div>
 
-      <!-- Load More Button -->
-      <div v-if="infographics.length > 0 && !loading && hasMore" class="mt-8">
-        <div class="flex items-center gap-4">
-          <div class="flex-1 h-px bg-gray-300"></div>
-          <button
-            @click="loadMore"
-            :disabled="loadingMore"
-            class="inline-flex items-center gap-2 px-6 py-2 border border-gray-900 text-gray-900 font-semibold whitespace-nowrap rounded-md hover:bg-gray-900 hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            <span>{{ loadingMore ? t('common.loading') : t('common.read_more') }}</span>
-            <svg v-if="!loadingMore" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
-            </svg>
-          </button>
-        </div>
+      <!-- Pagination -->
+      <div v-if="pagination && pagination.last_page > 1" class="flex justify-center gap-1.5 sm:gap-2 flex-wrap mt-8">
+        <!-- Previous Page -->
+        <button
+          @click="goToPage(pagination.current_page - 1)"
+          :disabled="pagination.current_page === 1"
+          class="px-3 py-2 rounded-lg bg-white border border-gray-200 text-gray-600 hover:bg-blue-50 hover:border-blue-200 hover:text-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+        >
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+          </svg>
+        </button>
+
+        <!-- Page Numbers -->
+        <button
+          v-for="page in displayedPages"
+          :key="page"
+          @click="goToPage(page)"
+          :class="[
+            'px-4 py-2 rounded-lg font-medium transition-all duration-200',
+            pagination.current_page === page
+              ? 'bg-blue-600 text-white shadow-md'
+              : 'bg-white border border-gray-200 text-gray-600 hover:bg-blue-50 hover:border-blue-200 hover:text-blue-600'
+          ]"
+        >
+          {{ page }}
+        </button>
+
+        <!-- Next Page -->
+        <button
+          @click="goToPage(pagination.current_page + 1)"
+          :disabled="pagination.current_page === pagination.last_page"
+          class="px-3 py-2 rounded-lg bg-white border border-gray-200 text-gray-600 hover:bg-blue-50 hover:border-blue-200 hover:text-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+        >
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+          </svg>
+        </button>
       </div>
     </div>
 
@@ -176,38 +199,42 @@
           <div class="min-h-full flex items-center justify-center p-4 py-12">
             <div class="relative max-w-4xl w-full" @click.stop>
               <!-- Image -->
-              <div class="bg-white rounded-t-lg overflow-hidden">
+              <div class="bg-black/5 rounded-t-lg overflow-hidden flex justify-center">
                 <img 
                   :src="getImageUrl(selectedInfographic.image)" 
                   :alt="selectedInfographic.title"
-                  class="w-full h-auto block"
+                  class="max-w-full max-h-[80vh] object-contain mx-auto"
                   loading="eager"
                 />
               </div>
               
               <!-- Info -->
-              <div class="p-6 bg-white rounded-b-lg border-t border-gray-100">
-                <h3 class="text-xl md:text-2xl font-bold text-gray-900 mb-2">
-                  {{ selectedInfographic.title }}
-                </h3>
-                <p v-if="selectedInfographic.description" class="text-gray-600 text-base md:text-lg leading-relaxed">
-                  {{ selectedInfographic.description }}
-                </p>
-                
-                <!-- Download Button (Optional) -->
-                <div class="mt-4 pt-4 border-t border-gray-100 flex justify-end">
-                  <a 
-                    :href="getImageUrl(selectedInfographic.image)" 
-                    download
-                    target="_blank"
-                    class="inline-flex items-center gap-2 text-blue-600 hover:text-blue-700 font-medium text-sm"
-                    @click.stop
-                  >
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                    </svg>
-                    {{ t('common.download') || 'تحميل الصورة' }}
-                  </a>
+              <div class="p-6 bg-white rounded-b-lg">
+                <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+                  <div class="flex-1">
+                    <h3 class="text-xl md:text-2xl font-bold text-gray-900 mb-2 leading-tight">
+                      {{ selectedInfographic.title }}
+                    </h3>
+                    <p v-if="selectedInfographic.description" class="text-gray-600 text-base leading-relaxed">
+                      {{ selectedInfographic.description }}
+                    </p>
+                  </div>
+                  
+                  <!-- Download Button -->
+                  <div class="flex-shrink-0 pt-2 md:pt-0">
+                    <a 
+                      :href="getImageUrl(selectedInfographic.image)" 
+                      download
+                      target="_blank"
+                      class="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-gray-900 hover:bg-gray-800 text-white font-medium rounded-lg transition-all duration-200 shadow-sm hover:shadow-md focus:ring-2 focus:ring-gray-900 focus:ring-offset-2"
+                      @click.stop
+                    >
+                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                      </svg>
+                      <span>{{ t('common.download') || 'تحميل' }}</span>
+                    </a>
+                  </div>
                 </div>
               </div>
             </div>
@@ -233,38 +260,79 @@ interface InfographicItem {
 // State
 const infographics = ref<InfographicItem[]>([])
 const loading = ref(true)
-const loadingMore = ref(false)
 const selectedInfographic = ref<InfographicItem | null>(null)
-const currentPage = ref(1)
-const hasMore = ref(true)
-const perPage = 12
+const pagination = ref({
+  current_page: 1,
+  last_page: 1,
+  total: 0,
+  per_page: 12
+})
 
 // Fetch infographics
 const fetchInfographics = async (page: number = 1) => {
   try {
+    loading.value = true
     const api = useApi()
-    const result = await api.apiFetch<any>(`/infographics?page=${page}&per_page=${perPage}`)
+    const result = await api.apiFetch<any>(`/infographics?page=${page}&per_page=${pagination.value.per_page}`)
     
-    if (page === 1) {
-      infographics.value = result?.data || []
-    } else {
-      infographics.value = [...infographics.value, ...(result?.data || [])]
+    infographics.value = result?.data || []
+    
+    // Update pagination from Laravel response
+    if (result?.meta) {
+      pagination.value = {
+        current_page: result.meta.current_page,
+        last_page: result.meta.last_page,
+        total: result.meta.total,
+        per_page: result.meta.per_page
+      }
     }
-    
-    // Check if there are more pages
-    hasMore.value = result?.data?.length === perPage
-    currentPage.value = page
   } catch (error) {
     console.error('Error fetching infographics:', error)
+  } finally {
+    loading.value = false
   }
 }
 
-// Load more
-const loadMore = async () => {
-  loadingMore.value = true
-  await fetchInfographics(currentPage.value + 1)
-  loadingMore.value = false
+// دوال التعامل مع الصفحات
+const goToPage = async (page: number | string) => {
+  const pageNumber = typeof page === 'number' ? page : parseInt(page)
+  if (!isNaN(pageNumber) && pageNumber >= 1 && pageNumber <= pagination.value.last_page) {
+    await fetchInfographics(pageNumber)
+  }
 }
+
+// عرض أرقام الصفحات (مع حذف الصفحات الوسيطة عند الحاجة)
+const displayedPages = computed(() => {
+  if (!pagination.value) return []
+  
+  const current = pagination.value.current_page
+  const last = pagination.value.last_page
+  const delta = 2 // عدد الصفحات التي تظهر قبل وبعد الصفحة الحالية
+  
+  let range: number[] = []
+  let rangeWithDots: (number | string)[] = []
+  let l: number | undefined
+
+  for (let i = 1; i <= last; i++) {
+    if (i === 1 || i === last || (i >= current - delta && i <= current + delta)) {
+      range.push(i)
+    }
+  }
+
+  range.forEach((i) => {
+    if (l) {
+      if (i - l === 2) {
+        rangeWithDots.push(l + 1)
+      } else if (i - l !== 1) {
+        rangeWithDots.push('...')
+      }
+    }
+    rangeWithDots.push(i)
+    l = i
+  })
+
+  return rangeWithDots
+})
 
 // Methods
 const getImageUrl = (image: string) => {

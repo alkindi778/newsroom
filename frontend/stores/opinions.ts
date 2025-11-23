@@ -44,8 +44,19 @@ export const useOpinionsStore = defineStore('opinions', {
 
         if (response && response.data) {
           this.opinions = response.data
-          if (response.pagination) {
-            this.pagination = response.pagination
+          // Laravel pagination uses 'meta' instead of 'pagination'
+          if (response.meta) {
+            this.pagination = {
+              current_page: response.meta.current_page,
+              last_page: response.meta.last_page,
+              total: response.meta.total,
+              per_page: response.meta.per_page,
+              from: response.meta.from,
+              to: response.meta.to
+            }
+            console.log('Opinions Pagination Data:', this.pagination)
+          } else {
+            console.log('No pagination data in response:', response)
           }
         }
       } catch (err: any) {

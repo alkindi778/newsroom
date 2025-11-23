@@ -246,13 +246,14 @@ document.getElementById('video_url').addEventListener('input', function() {
     clearTimeout(fetchTimeout);
     
     // Only fetch if URL looks valid
-    if (url && (url.includes('youtube.com') || url.includes('youtu.be') || url.includes('vimeo.com'))) {
+    if (url && (url.includes('youtube.com') || url.includes('youtu.be') || url.includes('vimeo.com') || url.includes('facebook.com') || url.includes('fb.watch'))) {
         // Show loading indicator
         const urlInput = this;
         urlInput.classList.add('border-blue-500');
         
         // Debounce the request
         fetchTimeout = setTimeout(async () => {
+            console.log('Fetching video info for:', url); // Debug log
             try {
                 const response = await fetch('{{ route("admin.videos.fetch-info") }}', {
                     method: 'POST',
@@ -264,6 +265,7 @@ document.getElementById('video_url').addEventListener('input', function() {
                 });
                 
                 const data = await response.json();
+                console.log('Video info received:', data); // Debug log
                 
                 if (data.success) {
                     // Show thumbnail preview first
@@ -297,6 +299,8 @@ document.getElementById('video_url').addEventListener('input', function() {
                         let message = 'تم تحديث معلومات الفيديو بنجاح!';
                         if (data.type === 'youtube' && !data.description) {
                             message = '✅ العنوان والصورة فقط (أضف YOUTUBE_API_KEY في .env للحصول على الوصف والمدة)';
+                        } else if (data.type === 'facebook') {
+                            message = '✅ تم جلب بيانات الفيديو من فيسبوك';
                         }
                         showNotification(message, 'success');
                     }

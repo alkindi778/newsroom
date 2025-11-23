@@ -16,7 +16,9 @@
         "error": "حدث خطأ ما",
         "no_results": "لا توجد نتائج",
         "search_placeholder": "ابحث عن...",
-        "featured": "مميز"
+        "featured": "مميز",
+        "download": "تحميل",
+        "close": "إغلاق"
     },
     "nav": {
         "news": "أخبار",

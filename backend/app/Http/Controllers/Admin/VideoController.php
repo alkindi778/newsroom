@@ -345,6 +345,60 @@ class VideoController extends Controller
                     ];
                 }
             }
+            
+            // Check if Facebook
+            elseif (preg_match('/(?:facebook\.com\/(?:[^\/]+\/videos\/|video\.php\?v=|watch\/\?v=|share\/v\/|share\/r\/|reel\/)|fb\.watch\/)([^"&?\/\s]+)/i', $url, $match)) {
+                $videoId = $match[1];
+                
+                // Use basic scraping to get Open Graph data
+                // Note: This works for public videos. Facebook might block scraping eventually.
+                // Set User-Agent to mimic a browser
+                $context = stream_context_create([
+                    'http' => [
+                        'header' => "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36\r\n"
+                    ]
+                ]);
+                
+                // For fb.watch short links, follow redirect first to get full URL
+                if (strpos($url, 'fb.watch') !== false) {
+                    $headers = get_headers($url, 1);
+                    if (isset($headers['Location'])) {
+                        $url = is_array($headers['Location']) ? end($headers['Location']) : $headers['Location'];
+                    }
+                }
+                
+                $html = @file_get_contents($url, false, $context);
+                
+                if ($html) {
+                    // Extract OG tags
+                    preg_match('/<meta property="og:title" content="([^"]+)"/i', $html, $titleMatch);
+                    preg_match('/<meta property="og:description" content="([^"]+)"/i', $html, $descMatch);
+                    preg_match('/<meta property="og:image" content="([^"]+)"/i', $html, $imageMatch);
+                    
+                    $title = isset($titleMatch[1]) ? html_entity_decode($titleMatch[1]) : 'Facebook Video';
+                    // Clean up title (remove " | Facebook")
+                    $title = str_replace(' | Facebook', '', $title);
+                    
+                    $info = [
+                        'success' => true,
+                        'title' => $title,
+                        'description' => isset($descMatch[1]) ? html_entity_decode($descMatch[1]) : '',
+                        'duration' => '', // Hard to scrape duration reliably without API
+                        'thumbnail' => isset($imageMatch[1]) ? html_entity_decode($imageMatch[1]) : '',
+                        'type' => 'facebook'
+                    ];
+                } else {
+                    // Fallback if scraping fails (e.g. blocked)
+                    $info = [
+                        'success' => true,
+                        'title' => 'Facebook Video',
+                        'description' => '',
+                        'duration' => '',
+                        'thumbnail' => '',
+                        'type' => 'facebook'
+                    ];
+                }
+            }
 
             if (empty($info)) {
                 return response()->json([

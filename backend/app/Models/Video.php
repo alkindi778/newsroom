@@ -144,6 +144,12 @@ class Video extends Model
             return "https://vumbnail.com/{$this->video_id}.jpg";
         }
 
+        if ($this->video_type === 'facebook') {
+            // Facebook doesn't provide a simple public thumbnail URL without API token
+            // Return default unless a custom thumbnail is uploaded
+            return asset('images/default-video-thumbnail.jpg');
+        }
+
         return asset('images/default-video-thumbnail.jpg');
     }
 
@@ -161,6 +167,14 @@ class Video extends Model
             return "https://player.vimeo.com/video/{$this->video_id}";
         }
 
+        if ($this->video_type === 'facebook') {
+            // Facebook embed requires full URL encoded
+            // Use plugins/post.php which works for both videos and reels
+            // Use the original video_url to ensure support for all link types (watch, share, reel)
+            $videoUrl = urlencode($this->video_url);
+            return "https://www.facebook.com/plugins/post.php?href={$videoUrl}&show_text=0&width=500";
+        }
+
         return $this->video_url;
     }
 
@@ -175,6 +189,10 @@ class Video extends Model
 
         if ($this->video_type === 'vimeo' && $this->video_id) {
             return "https://vimeo.com/{$this->video_id}";
+        }
+
+        if ($this->video_type === 'facebook') {
+            return $this->video_url;
         }
 
         return $this->video_url;

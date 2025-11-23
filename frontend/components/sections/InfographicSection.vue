@@ -176,38 +176,42 @@
           <div class="min-h-full flex items-center justify-center p-4 py-12">
             <div class="relative max-w-4xl w-full" @click.stop>
               <!-- Image -->
-              <div class="bg-white rounded-t-lg overflow-hidden">
+              <div class="bg-black/5 rounded-t-lg overflow-hidden flex justify-center">
                 <img 
                   :src="getImageUrl(selectedInfographic.image)" 
                   :alt="selectedInfographic.title"
-                  class="w-full h-auto block"
+                  class="max-w-full max-h-[80vh] object-contain mx-auto"
                   loading="eager"
                 />
               </div>
               
               <!-- Info -->
-              <div class="p-6 bg-white rounded-b-lg border-t border-gray-100">
-                <h3 class="text-xl md:text-2xl font-bold text-gray-900 mb-2">
-                  {{ selectedInfographic.title }}
-                </h3>
-                <p v-if="selectedInfographic.description" class="text-gray-600 text-base md:text-lg leading-relaxed">
-                  {{ selectedInfographic.description }}
-                </p>
-                
-                <!-- Download Button (Optional) -->
-                <div class="mt-4 pt-4 border-t border-gray-100 flex justify-end">
-                  <a 
-                    :href="getImageUrl(selectedInfographic.image)" 
-                    download
-                    target="_blank"
-                    class="inline-flex items-center gap-2 text-blue-600 hover:text-blue-700 font-medium text-sm"
-                    @click.stop
-                  >
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                    </svg>
-                    {{ $t('common.download') || 'تحميل الصورة' }}
-                  </a>
+              <div class="p-6 bg-white rounded-b-lg">
+                <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+                  <div class="flex-1">
+                    <h3 class="text-xl md:text-2xl font-bold text-gray-900 mb-2 leading-tight">
+                      {{ selectedInfographic.title }}
+                    </h3>
+                    <p v-if="selectedInfographic.description" class="text-gray-600 text-base leading-relaxed">
+                      {{ selectedInfographic.description }}
+                    </p>
+                  </div>
+                  
+                  <!-- Download Button -->
+                  <div class="flex-shrink-0 pt-2 md:pt-0">
+                    <a 
+                      :href="getImageUrl(selectedInfographic.image)" 
+                      download
+                      target="_blank"
+                      class="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-gray-900 hover:bg-gray-800 text-white font-medium rounded-lg transition-all duration-200 shadow-sm hover:shadow-md focus:ring-2 focus:ring-gray-900 focus:ring-offset-2"
+                      @click.stop
+                    >
+                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                      </svg>
+                      <span>{{ $t('common.download') || 'تحميل' }}</span>
+                    </a>
+                  </div>
                 </div>
               </div>
             </div>

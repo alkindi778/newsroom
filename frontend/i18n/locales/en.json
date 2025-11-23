@@ -16,7 +16,9 @@
         "error": "Something went wrong",
         "no_results": "No results found",
         "search_placeholder": "Search for...",
-        "featured": "Featured"
+        "featured": "Featured",
+        "download": "Download",
+        "close": "Close"
     },
     "nav": {
         "news": "News",
