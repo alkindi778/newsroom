@@ -159,36 +159,57 @@
       <transition name="fade">
         <div 
           v-if="selectedInfographic" 
-          class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/95 backdrop-blur-sm"
+          class="fixed inset-0 z-50 overflow-y-auto bg-black/95 backdrop-blur-sm"
           @click="closeInfographic"
         >
-          <div class="relative max-w-5xl w-full" @click.stop>
-            <!-- Close Button -->
-            <button 
-              @click="closeInfographic"
-              class="absolute -top-12 left-0 p-2 text-white hover:text-gray-300 transition-colors"
-            >
-              <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
+          <!-- Close Button (Fixed) -->
+          <button 
+            @click="closeInfographic"
+            class="fixed top-4 left-4 z-[60] p-2 text-white bg-white/10 hover:bg-white/20 rounded-full transition-colors backdrop-blur-md"
+            :title="$t('common.close')"
+          >
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
 
-            <!-- Image -->
-            <img 
-              :src="getImageUrl(selectedInfographic.image)" 
-              :alt="selectedInfographic.title"
-              class="w-full h-auto rounded-lg shadow-2xl"
-              loading="eager"
-            />
-            
-            <!-- Info -->
-            <div class="mt-4 p-6 bg-white rounded-lg">
-              <h3 class="text-2xl font-bold text-gray-900 mb-2">
-                {{ selectedInfographic.title }}
-              </h3>
-              <p v-if="selectedInfographic.description" class="text-gray-600 text-lg">
-                {{ selectedInfographic.description }}
-              </p>
+          <div class="min-h-full flex items-center justify-center p-4 py-12">
+            <div class="relative max-w-4xl w-full" @click.stop>
+              <!-- Image -->
+              <div class="bg-white rounded-t-lg overflow-hidden">
+                <img 
+                  :src="getImageUrl(selectedInfographic.image)" 
+                  :alt="selectedInfographic.title"
+                  class="w-full h-auto block"
+                  loading="eager"
+                />
+              </div>
+              
+              <!-- Info -->
+              <div class="p-6 bg-white rounded-b-lg border-t border-gray-100">
+                <h3 class="text-xl md:text-2xl font-bold text-gray-900 mb-2">
+                  {{ selectedInfographic.title }}
+                </h3>
+                <p v-if="selectedInfographic.description" class="text-gray-600 text-base md:text-lg leading-relaxed">
+                  {{ selectedInfographic.description }}
+                </p>
+                
+                <!-- Download Button (Optional) -->
+                <div class="mt-4 pt-4 border-t border-gray-100 flex justify-end">
+                  <a 
+                    :href="getImageUrl(selectedInfographic.image)" 
+                    download
+                    target="_blank"
+                    class="inline-flex items-center gap-2 text-blue-600 hover:text-blue-700 font-medium text-sm"
+                    @click.stop
+                  >
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                    </svg>
+                    {{ t('common.download') || 'تحميل الصورة' }}
+                  </a>
+                </div>
+              </div>
             </div>
           </div>
         </div>
