@@ -24,7 +24,10 @@ class ContactMessageController extends Controller
     {
         abort_unless(auth()->user()->can('view_contact_messages'), 403, 'ليس لديك صلاحية لعرض رسائل التواصل');
         
-        $query = ContactMessage::with(['assignedUser', 'approver'])->latest();
+        // استبعاد الرسائل المؤرشفة
+        $query = ContactMessage::with(['assignedUser', 'approver'])
+            ->notArchived()
+            ->latest();
 
         // فلترة حسب الحالة
         if ($request->filled('status')) {
@@ -58,9 +61,10 @@ class ContactMessageController extends Controller
         }
 
         $messages = $query->paginate(20);
-        $newCount = ContactMessage::where('status', 'new')->count();
-        $unreadCount = ContactMessage::whereNull('read_at')->count();
-        $myMessagesCount = ContactMessage::assignedTo(auth()->id())->where('approval_status', 'forwarded')->count();
+        // الإحصائيات تستثني المؤرشفة أيضاً
+        $newCount = ContactMessage::notArchived()->where('status', 'new')->count();
+        $unreadCount = ContactMessage::notArchived()->whereNull('read_at')->count();
+        $myMessagesCount = ContactMessage::notArchived()->assignedTo(auth()->id())->where('approval_status', 'forwarded')->count();
 
         return view('admin.contact-messages.index', compact('messages', 'newCount', 'unreadCount', 'myMessagesCount'));
     }
