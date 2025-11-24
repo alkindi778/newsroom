@@ -32,9 +32,23 @@
       <article class="bg-white rounded-lg shadow-lg overflow-hidden">
         <!-- Video Embed -->
         <div 
-          class="relative w-full bg-black flex items-center justify-center"
-          :class="isReelsOrShorts ? 'aspect-[9/16] max-h-[80vh]' : 'aspect-video'"
-          :style="isReelsOrShorts ? 'max-width: min(100%, 500px); margin: 0 auto;' : ''"
+          v-if="isReelsOrShorts"
+          class="relative bg-black flex items-center justify-center mx-auto w-full"
+          style="max-width: min(100%, 420px); aspect-ratio: 9/16; height: auto; max-height: min(calc(100vh - 200px), 750px);"
+        >
+          <iframe
+            :src="video.embed_url"
+            :title="getVideoTitle(video)"
+            frameborder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            allowfullscreen
+            class="absolute inset-0 w-full h-full rounded-lg"
+          ></iframe>
+        </div>
+        <div 
+          v-else
+          class="relative w-full bg-black"
+          style="aspect-ratio: 16/9;"
         >
           <iframe
             :src="video.embed_url"
