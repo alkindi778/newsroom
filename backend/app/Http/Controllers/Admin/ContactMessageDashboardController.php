@@ -16,7 +16,7 @@ class ContactMessageDashboardController extends Controller
      */
     public function index()
     {
-        abort_unless(auth()->user()->can('manage_contact_messages'), 403);
+        abort_unless(auth()->user()->canAny(['view_contact_dashboard', 'manage_contact_messages']), 403);
 
         // الإحصائيات العامة
         $stats = [

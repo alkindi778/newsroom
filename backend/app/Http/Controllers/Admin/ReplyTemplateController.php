@@ -13,7 +13,7 @@ class ReplyTemplateController extends Controller
      */
     public function index()
     {
-        abort_unless(auth()->user()->can('manage_contact_messages'), 403);
+        abort_unless(auth()->user()->canAny(['manage_reply_templates', 'manage_contact_messages']), 403);
 
         $templates = ReplyTemplate::with('creator')
             ->orderBy('category')
@@ -28,7 +28,7 @@ class ReplyTemplateController extends Controller
      */
     public function create()
     {
-        abort_unless(auth()->user()->can('manage_contact_messages'), 403);
+        abort_unless(auth()->user()->canAny(['manage_reply_templates', 'manage_contact_messages']), 403);
 
         return view('admin.reply-templates.create');
     }
@@ -38,7 +38,7 @@ class ReplyTemplateController extends Controller
      */
     public function store(Request $request)
     {
-        abort_unless(auth()->user()->can('manage_contact_messages'), 403);
+        abort_unless(auth()->user()->canAny(['manage_reply_templates', 'manage_contact_messages']), 403);
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
@@ -62,7 +62,7 @@ class ReplyTemplateController extends Controller
      */
     public function edit($id)
     {
-        abort_unless(auth()->user()->can('manage_contact_messages'), 403);
+        abort_unless(auth()->user()->canAny(['manage_reply_templates', 'manage_contact_messages']), 403);
 
         $template = ReplyTemplate::findOrFail($id);
 
@@ -74,7 +74,7 @@ class ReplyTemplateController extends Controller
      */
     public function update(Request $request, $id)
     {
-        abort_unless(auth()->user()->can('manage_contact_messages'), 403);
+        abort_unless(auth()->user()->canAny(['manage_reply_templates', 'manage_contact_messages']), 403);
 
         $template = ReplyTemplate::findOrFail($id);
 
@@ -99,7 +99,7 @@ class ReplyTemplateController extends Controller
      */
     public function destroy($id)
     {
-        abort_unless(auth()->user()->can('manage_contact_messages'), 403);
+        abort_unless(auth()->user()->canAny(['manage_reply_templates', 'manage_contact_messages']), 403);
 
         $template = ReplyTemplate::findOrFail($id);
         $template->delete();
@@ -113,7 +113,7 @@ class ReplyTemplateController extends Controller
      */
     public function toggle($id)
     {
-        abort_unless(auth()->user()->can('manage_contact_messages'), 403);
+        abort_unless(auth()->user()->canAny(['manage_reply_templates', 'manage_contact_messages']), 403);
 
         $template = ReplyTemplate::findOrFail($id);
         $template->update(['is_active' => !$template->is_active]);
