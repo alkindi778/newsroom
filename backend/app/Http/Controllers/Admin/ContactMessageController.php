@@ -5,10 +5,18 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\ContactMessage;
 use App\Models\User;
+use App\Services\OfficeManagerAiService;
 use Illuminate\Http\Request;
 
 class ContactMessageController extends Controller
 {
+    protected $aiService;
+
+    public function __construct(OfficeManagerAiService $aiService)
+    {
+        $this->aiService = $aiService;
+    }
+
     /**
      * عرض قائمة الرسائل
      */
@@ -64,7 +72,7 @@ class ContactMessageController extends Controller
     {
         abort_unless(auth()->user()->can('view_contact_messages'), 403, 'ليس لديك صلاحية لعرض رسائل التواصل');
         
-        $message = ContactMessage::with(['assignedUser', 'approver'])->findOrFail($id);
+        $message = ContactMessage::with(['assignedUser', 'approver', 'replies.user'])->findOrFail($id);
         
         // تحديد الرسالة كمقروءة
         if (!$message->read_at) {
@@ -88,24 +96,32 @@ class ContactMessageController extends Controller
         $validationRules = [
             'status' => 'required|in:new,read,in_progress,closed',
             'admin_notes' => 'nullable|string',
+            'internal_notes' => 'nullable|string',
+            'priority' => 'nullable|in:normal,high,urgent',
         ];
 
         // فقط المدراء يمكنهم تكليف الرسائل
         if (auth()->user()->can('assign_contact_messages')) {
             $validationRules['assigned_to'] = 'nullable|exists:users,id';
+            $validationRules['forwarding_reason'] = 'nullable|string';
         }
 
         $request->validate($validationRules);
 
-        $dataToUpdate = ['status' => $request->status, 'admin_notes' => $request->admin_notes];
+        $dataToUpdate = [
+            'status' => $request->status, 
+            'admin_notes' => $request->admin_notes,
+            'internal_notes' => $request->internal_notes,
+            'priority' => $request->priority ?? 'normal'
+        ];
         
         // إضافة assigned_to فقط إذا كان المستخدم لديه الصلاحية
         if (auth()->user()->can('assign_contact_messages') && $request->has('assigned_to')) {
             $assignedTo = $request->assigned_to;
             
-            // إذا تم التكليف لأول مرة، قم بتحويل الرسالة
-            if ($assignedTo && $message->assigned_to != $assignedTo && $message->approval_status == 'pending') {
-                $message->forward($assignedTo);
+            // إذا تم التكليف لأول مرة أو تغيير المكلف، قم بتحويل الرسالة
+            if ($assignedTo && $message->assigned_to != $assignedTo) {
+                $message->forward($assignedTo, $request->forwarding_reason, $request->priority ?? 'normal');
             } else {
                 $dataToUpdate['assigned_to'] = $assignedTo;
             }
@@ -115,6 +131,46 @@ class ContactMessageController extends Controller
 
         return redirect()->route('admin.contact-messages.show', $message->id)
             ->with('success', 'تم تحديث الرسالة بنجاح');
+    }
+
+    /**
+     * تحليل الرسالة باستخدام الذكاء الاصطناعي
+     */
+    public function analyze(Request $request, $id)
+    {
+        abort_unless(auth()->user()->can('manage_contact_messages'), 403, 'ليس لديك صلاحية لاستخدام التحليل الذكي');
+
+        $message = ContactMessage::findOrFail($id);
+
+        try {
+            $analysis = $this->aiService->analyzeContactMessage(
+                $message->message,
+                $message->full_name,
+                $message->subject
+            );
+
+            if (!isset($analysis['summary']) || !isset($analysis['sentiment']) || !isset($analysis['suggested_reply'])) {
+                throw new \Exception('التحليل لم يعد بالحقول المطلوبة');
+            }
+
+            $message->update([
+                'ai_summary' => $analysis['summary'],
+                'ai_sentiment' => $analysis['sentiment'],
+                'ai_suggested_reply' => $analysis['suggested_reply'],
+                'ai_category' => $analysis['category'] ?? 'other',
+            ]);
+
+            $message->refresh();
+
+            return redirect()->route('admin.contact-messages.show', $message->id)
+                ->with('success', 'تم تحليل الرسالة بنجاح');
+
+        } catch (\Exception $e) {
+            \Log::error('AI analysis failed', ['message_id' => $id, 'error' => $e->getMessage()]);
+            
+            return redirect()->route('admin.contact-messages.show', $message->id)
+                ->with('error', 'فشل تحليل الرسالة: ' . $e->getMessage());
+        }
     }
 
     /**

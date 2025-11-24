@@ -17,12 +17,14 @@ use App\Models\HomepageSection;
 use App\Models\Video;
 use App\Models\Writer;
 use App\Models\Opinion;
+use App\Models\ContactMessage;
 use App\Observers\ArticleObserver;
 use App\Observers\CategoryObserver;
 use App\Observers\HomepageSectionObserver;
 use App\Observers\VideoObserver;
 use App\Observers\WriterObserver;
 use App\Observers\OpinionObserver;
+use App\Observers\ContactMessageObserver;
 use App\Models\SiteSetting;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Schema;
@@ -76,6 +78,9 @@ class AppServiceProvider extends ServiceProvider
         
         // تسجيل Opinion Observer للترجمة التلقائية
         Opinion::observe(OpinionObserver::class);
+        
+        // تسجيل ContactMessage Observer للإشعارات
+        ContactMessage::observe(ContactMessageObserver::class);
 
         // فرض HTTPS في Production أو عند تفعيل APP_FORCE_HTTPS
         if ($this->app->environment('production') || config('app.force_https')) {

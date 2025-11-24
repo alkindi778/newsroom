@@ -410,6 +410,10 @@ Route::middleware(['auth', App\Http\Middleware\AdminMiddleware::class])->group(f
     Route::prefix('contact-messages')->name('contact-messages.')->group(function () {
         Route::get('/', [ContactMessageController::class, 'index'])->name('index');
         
+        // Dashboard - لوحة الإحصائيات
+        Route::get('/dashboard', [\App\Http\Controllers\Admin\ContactMessageDashboardController::class, 'index'])->name('dashboard');
+        Route::get('/dashboard/chart-data', [\App\Http\Controllers\Admin\ContactMessageDashboardController::class, 'chartData'])->name('dashboard.chart');
+        
         // مراجعة الرسائل (للمدراء) - يجب أن تكون قبل /{id}
         Route::prefix('review')->name('review.')->group(function () {
             Route::get('/', [\App\Http\Controllers\Admin\ContactMessageReviewController::class, 'index'])->name('index');
@@ -418,8 +422,32 @@ Route::middleware(['auth', App\Http\Middleware\AdminMiddleware::class])->group(f
             Route::post('/{id}/reject', [\App\Http\Controllers\Admin\ContactMessageReviewController::class, 'reject'])->name('reject');
         });
         
+        // قوالب الردود
+        Route::prefix('templates')->name('templates.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Admin\ReplyTemplateController::class, 'index'])->name('index');
+            Route::get('/create', [\App\Http\Controllers\Admin\ReplyTemplateController::class, 'create'])->name('create');
+            Route::post('/', [\App\Http\Controllers\Admin\ReplyTemplateController::class, 'store'])->name('store');
+            Route::get('/{id}/edit', [\App\Http\Controllers\Admin\ReplyTemplateController::class, 'edit'])->name('edit');
+            Route::put('/{id}', [\App\Http\Controllers\Admin\ReplyTemplateController::class, 'update'])->name('update');
+            Route::delete('/{id}', [\App\Http\Controllers\Admin\ReplyTemplateController::class, 'destroy'])->name('destroy');
+            Route::post('/{id}/toggle', [\App\Http\Controllers\Admin\ReplyTemplateController::class, 'toggle'])->name('toggle');
+        });
+        
         Route::post('/mark-as-read', [ContactMessageController::class, 'markAsRead'])->name('mark-as-read');
         Route::get('/statistics/data', [ContactMessageController::class, 'statistics'])->name('statistics');
+        
+        // AI Analysis
+        Route::post('/{id}/analyze', [ContactMessageController::class, 'analyze'])->name('analyze');
+        
+        // الردود
+        Route::post('/{id}/reply/email', [\App\Http\Controllers\Admin\ContactMessageReplyController::class, 'sendEmail'])->name('reply.email');
+        Route::post('/{id}/reply/note', [\App\Http\Controllers\Admin\ContactMessageReplyController::class, 'addNote'])->name('reply.note');
+        Route::delete('/{id}/reply/{replyId}', [\App\Http\Controllers\Admin\ContactMessageReplyController::class, 'destroy'])->name('reply.destroy');
+        Route::get('/{id}/email-preview', [\App\Http\Controllers\Admin\ContactMessageReplyController::class, 'previewEmail'])->name('email-preview');
+        
+        // API للقوالب
+        Route::get('/api/templates', [\App\Http\Controllers\Admin\ContactMessageReplyController::class, 'getTemplates'])->name('api.templates');
+        Route::get('/api/templates/{templateId}/message/{messageId}', [\App\Http\Controllers\Admin\ContactMessageReplyController::class, 'getTemplate'])->name('api.template');
         
         // Dynamic routes يجب أن تكون في النهاية
         Route::get('/{id}', [ContactMessageController::class, 'show'])->name('show');

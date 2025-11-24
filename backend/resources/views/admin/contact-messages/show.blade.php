@@ -156,10 +156,10 @@
                         <div>
                             <label class="block text-sm font-bold text-gray-700 mb-2">الملاحظات الداخلية</label>
                             @if(in_array($message->approval_status, ['approved', 'rejected']))
-                                <div class="w-full px-4 py-3 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 whitespace-pre-wrap min-h-[100px]">{{ $message->admin_notes ?: 'لا توجد ملاحظات' }}</div>
-                                <input type="hidden" name="admin_notes" value="{{ $message->admin_notes }}">
+                                <div class="w-full px-4 py-3 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 whitespace-pre-wrap min-h-[100px]">{{ $message->internal_notes ?: ($message->admin_notes ?: 'لا توجد ملاحظات') }}</div>
+                                <input type="hidden" name="internal_notes" value="{{ $message->internal_notes }}">
                             @else
-                                <textarea name="admin_notes" rows="4" class="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none transition-all" placeholder="أضف ملاحظاتك هنا...">{{ $message->admin_notes }}</textarea>
+                                <textarea name="internal_notes" rows="4" class="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none transition-all" placeholder="أضف ملاحظات داخلية للموظف المختص...">{{ $message->internal_notes ?? $message->admin_notes }}</textarea>
                             @endif
                         </div>
 
@@ -192,11 +192,32 @@
                                 @endif
                             </div>
                             
+                            <div>
+                                <label class="block text-sm font-bold text-gray-700 mb-2">الأولوية</label>
+                                @if(in_array($message->approval_status, ['approved', 'rejected']))
+                                    <div class="w-full px-4 py-3 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 font-medium">
+                                        @if($message->priority == 'urgent')
+                                            عاجل 🔴
+                                        @elseif($message->priority == 'high')
+                                            هام 🟠
+                                        @else
+                                            عادي ⚪
+                                        @endif
+                                    </div>
+                                @else
+                                    <select name="priority" class="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
+                                        <option value="normal" {{ $message->priority == 'normal' ? 'selected' : '' }}>عادي</option>
+                                        <option value="high" {{ $message->priority == 'high' ? 'selected' : '' }}>هام</option>
+                                        <option value="urgent" {{ $message->priority == 'urgent' ? 'selected' : '' }}>عاجل</option>
+                                    </select>
+                                @endif
+                            </div>
+                            
                             @can('assign_contact_messages')
                                 @if(in_array($message->approval_status, ['approved', 'rejected']))
                                     {{-- عرض المكلف للقراءة فقط بعد الموافقة/الرفض --}}
                                     @if($message->assignedUser)
-                                    <div>
+                                    <div class="col-span-2">
                                         <label class="block text-sm font-bold text-gray-700 mb-2">مكلف إلى</label>
                                         <div class="flex items-center gap-2 text-gray-900 bg-gray-100 px-4 py-3 rounded-lg">
                                             <svg class="w-5 h-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
@@ -209,16 +230,21 @@
                                     @endif
                                 @else
                                     {{-- يمكن التعديل قبل الموافقة/الرفض --}}
-                                    <div>
-                                        <label class="block text-sm font-bold text-gray-700 mb-2">تكليف إلى</label>
+                                    <div class="col-span-2">
+                                        <label class="block text-sm font-bold text-gray-700 mb-2">تكليف/تحويل إلى</label>
                                         <select name="assigned_to" class="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
                                             <option value="">غير مكلف</option>
                                             @foreach($users as $user)
                                                 <option value="{{ $user->id }}" {{ $message->assigned_to == $user->id ? 'selected' : '' }}>
-                                                    {{ $user->name }}
+                                                    {{ $user->name }} ({{ $user->roles->pluck('name')->first() ?? 'موظف' }})
                                                 </option>
                                             @endforeach
                                         </select>
+                                    </div>
+                                    
+                                    <div class="col-span-2">
+                                        <label class="block text-sm font-bold text-gray-700 mb-2">سبب التحويل (يظهر للمدير)</label>
+                                        <textarea name="forwarding_reason" rows="2" class="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none transition-all" placeholder="لماذا تقوم بتحويل هذه الرسالة؟">{{ $message->forwarding_reason }}</textarea>
                                     </div>
                                 @endif
                             @else
@@ -259,6 +285,80 @@
 
         <!-- Sidebar -->
         <div class="lg:col-span-1 space-y-6">
+            
+            <!-- تحليل الذكاء الاصطناعي -->
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                <div class="bg-gradient-to-r from-purple-600 to-indigo-600 border-b border-purple-700 px-6 py-4">
+                    <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                        </svg>
+                        المساعد الذكي
+                    </h3>
+                </div>
+                <div class="p-6 space-y-4">
+                    @if(!$message->ai_summary)
+                        <p class="text-gray-600 text-sm mb-4">يمكنك استخدام الذكاء الاصطناعي لتحليل محتوى الرسالة واقتراح رد مناسب.</p>
+                        <form action="{{ route('admin.contact-messages.analyze', $message->id) }}" method="POST">
+                            @csrf
+                            <button type="submit" class="w-full px-4 py-3 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-lg transition-colors duration-200 flex items-center justify-center gap-2 shadow-sm">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.384-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path>
+                                </svg>
+                                تحليل الرسالة
+                            </button>
+                        </form>
+                    @else
+                        <!-- تصنيف الرسالة -->
+                        @if($message->ai_category)
+                        <div class="bg-gray-50 rounded-lg p-3 border border-gray-200">
+                            <div class="text-xs font-bold text-gray-500 uppercase mb-2">التصنيف</div>
+                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-{{ $message->ai_category_color }}-100 text-{{ $message->ai_category_color }}-800">
+                                {!! $message->ai_category_icon_svg !!}
+                                {{ $message->ai_category_label }}
+                            </span>
+                        </div>
+                        @endif
+
+                        <!-- تحليل المشاعر -->
+                        <div class="bg-gray-50 rounded-lg p-3 border border-gray-200">
+                            <div class="text-xs font-bold text-gray-500 uppercase mb-2">نبرة الرسالة</div>
+                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-{{ $message->ai_sentiment_color }}-100 text-{{ $message->ai_sentiment_color }}-800">
+                                {!! $message->ai_sentiment_icon_svg !!}
+                                {{ $message->ai_sentiment_label }}
+                            </span>
+                        </div>
+
+                        <!-- الملخص -->
+                        <div class="bg-gray-50 rounded-lg p-3 border border-gray-200">
+                            <div class="text-xs font-bold text-gray-500 uppercase mb-2">الملخص</div>
+                            <p class="text-sm text-gray-800 leading-relaxed">{{ $message->ai_summary }}</p>
+                        </div>
+
+                        <!-- الرد المقترح -->
+                        <div class="bg-gray-50 rounded-lg p-3 border border-gray-200">
+                            <div class="text-xs font-bold text-gray-500 uppercase mb-2">الرد المقترح</div>
+                            <div class="bg-white p-2 rounded border border-gray-200 text-xs text-gray-600 max-h-32 overflow-y-auto">
+                                {{Str::limit($message->ai_suggested_reply, 150)}}
+                            </div>
+                            <button onclick="navigator.clipboard.writeText(`{{$message->ai_suggested_reply}}`); alert('تم نسخ الرد المقترح')" class="mt-2 w-full text-xs text-purple-600 hover:text-purple-800 font-medium flex items-center justify-center gap-1">
+                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path>
+                                </svg>
+                                نسخ الرد المقترح
+                            </button>
+                        </div>
+                        
+                        <form action="{{ route('admin.contact-messages.analyze', $message->id) }}" method="POST" class="mt-2">
+                            @csrf
+                            <button type="submit" class="text-xs text-gray-500 hover:text-gray-700 underline w-full text-center">
+                                إعادة التحليل
+                            </button>
+                        </form>
+                    @endif
+                </div>
+            </div>
+
             <!-- معلومات الرسالة -->
             <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
                 <div class="bg-gray-50 border-b border-gray-200 px-6 py-4">
@@ -418,5 +518,173 @@
             </div>
         </div>
     </div>
+    
+    <!-- قسم الردود والمحادثات -->
+    <div class="mt-8 space-y-6">
+        <!-- إرسال رد جديد -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+            <div class="bg-gradient-to-r from-green-600 to-teal-600 border-b px-6 py-4">
+                <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                    </svg>
+                    إرسال رد بالبريد الإلكتروني
+                </h3>
+            </div>
+            <form action="{{ route('admin.contact-messages.reply.email', $message->id) }}" method="POST">
+                @csrf
+                <div class="p-6 space-y-4">
+                    <!-- اختيار قالب -->
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-2">اختر قالب رد (اختياري)</label>
+                        <select id="template-select" class="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                            <option value="">-- بدون قالب --</option>
+                            @if($message->ai_suggested_reply)
+                                <option value="ai">[AI] استخدام رد الذكاء الاصطناعي</option>
+                            @endif
+                            @php $templates = \App\Models\ReplyTemplate::active()->orderBy('usage_count', 'desc')->get(); @endphp
+                            @foreach($templates as $template)
+                                <option value="{{ $template->id }}" data-subject="{{ $template->parseSubject($message) }}" data-content="{{ $template->parseContent($message) }}">
+                                    {{ $template->name }} ({{ $template->category_label }})
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-2">عنوان البريد <span class="text-red-500">*</span></label>
+                        <input type="text" name="subject" id="reply-subject" value="رد: {{ $message->subject }}" required class="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-2">نص الرد <span class="text-red-500">*</span></label>
+                        <textarea name="content" id="reply-content" rows="8" required class="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent" placeholder="اكتب ردك هنا..."></textarea>
+                    </div>
+                    
+                    <input type="hidden" name="template_id" id="template-id" value="">
+                </div>
+                <div class="bg-gray-50 border-t border-gray-200 px-6 py-4 flex justify-between items-center">
+                    <div class="flex items-center gap-3">
+                        <span class="text-sm text-gray-500">سيتم الإرسال إلى: <strong>{{ $message->email }}</strong></span>
+                        <a href="{{ route('admin.contact-messages.email-preview', $message->id) }}" target="_blank" class="text-sm text-purple-600 hover:text-purple-800 flex items-center gap-1">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                            </svg>
+                            معاينة القالب
+                        </a>
+                    </div>
+                    <button type="submit" class="px-6 py-2.5 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-colors flex items-center gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
+                        </svg>
+                        إرسال الرد
+                    </button>
+                </div>
+            </form>
+        </div>
+        
+        <!-- إضافة ملاحظة داخلية -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+            <div class="bg-gradient-to-r from-yellow-500 to-orange-500 border-b px-6 py-4">
+                <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                    </svg>
+                    إضافة ملاحظة داخلية
+                </h3>
+            </div>
+            <form action="{{ route('admin.contact-messages.reply.note', $message->id) }}" method="POST">
+                @csrf
+                <div class="p-6">
+                    <textarea name="content" rows="3" required class="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent" placeholder="ملاحظة داخلية للفريق..."></textarea>
+                </div>
+                <div class="bg-gray-50 border-t border-gray-200 px-6 py-3 flex justify-end">
+                    <button type="submit" class="px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-white font-medium rounded-lg transition-colors">
+                        إضافة ملاحظة
+                    </button>
+                </div>
+            </form>
+        </div>
+        
+        <!-- سجل المحادثات -->
+        @if($message->replies->isNotEmpty())
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+            <div class="bg-gradient-to-r from-blue-600 to-indigo-600 border-b px-6 py-4">
+                <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+                    </svg>
+                    سجل المحادثات ({{ $message->replies->count() }})
+                </h3>
+            </div>
+            <div class="divide-y divide-gray-200">
+                @foreach($message->replies as $reply)
+                    <div class="p-4 {{ $reply->type == 'internal_note' ? 'bg-yellow-50' : ($reply->type == 'system' ? 'bg-gray-50' : '') }}">
+                        <div class="flex justify-between items-start mb-2">
+                            <div class="flex items-center gap-2">
+                                {!! $reply->type_icon_svg !!}
+                                <span class="font-semibold text-gray-900">{{ $reply->user->name ?? 'النظام' }}</span>
+                                <span class="text-xs px-2 py-0.5 rounded-full {{ $reply->type == 'email' ? 'bg-green-100 text-green-800' : ($reply->type == 'internal_note' ? 'bg-yellow-100 text-yellow-800' : 'bg-gray-100 text-gray-800') }}">
+                                    {{ $reply->type_label }}
+                                </span>
+                                @if($reply->type == 'email')
+                                    @if($reply->sent_successfully)
+                                        <span class="inline-flex items-center gap-1 text-xs text-green-600">
+                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                            تم الإرسال
+                                        </span>
+                                    @else
+                                        <span class="inline-flex items-center gap-1 text-xs text-red-600">
+                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                                            فشل الإرسال
+                                        </span>
+                                    @endif
+                                @endif
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="text-xs text-gray-500">{{ $reply->created_at->format('Y-m-d H:i') }}</span>
+                                @if($reply->user_id == auth()->id() || auth()->user()->hasRole('super-admin'))
+                                    <form action="{{ route('admin.contact-messages.reply.destroy', [$message->id, $reply->id]) }}" method="POST" onsubmit="return confirm('هل أنت متأكد؟')" class="inline">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="text-red-500 hover:text-red-700 text-xs">حذف</button>
+                                    </form>
+                                @endif
+                            </div>
+                        </div>
+                        @if($reply->subject)
+                            <div class="text-sm font-medium text-gray-700 mb-1">{{ $reply->subject }}</div>
+                        @endif
+                        <div class="text-gray-600 text-sm whitespace-pre-wrap">{{ $reply->content }}</div>
+                    </div>
+                @endforeach
+            </div>
+        </div>
+        @endif
+    </div>
 </div>
+
+<script>
+document.getElementById('template-select').addEventListener('change', function() {
+    const templateId = this.value;
+    const subjectInput = document.getElementById('reply-subject');
+    const contentInput = document.getElementById('reply-content');
+    const templateIdInput = document.getElementById('template-id');
+    
+    if (templateId === 'ai') {
+        // استخدام رد AI
+        contentInput.value = `{{ $message->ai_suggested_reply ?? '' }}`.replace(/\\n/g, '\n');
+        templateIdInput.value = '';
+    } else if (templateId) {
+        // استخدام قالب
+        const option = this.options[this.selectedIndex];
+        subjectInput.value = option.dataset.subject || subjectInput.value;
+        contentInput.value = option.dataset.content || '';
+        templateIdInput.value = templateId;
+    } else {
+        templateIdInput.value = '';
+    }
+});
+</script>
 @endsection

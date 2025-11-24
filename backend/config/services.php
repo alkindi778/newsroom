@@ -48,6 +48,9 @@ return [
         'api_key' => env('GEMINI_API_KEY'),
         'base_url' => env('GEMINI_BASE_URL', 'https://generativelanguage.googleapis.com/v1beta'),
         'model' => env('GEMINI_MODEL', 'gemini-flash-latest'),
+        // Office Manager AI Service
+        'office_manager_key' => env('OFFICE_MANAGER_GEMINI_API_KEY'),
+        'office_manager_model' => env('OFFICE_MANAGER_GEMINI_MODEL', 'gemini-2.5-pro'),
     ],
 
 ];
