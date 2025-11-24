@@ -195,25 +195,63 @@ class BreakingNewsController extends Controller
     }
 
     /**
-     * API للموقع الرئيسي - الأخبار العاجلة النشطة
+     * API للموقع الرئيسي - الأخبار العاجلة النشطة (يجمع النظامين)
      */
     public function getActive()
     {
-        $breakingNews = BreakingNews::with('article:id,slug,title')
+        $result = collect();
+        
+        // 1. الأخبار العاجلة المستقلة (من جدول breaking_news)
+        $independentNews = BreakingNews::with('article:id,slug,title')
             ->active()
             ->ordered()
             ->get()
             ->map(function ($news) {
                 return [
-                    'id' => $news->id,
+                    'id' => 'bn_' . $news->id,
                     'title' => $news->title,
                     'url' => $news->final_url,
+                    'type' => 'breaking',
+                    'priority' => $news->priority + 100, // أولوية أعلى
+                    'created_at' => $news->created_at,
+                ];
+            });
+        
+        // 2. المقالات المعلمة كأخبار عاجلة (من جدول articles)
+        $breakingArticles = \App\Models\Article::where('is_published', true)
+            ->where('is_breaking_news', true)
+            ->whereNotNull('published_at')
+            ->where('published_at', '<=', now())
+            ->orderBy('published_at', 'desc')
+            ->limit(10)
+            ->get()
+            ->map(function ($article) {
+                return [
+                    'id' => 'art_' . $article->id,
+                    'title' => html_entity_decode($article->title, ENT_QUOTES, 'UTF-8'),
+                    'url' => '/news/' . $article->slug,
+                    'type' => 'article',
+                    'priority' => 50,
+                    'created_at' => $article->published_at,
+                ];
+            });
+        
+        // دمج النتائج وترتيبها
+        $result = $independentNews->concat($breakingArticles)
+            ->sortByDesc('priority')
+            ->sortByDesc('created_at')
+            ->values()
+            ->map(function ($item) {
+                return [
+                    'id' => $item['id'],
+                    'title' => $item['title'],
+                    'url' => $item['url'],
                 ];
             });
 
         return response()->json([
             'success' => true,
-            'data' => $breakingNews,
+            'data' => $result,
         ]);
     }
 }
