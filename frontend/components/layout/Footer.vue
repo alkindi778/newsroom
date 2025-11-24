@@ -20,10 +20,10 @@
 
         <!-- Copyright Section - الوسط -->
         <div class="text-center order-3 md:order-2">
-          <p class="text-sm md:text-base text-gray-300 mb-1">
+          <p class="text-base md:text-lg text-gray-300 mb-1">
             © {{ currentYear }} {{ siteName }}. {{ $t('common.copyright') }}.
           </p>
-          <p class="text-xs md:text-sm text-gray-400">
+          <p class="text-sm md:text-base text-gray-400">
             تصميم وتطوير: <a href="https://www.facebook.com/a.a.alkindi" target="_blank" rel="noopener" class="font-semibold text-white">عبدالسلام التوي</a>
           </p>
         </div>
