@@ -283,24 +283,27 @@ const { locale } = useI18n()
 const fixImagePaths = (content: string): string => {
   if (!content) return content
   
-  // الحصول على الـ base URL من config أو استخدام الموقع الرسمي كـ fallback
-  const apiUrl = (config as any).public?.apiUrl || 'https://adenlink.cloud'
+  // الحصول على الـ base URL من config
+  let baseUrl = (config as any).public?.apiUrl || 'https://adenlink.cloud'
+  
+  // إزالة /api/v1 من نهاية الرابط للوصول إلى المسار الصحيح
+  baseUrl = baseUrl.replace(/\/api\/v1\/?$/, '')
   
   // استبدال المسارات النسبية بالمسارات الكاملة
   return content
     // استبدال المسارات النسبية مثل ../../storage/ و ../storage/
-    .replace(/src="\.\.\/\.\.\/storage\//g, `src="${apiUrl}/storage/`)
-    .replace(/src="\.\.\/storage\//g, `src="${apiUrl}/storage/`)
-    .replace(/src="\.\/storage\//g, `src="${apiUrl}/storage/`)
-    .replace(/src="\/storage\//g, `src="${apiUrl}/storage/`)
-    .replace(/src="storage\//g, `src="${apiUrl}/storage/`)
-    .replace(/src="\/uploads\//g, `src="${apiUrl}/uploads/`)
-    .replace(/src="uploads\//g, `src="${apiUrl}/uploads/`)
+    .replace(/src="\.\.\/\.\.\/storage\//g, `src="${baseUrl}/storage/`)
+    .replace(/src="\.\.\/storage\//g, `src="${baseUrl}/storage/`)
+    .replace(/src="\.\/storage\//g, `src="${baseUrl}/storage/`)
+    .replace(/src="\/storage\//g, `src="${baseUrl}/storage/`)
+    .replace(/src="storage\//g, `src="${baseUrl}/storage/`)
+    .replace(/src="\/uploads\//g, `src="${baseUrl}/uploads/`)
+    .replace(/src="uploads\//g, `src="${baseUrl}/uploads/`)
     // استبدال localhost بالمسار الصحيح
-    .replace(/src="http:\/\/localhost(:\d+)?\/storage\//g, `src="${apiUrl}/storage/`)
-    .replace(/src="http:\/\/127\.0\.0\.1(:\d+)?\/storage\//g, `src="${apiUrl}/storage/`)
-    .replace(/src="http:\/\/localhost(:\d+)?\/uploads\//g, `src="${apiUrl}/uploads/`)
-    .replace(/src="http:\/\/127\.0\.0\.1(:\d+)?\/uploads\//g, `src="${apiUrl}/uploads/`)
+    .replace(/src="http:\/\/localhost(:\d+)?\/storage\//g, `src="${baseUrl}/storage/`)
+    .replace(/src="http:\/\/127\.0\.0\.1(:\d+)?\/storage\//g, `src="${baseUrl}/storage/`)
+    .replace(/src="http:\/\/localhost(:\d+)?\/uploads\//g, `src="${baseUrl}/uploads/`)
+    .replace(/src="http:\/\/127\.0\.0\.1(:\d+)?\/uploads\//g, `src="${baseUrl}/uploads/`)
 }
 
 // المحتوى المعروض بناءً على اللغة
