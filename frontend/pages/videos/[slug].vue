@@ -31,7 +31,11 @@
       <!-- Video Player -->
       <article class="bg-white rounded-lg shadow-lg overflow-hidden">
         <!-- Video Embed -->
-        <div class="relative w-full bg-black" style="padding-bottom: 56.25%;">
+        <div 
+          class="relative w-full bg-black flex items-center justify-center"
+          :class="isReelsOrShorts ? 'aspect-[9/16] max-h-[80vh]' : 'aspect-video'"
+          :style="isReelsOrShorts ? 'max-width: min(100%, 500px); margin: 0 auto;' : ''"
+        >
           <iframe
             :src="video.embed_url"
             :title="getVideoTitle(video)"
@@ -166,6 +170,26 @@ const getVideoDescription = (video: any) => {
 const formatNumber = (num: number) => {
   return new Intl.NumberFormat('ar-EG').format(num)
 }
+
+// Check if video is Reels or Shorts (vertical format)
+const isReelsOrShorts = computed(() => {
+  if (!video.value) return false
+  
+  const videoUrl = video.value.video_url?.toLowerCase() || ''
+  const embedUrl = video.value.embed_url?.toLowerCase() || ''
+  
+  // Check for Facebook Reels
+  if (video.value.video_type === 'facebook' && (videoUrl.includes('/reel/') || videoUrl.includes('/share/r/'))) {
+    return true
+  }
+  
+  // Check for YouTube Shorts
+  if (video.value.video_type === 'youtube' && (videoUrl.includes('/shorts/') || embedUrl.includes('/shorts/'))) {
+    return true
+  }
+  
+  return false
+})
 
 // Fetch video
 const slug = computed(() => route.params.slug as string)
