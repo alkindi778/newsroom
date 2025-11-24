@@ -1,5 +1,5 @@
 <template>
-  <footer class="bg-[#0C111F] text-white mt-16 border-t border-gray-800">
+  <footer class="bg-gradient-to-b from-[#1e2a4a] to-[#0f172a] text-white mt-16 border-t border-gray-800">
     <div class="container mx-auto px-4 py-6">
       <!-- Footer Content -->
       <div class="flex flex-col md:flex-row items-center justify-between gap-6">
