@@ -273,39 +273,6 @@ const article = computed(() => {
   // معالجة HTML entities
   const processedData = processArticleText(data)
   
-  // Debugging logs
-  if (data && process.client) {
-    console.log('🔍 Article Data:', {
-      id: data.id,
-      title: data.title,
-      processed_title: processedData.title,
-      image: data.image,
-      content_length: data.content?.length || 0
-    })
-    
-    // استخراج الصور من المحتوى
-    const imgRegex = /<img[^>]+src="([^">]+)"/g
-    const matches = [...(data.content || '').matchAll(imgRegex)]
-    const imageSrcs = matches.map(m => m[1])
-    
-    console.log('🖼️ Images in content:', imageSrcs)
-    console.log('📊 Total images:', imageSrcs.length)
-    
-    // فحص الصور بعد التحميل
-    setTimeout(() => {
-      const imgs = document.querySelectorAll('.article-content img')
-      console.log('🎨 DOM Images after render:', imgs.length)
-      imgs.forEach((img: any, index) => {
-        console.log(`  Image ${index + 1}:`, {
-          src: img.src,
-          complete: img.complete,
-          naturalWidth: img.naturalWidth,
-          naturalHeight: img.naturalHeight,
-          error: img.complete && img.naturalWidth === 0
-        })
-      })
-    }, 1000)
-  }
   
   return processedData
 })
@@ -319,36 +286,14 @@ const displayArticle = computed(() => {
   const isEnglish = locale.value === 'en'
   const hasTranslation = article.value.title_en && article.value.content_en
   
-  console.log('📰 displayArticle computed:', {
-    locale: locale.value,
-    isEnglish,
-    hasTranslation,
-    articleId: article.value.id,
-    title_ar: article.value.title?.substring(0, 50) + '...',
-    title_en: article.value.title_en?.substring(0, 50) + '...',
-    content_en_length: article.value.content_en?.length || 0,
-    willUseTranslation: isEnglish && hasTranslation
-  })
-  
   if (isEnglish && hasTranslation) {
-    const translatedArticle = {
+    return {
       ...article.value,
       title: article.value.title_en,
       content: article.value.content_en,
       excerpt: article.value.excerpt_en || article.value.excerpt,
     }
-    console.log('✅ Using English translation:', {
-      title: translatedArticle.title?.substring(0, 50) + '...',
-      contentLength: translatedArticle.content?.length,
-      hasExcerptEn: !!article.value.excerpt_en
-    })
-    return translatedArticle
   }
-  
-  console.log('🔴 Using Arabic (no translation or not English):', {
-    title: article.value.title?.substring(0, 50) + '...',
-    reason: !isEnglish ? 'Not English locale' : 'No translation available'
-  })
   
   return article.value
 })

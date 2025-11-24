@@ -53,7 +53,7 @@ export const useAdvertisements = () => {
     } catch (err: any) {
       // تجاهل أخطاء الإلغاء
       if (err.name === 'AbortError') {
-        console.log('Request aborted:', position)
+
         return []
       }
       error.value = err.message

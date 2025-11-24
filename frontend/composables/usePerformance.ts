@@ -38,7 +38,7 @@ export const usePerformance = () => {
     const end = performance.now()
     const duration = end - start
 
-    console.log(`⏱️ ${name}: ${duration.toFixed(2)}ms`)
+
     
     return { result, duration }
   }
@@ -51,21 +51,21 @@ export const usePerformance = () => {
       // Largest Contentful Paint (LCP)
       new PerformanceObserver((list) => {
         for (const entry of list.getEntries()) {
-          console.log('🎨 LCP:', entry)
+
         }
       }).observe({ entryTypes: ['largest-contentful-paint'] })
 
       // First Input Delay (FID)
       new PerformanceObserver((list) => {
         for (const entry of list.getEntries()) {
-          console.log('👆 FID:', entry)
+
         }
       }).observe({ entryTypes: ['first-input'] })
 
       // Cumulative Layout Shift (CLS)
       new PerformanceObserver((list) => {
         for (const entry of list.getEntries()) {
-          console.log('📐 CLS:', entry)
+
         }
       }).observe({ entryTypes: ['layout-shift'] })
     }

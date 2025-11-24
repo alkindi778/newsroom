@@ -272,7 +272,7 @@ const checkForExistingSummary = async () => {
     })
 
     if (result.success && result.summary) {
-      console.log('✅ تم العثور على ملخص محفوظ - تم الاسترجاع من قاعدة البيانات عبر Nuxt API')
+
       currentSummary.value = result.summary
       summaryData.value = {
         summary: result.summary,
@@ -284,7 +284,7 @@ const checkForExistingSummary = async () => {
       // لا نظهر الملخص تلقائياً، المستخدم يضغط الزر عند الحاجة
     }
   } catch (error) {
-    console.log('لا يوجد ملخص محفوظ لهذا المحتوى، سيتم التوليد عند الطلب')
+
   }
 }
 

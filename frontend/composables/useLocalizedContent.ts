@@ -6,21 +6,11 @@ export const useLocalizedContent = () => {
      */
     const getCategoryName = (category: any): string => {
         if (!category) {
-            console.log('⚠️ getCategoryName: No category provided')
             return ''
         }
 
         const isEnglish = locale.value === 'en'
         const hasTranslation = category.name_en
-
-        console.log('🌐 getCategoryName called:', {
-            locale: locale.value,
-            isEnglish,
-            categoryName: category.name,
-            categoryNameEn: category.name_en,
-            hasTranslation,
-            willReturn: isEnglish && hasTranslation ? category.name_en : category.name
-        })
 
         if (isEnglish && hasTranslation) {
             return category.name_en

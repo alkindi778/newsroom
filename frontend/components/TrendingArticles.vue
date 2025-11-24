@@ -174,7 +174,7 @@ const formatViews = (views: number): string => {
 const fetchTrendingArticles = async () => {
   loading.value = true
   try {
-    console.log('🔍 Fetching trending articles...', { limit: props.limit, period: activeTab.value })
+
     const response = await apiFetch<any>('/articles/popular', {
       params: {
         limit: props.limit,
@@ -182,10 +182,10 @@ const fetchTrendingArticles = async () => {
       }
     })
     
-    console.log('📊 API Response:', response)
+
     
     if (response?.data) {
-      console.log('✅ Articles loaded:', response.data.length, 'articles')
+
       articles.value = response.data
     } else {
       console.warn('⚠️ No data in response')

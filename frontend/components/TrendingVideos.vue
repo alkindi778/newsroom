@@ -222,7 +222,7 @@ onMounted(() => {
 
 // Watch locale changes and refetch
 watch(locale, () => {
-  console.log('Locale changed to:', locale.value)
+
   // No need to refetch, just let Vue re-render with new titles
   // The getVideoTitle computed will automatically use the correct language
 })
