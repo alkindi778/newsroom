@@ -20,7 +20,7 @@ class ReplyTemplateController extends Controller
             ->orderBy('usage_count', 'desc')
             ->paginate(20);
 
-        return view('admin.reply-templates.index', compact('templates'));
+        return view('admin.contact-messages.templates.index', compact('templates'));
     }
 
     /**
@@ -30,7 +30,7 @@ class ReplyTemplateController extends Controller
     {
         abort_unless(auth()->user()->canAny(['manage_reply_templates', 'manage_contact_messages']), 403);
 
-        return view('admin.reply-templates.create');
+        return view('admin.contact-messages.templates.create');
     }
 
     /**
@@ -53,7 +53,7 @@ class ReplyTemplateController extends Controller
 
         ReplyTemplate::create($validated);
 
-        return redirect()->route('admin.reply-templates.index')
+        return redirect()->route('admin.contact-messages.templates.index')
             ->with('success', 'تم إنشاء القالب بنجاح');
     }
 
@@ -66,7 +66,7 @@ class ReplyTemplateController extends Controller
 
         $template = ReplyTemplate::findOrFail($id);
 
-        return view('admin.reply-templates.edit', compact('template'));
+        return view('admin.contact-messages.templates.edit', compact('template'));
     }
 
     /**
@@ -90,7 +90,7 @@ class ReplyTemplateController extends Controller
 
         $template->update($validated);
 
-        return redirect()->route('admin.reply-templates.index')
+        return redirect()->route('admin.contact-messages.templates.index')
             ->with('success', 'تم تحديث القالب بنجاح');
     }
 
@@ -104,7 +104,7 @@ class ReplyTemplateController extends Controller
         $template = ReplyTemplate::findOrFail($id);
         $template->delete();
 
-        return redirect()->route('admin.reply-templates.index')
+        return redirect()->route('admin.contact-messages.templates.index')
             ->with('success', 'تم حذف القالب بنجاح');
     }
 
@@ -119,7 +119,7 @@ class ReplyTemplateController extends Controller
         $template->update(['is_active' => !$template->is_active]);
 
         $status = $template->is_active ? 'تفعيل' : 'تعطيل';
-        return redirect()->route('admin.reply-templates.index')
+        return redirect()->route('admin.contact-messages.templates.index')
             ->with('success', "تم {$status} القالب بنجاح");
     }
 }
