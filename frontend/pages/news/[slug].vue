@@ -288,6 +288,10 @@ const fixImagePaths = (content: string): string => {
   
   // استبدال المسارات النسبية بالمسارات الكاملة
   return content
+    // استبدال المسارات النسبية مثل ../../storage/ و ../storage/
+    .replace(/src="\.\.\/\.\.\/storage\//g, `src="${apiUrl}/storage/`)
+    .replace(/src="\.\.\/storage\//g, `src="${apiUrl}/storage/`)
+    .replace(/src="\.\/storage\//g, `src="${apiUrl}/storage/`)
     .replace(/src="\/storage\//g, `src="${apiUrl}/storage/`)
     .replace(/src="storage\//g, `src="${apiUrl}/storage/`)
     .replace(/src="\/uploads\//g, `src="${apiUrl}/uploads/`)
