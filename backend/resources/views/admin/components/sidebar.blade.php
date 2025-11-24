@@ -33,12 +33,27 @@
             @endphp
 
             @if($user && $user->hasRole('سكرتير'))
-                <!-- Sidebar مبسّط لدور السكرتير: رسائل التواصل فقط -->
+                <!-- Sidebar لدور السكرتير: رسائل التواصل -->
                 <ul class="space-y-1">
+                    <!-- لوحة إحصائيات الرسائل -->
+                    <li>
+                        <a href="{{ route('admin.contact-messages.dashboard') }}" 
+                           class="group flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 {{ request()->routeIs('admin.contact-messages.dashboard') ? 'bg-gradient-to-l from-cyan-600 to-cyan-700 shadow-lg shadow-cyan-500/30' : 'hover:bg-white/5 hover:translate-x-[-4px]' }}">
+                            <div class="w-9 h-9 flex items-center justify-center rounded-lg {{ request()->routeIs('admin.contact-messages.dashboard') ? 'bg-white/20' : 'bg-white/5 group-hover:bg-white/10' }} transition-colors">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                                </svg>
+                            </div>
+                            <span class="flex-1">لوحة الإحصائيات</span>
+                            @if(request()->routeIs('admin.contact-messages.dashboard'))
+                            <div class="w-1.5 h-1.5 bg-white rounded-full animate-pulse"></div>
+                            @endif
+                        </a>
+                    </li>
                     <li>
                         <a href="{{ route('admin.contact-messages.index') }}" 
-                           class="group flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 {{ request()->routeIs('admin.contact-messages.*') ? 'bg-gradient-to-l from-cyan-600 to-cyan-700 shadow-lg shadow-cyan-500/30' : 'hover:bg-white/5 hover:translate-x-[-4px]' }}">
-                            <div class="w-9 h-9 flex items-center justify-center rounded-lg {{ request()->routeIs('admin.contact-messages.*') ? 'bg-white/20' : 'bg-white/5 group-hover:bg-white/10' }} transition-colors">
+                           class="group flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 {{ request()->routeIs('admin.contact-messages.index') || request()->routeIs('admin.contact-messages.show') ? 'bg-gradient-to-l from-cyan-600 to-cyan-700 shadow-lg shadow-cyan-500/30' : 'hover:bg-white/5 hover:translate-x-[-4px]' }}">
+                            <div class="w-9 h-9 flex items-center justify-center rounded-lg {{ request()->routeIs('admin.contact-messages.index') || request()->routeIs('admin.contact-messages.show') ? 'bg-white/20' : 'bg-white/5 group-hover:bg-white/10' }} transition-colors">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
                                 </svg>
@@ -50,7 +65,22 @@
                             @if($newMessagesCount > 0)
                             <span class="px-2 py-0.5 bg-red-500 text-white text-xs font-bold rounded-full">{{ $newMessagesCount }}</span>
                             @endif
-                            @if(request()->routeIs('admin.contact-messages.*'))
+                            @if(request()->routeIs('admin.contact-messages.index') || request()->routeIs('admin.contact-messages.show'))
+                            <div class="w-1.5 h-1.5 bg-white rounded-full animate-pulse"></div>
+                            @endif
+                        </a>
+                    </li>
+                    <!-- قوالب الردود -->
+                    <li>
+                        <a href="{{ route('admin.contact-messages.templates.index') }}" 
+                           class="group flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 {{ request()->routeIs('admin.contact-messages.templates.*') ? 'bg-gradient-to-l from-cyan-600 to-cyan-700 shadow-lg shadow-cyan-500/30' : 'hover:bg-white/5 hover:translate-x-[-4px]' }}">
+                            <div class="w-9 h-9 flex items-center justify-center rounded-lg {{ request()->routeIs('admin.contact-messages.templates.*') ? 'bg-white/20' : 'bg-white/5 group-hover:bg-white/10' }} transition-colors">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"/>
+                                </svg>
+                            </div>
+                            <span class="flex-1">قوالب الردود</span>
+                            @if(request()->routeIs('admin.contact-messages.templates.*'))
                             <div class="w-1.5 h-1.5 bg-white rounded-full animate-pulse"></div>
                             @endif
                         </a>
@@ -248,10 +278,25 @@
                         <div class="h-px flex-1 bg-gradient-to-r from-cyan-500/30 to-transparent"></div>
                     </div>
                 </li>
+                <!-- لوحة إحصائيات الرسائل -->
+                <li>
+                    <a href="{{ route('admin.contact-messages.dashboard') }}" 
+                       class="group flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 {{ request()->routeIs('admin.contact-messages.dashboard') ? 'bg-gradient-to-l from-cyan-600 to-cyan-700 shadow-lg shadow-cyan-500/30' : 'hover:bg-white/5 hover:translate-x-[-4px]' }}">
+                        <div class="w-9 h-9 flex items-center justify-center rounded-lg {{ request()->routeIs('admin.contact-messages.dashboard') ? 'bg-white/20' : 'bg-white/5 group-hover:bg-white/10' }} transition-colors">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                            </svg>
+                        </div>
+                        <span class="flex-1">لوحة الإحصائيات</span>
+                        @if(request()->routeIs('admin.contact-messages.dashboard'))
+                        <div class="w-1.5 h-1.5 bg-white rounded-full animate-pulse"></div>
+                        @endif
+                    </a>
+                </li>
                 <li>
                     <a href="{{ route('admin.contact-messages.index') }}" 
-                       class="group flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 {{ request()->routeIs('admin.contact-messages.*') ? 'bg-gradient-to-l from-cyan-600 to-cyan-700 shadow-lg shadow-cyan-500/30' : 'hover:bg-white/5 hover:translate-x-[-4px]' }}">
-                        <div class="w-9 h-9 flex items-center justify-center rounded-lg {{ request()->routeIs('admin.contact-messages.*') ? 'bg-white/20' : 'bg-white/5 group-hover:bg-white/10' }} transition-colors">
+                       class="group flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 {{ request()->routeIs('admin.contact-messages.index') || request()->routeIs('admin.contact-messages.show') ? 'bg-gradient-to-l from-cyan-600 to-cyan-700 shadow-lg shadow-cyan-500/30' : 'hover:bg-white/5 hover:translate-x-[-4px]' }}">
+                        <div class="w-9 h-9 flex items-center justify-center rounded-lg {{ request()->routeIs('admin.contact-messages.index') || request()->routeIs('admin.contact-messages.show') ? 'bg-white/20' : 'bg-white/5 group-hover:bg-white/10' }} transition-colors">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
                             </svg>
@@ -263,7 +308,22 @@
                         @if($newMessagesCount > 0)
                         <span class="px-2 py-0.5 bg-red-500 text-white text-xs font-bold rounded-full">{{ $newMessagesCount }}</span>
                         @endif
-                        @if(request()->routeIs('admin.contact-messages.*'))
+                        @if(request()->routeIs('admin.contact-messages.index') || request()->routeIs('admin.contact-messages.show'))
+                        <div class="w-1.5 h-1.5 bg-white rounded-full animate-pulse"></div>
+                        @endif
+                    </a>
+                </li>
+                <!-- قوالب الردود -->
+                <li>
+                    <a href="{{ route('admin.contact-messages.templates.index') }}" 
+                       class="group flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 {{ request()->routeIs('admin.contact-messages.templates.*') ? 'bg-gradient-to-l from-cyan-600 to-cyan-700 shadow-lg shadow-cyan-500/30' : 'hover:bg-white/5 hover:translate-x-[-4px]' }}">
+                        <div class="w-9 h-9 flex items-center justify-center rounded-lg {{ request()->routeIs('admin.contact-messages.templates.*') ? 'bg-white/20' : 'bg-white/5 group-hover:bg-white/10' }} transition-colors">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"/>
+                            </svg>
+                        </div>
+                        <span class="flex-1">قوالب الردود</span>
+                        @if(request()->routeIs('admin.contact-messages.templates.*'))
                         <div class="w-1.5 h-1.5 bg-white rounded-full animate-pulse"></div>
                         @endif
                     </a>
