@@ -5,6 +5,7 @@ namespace App\Observers;
 use App\Models\ContactMessage;
 use App\Models\User;
 use App\Notifications\NewContactMessageNotification;
+use Illuminate\Support\Facades\Log;
 
 class ContactMessageObserver
 {
@@ -13,11 +14,15 @@ class ContactMessageObserver
      */
     public function created(ContactMessage $contactMessage): void
     {
-        // إشعار المستخدمين الذين لديهم صلاحية إدارة الرسائل
-        $users = User::permission('manage_contact_messages')->get();
-        
-        foreach ($users as $user) {
-            $user->notify(new NewContactMessageNotification($contactMessage, 'new'));
+        try {
+            // إشعار المستخدمين الذين لديهم صلاحية إدارة الرسائل
+            $users = User::role(['Super Admin', 'Admin', 'سكرتير'])->get();
+            
+            foreach ($users as $user) {
+                $user->notify(new NewContactMessageNotification($contactMessage, 'new'));
+            }
+        } catch (\Exception $e) {
+            Log::warning('Failed to send notification for new contact message: ' . $e->getMessage());
         }
     }
 
@@ -26,24 +31,27 @@ class ContactMessageObserver
      */
     public function updated(ContactMessage $contactMessage): void
     {
-        // إشعار عند التحويل
-        if ($contactMessage->isDirty('assigned_to') && $contactMessage->assigned_to) {
-            $assignedUser = User::find($contactMessage->assigned_to);
-            if ($assignedUser) {
-                $assignedUser->notify(new NewContactMessageNotification($contactMessage, 'forwarded'));
+        try {
+            // إشعار عند التحويل
+            if ($contactMessage->isDirty('assigned_to') && $contactMessage->assigned_to) {
+                $assignedUser = User::find($contactMessage->assigned_to);
+                if ($assignedUser) {
+                    $assignedUser->notify(new NewContactMessageNotification($contactMessage, 'forwarded'));
+                }
             }
-        }
 
-        // إشعار عند الموافقة
-        if ($contactMessage->isDirty('approval_status')) {
-            $originalAssignedTo = $contactMessage->getOriginal('assigned_to');
-            $creator = User::permission('manage_contact_messages')->first();
-            
-            if ($contactMessage->approval_status === 'approved' && $creator) {
-                $creator->notify(new NewContactMessageNotification($contactMessage, 'approved'));
-            } elseif ($contactMessage->approval_status === 'rejected' && $creator) {
-                $creator->notify(new NewContactMessageNotification($contactMessage, 'rejected'));
+            // إشعار عند الموافقة
+            if ($contactMessage->isDirty('approval_status')) {
+                $creator = User::role(['Super Admin', 'Admin', 'سكرتير'])->first();
+                
+                if ($contactMessage->approval_status === 'approved' && $creator) {
+                    $creator->notify(new NewContactMessageNotification($contactMessage, 'approved'));
+                } elseif ($contactMessage->approval_status === 'rejected' && $creator) {
+                    $creator->notify(new NewContactMessageNotification($contactMessage, 'rejected'));
+                }
             }
+        } catch (\Exception $e) {
+            Log::warning('Failed to send notification for updated contact message: ' . $e->getMessage());
         }
     }
 
