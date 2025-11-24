@@ -4,17 +4,17 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\ContactMessage;
-use App\Services\GeminiService;
+use App\Services\OfficeManagerAiService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
 class ContactMessageArchiveController extends Controller
 {
-    protected GeminiService $geminiService;
+    protected OfficeManagerAiService $aiService;
 
-    public function __construct(GeminiService $geminiService)
+    public function __construct(OfficeManagerAiService $aiService)
     {
-        $this->geminiService = $geminiService;
+        $this->aiService = $aiService;
     }
 
     /**
@@ -241,7 +241,7 @@ class ContactMessageArchiveController extends Controller
 مهم: أرجع JSON فقط بدون أي تفسير أو نص إضافي.
 PROMPT;
 
-            $response = $this->geminiService->generateContent($prompt);
+            $response = $this->aiService->generateContent($prompt);
             
             // تنظيف الاستجابة واستخراج JSON
             $cleanResponse = preg_replace('/```json\s*|\s*```/', '', $response);
