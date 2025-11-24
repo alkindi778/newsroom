@@ -14,7 +14,12 @@ class GenerateArticleEmbeddings extends Command
      *
      * @var string
      */
-    protected $signature = 'embeddings:generate {--force : Force regenerate all embeddings} {--article-id= : Generate embedding for specific article}';
+    protected $signature = 'embeddings:generate 
+                            {--force : Force regenerate all embeddings} 
+                            {--article-id= : Generate embedding for specific article}
+                            {--limit= : Limit number of articles to process}
+                            {--offset= : Skip first N articles}
+                            {--delay=1 : Delay in seconds between each request (default: 1)}';
 
     /**
      * The console command description.
@@ -100,11 +105,23 @@ class GenerateArticleEmbeddings extends Command
      */
     private function generateForAllArticles(bool $force = false): int
     {
-        $query = Article::query();
+        $query = Article::query()->orderBy('id');
 
         if (!$force) {
             // Only process articles without embeddings
             $query->doesntHave('embedding');
+        }
+
+        // Apply offset if provided
+        $offset = $this->option('offset');
+        if ($offset) {
+            $query->skip((int)$offset);
+        }
+
+        // Apply limit if provided
+        $limit = $this->option('limit');
+        if ($limit) {
+            $query->take((int)$limit);
         }
 
         $articles = $query->get();
@@ -115,14 +132,22 @@ class GenerateArticleEmbeddings extends Command
             return 0;
         }
 
-        $this->info("Processing {$total} articles...");
+        // Get delay option (in seconds)
+        $delay = max(0.5, (float)$this->option('delay'));
+
+        // Count articles without embeddings
+        $totalWithoutEmbeddings = Article::doesntHave('embedding')->count();
+        
+        $this->info("Total articles without embeddings: {$totalWithoutEmbeddings}");
+        $this->info("Processing {$total} articles with {$delay}s delay between requests...");
+        
         $bar = $this->output->createProgressBar($total);
         $bar->start();
 
         $successful = 0;
         $failed = 0;
 
-        foreach ($articles as $article) {
+        foreach ($articles as $index => $article) {
             try {
                 $text = $this->prepareText($article);
                 $embedding = $this->embeddingService->generateEmbedding(
@@ -143,12 +168,23 @@ class GenerateArticleEmbeddings extends Command
                 ]);
 
                 $successful++;
+                
+                // Sleep between requests to avoid rate limits (except for last item)
+                if ($index < $total - 1) {
+                    usleep((int)($delay * 1000000));
+                }
             } catch (\Exception $e) {
                 $failed++;
                 Log::error('Failed to generate embedding for article', [
                     'article_id' => $article->id,
                     'error' => $e->getMessage()
                 ]);
+                
+                // If rate limit error, wait longer
+                if (str_contains($e->getMessage(), '429') || str_contains($e->getMessage(), 'rate limit')) {
+                    $this->warn("\nRate limit hit, waiting 60 seconds...");
+                    sleep(60);
+                }
             }
 
             $bar->advance();
@@ -157,7 +193,11 @@ class GenerateArticleEmbeddings extends Command
         $bar->finish();
         $this->newLine();
 
+        // Show remaining count
+        $remaining = Article::doesntHave('embedding')->count();
+        
         $this->info("✓ Completed: {$successful} successful, {$failed} failed");
+        $this->info("✓ Remaining articles without embeddings: {$remaining}");
 
         return $failed > 0 ? 1 : 0;
     }
