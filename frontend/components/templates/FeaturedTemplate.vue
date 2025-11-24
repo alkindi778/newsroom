@@ -175,7 +175,8 @@ const sideArticles = computed(() => articles.value.slice(1, 7))
 
 const formatDate = (date?: string) => {
   if (!date) return ''
-  return new Date(date).toLocaleDateString('ar-SA', { 
+  const localeCode = locale.value === 'en' ? 'en-US' : 'ar-SA'
+  return new Date(date).toLocaleDateString(localeCode, { 
     year: 'numeric', 
     month: 'short', 
     day: 'numeric' 
