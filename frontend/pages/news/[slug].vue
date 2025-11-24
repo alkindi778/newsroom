@@ -279,6 +279,26 @@ const article = computed(() => {
 
 const { locale } = useI18n()
 
+// دالة لإصلاح مسارات الصور في المحتوى
+const fixImagePaths = (content: string): string => {
+  if (!content) return content
+  
+  // الحصول على الـ base URL من config أو استخدام الموقع الرسمي كـ fallback
+  const apiUrl = (config as any).public?.apiUrl || 'https://adenlink.cloud'
+  
+  // استبدال المسارات النسبية بالمسارات الكاملة
+  return content
+    .replace(/src="\/storage\//g, `src="${apiUrl}/storage/`)
+    .replace(/src="storage\//g, `src="${apiUrl}/storage/`)
+    .replace(/src="\/uploads\//g, `src="${apiUrl}/uploads/`)
+    .replace(/src="uploads\//g, `src="${apiUrl}/uploads/`)
+    // استبدال localhost بالمسار الصحيح
+    .replace(/src="http:\/\/localhost(:\d+)?\/storage\//g, `src="${apiUrl}/storage/`)
+    .replace(/src="http:\/\/127\.0\.0\.1(:\d+)?\/storage\//g, `src="${apiUrl}/storage/`)
+    .replace(/src="http:\/\/localhost(:\d+)?\/uploads\//g, `src="${apiUrl}/uploads/`)
+    .replace(/src="http:\/\/127\.0\.0\.1(:\d+)?\/uploads\//g, `src="${apiUrl}/uploads/`)
+}
+
 // المحتوى المعروض بناءً على اللغة
 const displayArticle = computed(() => {
   if (!article.value) return null
@@ -290,12 +310,15 @@ const displayArticle = computed(() => {
     return {
       ...article.value,
       title: article.value.title_en,
-      content: article.value.content_en,
+      content: fixImagePaths(article.value.content_en),
       excerpt: article.value.excerpt_en || article.value.excerpt,
     }
   }
   
-  return article.value
+  return {
+    ...article.value,
+    content: fixImagePaths(article.value.content)
+  }
 })
 
 const loading = ref(false)
