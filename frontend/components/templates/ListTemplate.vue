@@ -136,7 +136,7 @@
 
     <!-- Empty State -->
     <div v-else class="text-center py-12 text-gray-500">
-      لا توجد مقالات متاحة
+      {{ locale === 'en' ? 'No articles available' : 'لا توجد مقالات متاحة' }}
     </div>
 
     <!-- زر المزيد -->
@@ -147,7 +147,7 @@
           :to="categorySlug ? `/category/${categorySlug}` : '/news'"
           class="inline-flex items-center gap-2 px-6 py-2 border border-gray-900 text-gray-900 font-semibold whitespace-nowrap rounded-md"
         >
-          <span>المزيد</span>
+          <span>{{ locale === 'en' ? 'More' : 'المزيد' }}</span>
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
           </svg>
@@ -223,7 +223,7 @@ const getExcerpt = (article: any) => {
     const textContent = article.content.replace(/<[^>]*>/g, '').trim()
     return textContent.substring(0, 200) + '...'
   }
-  return 'اضغط لقراءة المزيد من التفاصيل حول هذا الخبر المهم...'
+  return locale.value === 'en' ? 'Click to read more details about this important news...' : 'اضغط لقراءة المزيد من التفاصيل حول هذا الخبر المهم...'
 }
 
 const fetchArticles = async () => {

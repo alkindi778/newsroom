@@ -53,8 +53,8 @@
               <h3 class="text-3xl font-bold mb-3 line-clamp-2">
                 {{ getArticleTitle(mainArticle) }}
               </h3>
-              <p v-if="mainArticle.excerpt" class="text-gray-200 mb-4 line-clamp-2">
-                {{ mainArticle.excerpt }}
+              <p v-if="mainArticle.excerpt || mainArticle.excerpt_en" class="text-gray-200 mb-4 line-clamp-2">
+                {{ getArticleExcerpt(mainArticle) }}
               </p>
               <div class="flex items-center gap-4 text-sm">
                 <span>{{ formatDate(mainArticle.published_at) }}</span>
@@ -138,7 +138,7 @@
 
     <!-- Empty State -->
     <div v-else class="text-center py-12 text-gray-500">
-      لا توجد مقالات متاحة
+      {{ locale === 'en' ? 'No articles available' : 'لا توجد مقالات متاحة' }}
     </div>
 
     <!-- زر المزيد -->
@@ -149,7 +149,7 @@
           :to="categorySlug ? `/category/${categorySlug}` : '/news'"
           class="inline-flex items-center gap-2 px-6 py-2 border border-gray-900 text-gray-900 font-semibold whitespace-nowrap rounded-md"
         >
-          <span>المزيد</span>
+          <span>{{ locale === 'en' ? 'More' : 'المزيد' }}</span>
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
           </svg>
@@ -203,6 +203,13 @@ const getArticleTitle = (article: Article) => {
   })
   
   return title
+}
+
+// دالة للحصول على ملخص المقال المترجم
+const getArticleExcerpt = (article: any) => {
+  const isEnglish = locale.value === 'en'
+  const hasTranslation = !!article.excerpt_en
+  return isEnglish && hasTranslation ? article.excerpt_en : article.excerpt
 }
 
 const mainArticle = computed(() => articles.value[0])

@@ -27,6 +27,7 @@ export interface Article {
   slug: string
   subtitle?: string
   excerpt?: string
+  excerpt_en?: string
   content: string
   content_en?: string
   source?: string
