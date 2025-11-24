@@ -92,7 +92,10 @@ class ContactMessage extends Model
      */
     public function scopeNotArchived($query)
     {
-        return $query->where('is_archived', false);
+        return $query->where(function ($q) {
+            $q->where('is_archived', false)
+              ->orWhereNull('is_archived');
+        });
     }
     
     /**
