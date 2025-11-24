@@ -87,6 +87,15 @@ Route::middleware(['auth', App\Http\Middleware\AdminMiddleware::class])->group(f
         Route::post('articles/{article}/reject', [ArticleController::class, 'reject'])->name('articles.reject');
     });
     
+    // Breaking News - الأخبار العاجلة
+    Route::prefix('breaking-news')->name('breaking-news.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Admin\BreakingNewsController::class, 'index'])->name('index');
+        Route::post('/', [\App\Http\Controllers\Admin\BreakingNewsController::class, 'store'])->name('store');
+        Route::post('/{id}/toggle', [\App\Http\Controllers\Admin\BreakingNewsController::class, 'toggle'])->name('toggle');
+        Route::put('/{id}/priority', [\App\Http\Controllers\Admin\BreakingNewsController::class, 'updatePriority'])->name('priority');
+        Route::delete('/{id}', [\App\Http\Controllers\Admin\BreakingNewsController::class, 'destroy'])->name('destroy');
+    });
+    
     // Categories Management
     // ملاحظة: routes المحددة يجب أن تأتي قبل resource routes
     Route::middleware(['permission:create_categories'])->group(function () {

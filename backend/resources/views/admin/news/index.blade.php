@@ -5,6 +5,65 @@
 
 @section('content')
 <div class="space-y-6">
+    <!-- Breaking News Section -->
+    <div class="bg-gradient-to-r from-red-600 to-red-700 rounded-xl shadow-lg overflow-hidden">
+        <div class="p-4 sm:p-6">
+            <!-- Header -->
+            <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
+                        <svg class="w-6 h-6 text-white animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h2 class="text-lg font-bold text-white">الأخبار العاجلة</h2>
+                        <p class="text-red-100 text-sm">تظهر في شريط الأخبار العاجلة بالموقع</p>
+                    </div>
+                </div>
+                <span id="breaking-count" class="bg-white/20 text-white px-3 py-1 rounded-full text-sm font-medium">0 خبر</span>
+            </div>
+            
+            <!-- Add Form -->
+            <form id="breaking-news-form" class="flex flex-col sm:flex-row gap-3 mb-4">
+                @csrf
+                <div class="flex-1">
+                    <input type="text" 
+                           id="breaking-title" 
+                           name="title" 
+                           placeholder="اكتب عنوان الخبر العاجل..." 
+                           class="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-red-200 focus:ring-2 focus:ring-white/50 focus:border-transparent"
+                           required>
+                </div>
+                <div class="sm:w-64">
+                    <input type="url" 
+                           id="breaking-url" 
+                           name="url" 
+                           placeholder="رابط (اختياري)" 
+                           class="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-red-200 focus:ring-2 focus:ring-white/50 focus:border-transparent">
+                </div>
+                <button type="submit" 
+                        id="breaking-submit"
+                        class="px-6 py-3 bg-white text-red-600 font-bold rounded-lg hover:bg-red-50 transition-all duration-200 flex items-center justify-center gap-2 whitespace-nowrap">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                    </svg>
+                    نشر عاجل
+                </button>
+            </form>
+            
+            <!-- Breaking News List -->
+            <div id="breaking-news-list" class="space-y-2">
+                <!-- سيتم ملؤها بـ AJAX -->
+                <div class="text-center py-4 text-red-200" id="breaking-loading">
+                    <svg class="w-6 h-6 mx-auto animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                    </svg>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Header with Add Button -->
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
         <div class="mb-4 sm:mb-0">
@@ -322,4 +381,159 @@
     overflow: hidden;
 }
 </style>
+@endpush
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('breaking-news-form');
+    const list = document.getElementById('breaking-news-list');
+    const loading = document.getElementById('breaking-loading');
+    const countEl = document.getElementById('breaking-count');
+    const titleInput = document.getElementById('breaking-title');
+    const urlInput = document.getElementById('breaking-url');
+    const submitBtn = document.getElementById('breaking-submit');
+    
+    // تحميل الأخبار العاجلة
+    function loadBreakingNews() {
+        fetch('{{ route("admin.breaking-news.index") }}')
+            .then(res => res.json())
+            .then(data => {
+                loading.style.display = 'none';
+                if (data.success && data.data.length > 0) {
+                    renderBreakingNews(data.data);
+                    updateCount(data.data.filter(n => n.is_active).length);
+                } else {
+                    list.innerHTML = '<p class="text-center py-4 text-red-200">لا توجد أخبار عاجلة حالياً</p>';
+                    updateCount(0);
+                }
+            })
+            .catch(err => {
+                loading.style.display = 'none';
+                list.innerHTML = '<p class="text-center py-4 text-red-200">خطأ في تحميل البيانات</p>';
+            });
+    }
+    
+    // عرض الأخبار
+    function renderBreakingNews(news) {
+        list.innerHTML = news.map(item => `
+            <div class="flex items-center gap-3 bg-white/10 rounded-lg p-3 ${item.is_expired ? 'opacity-50' : ''}" data-id="${item.id}">
+                <button onclick="toggleBreaking(${item.id})" 
+                        class="w-8 h-8 rounded-full flex items-center justify-center transition-colors ${item.is_active ? 'bg-green-500 hover:bg-green-600' : 'bg-gray-500 hover:bg-gray-600'}">
+                    <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        ${item.is_active 
+                            ? '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>'
+                            : '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z"/>'}
+                    </svg>
+                </button>
+                <div class="flex-1 min-w-0">
+                    <p class="text-white font-medium truncate">${item.title}</p>
+                    <p class="text-red-200 text-xs">${item.created_by} - ${item.created_at} ${item.is_expired ? '(منتهي)' : ''}</p>
+                </div>
+                ${item.url ? `<a href="${item.url}" target="_blank" class="text-white/70 hover:text-white"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg></a>` : ''}
+                <button onclick="deleteBreaking(${item.id})" 
+                        class="w-8 h-8 bg-red-500/50 hover:bg-red-500 rounded-full flex items-center justify-center transition-colors">
+                    <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                    </svg>
+                </button>
+            </div>
+        `).join('');
+    }
+    
+    // تحديث العداد
+    function updateCount(count) {
+        countEl.textContent = count + ' خبر';
+    }
+    
+    // إضافة خبر عاجل
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const title = titleInput.value.trim();
+        if (!title) return;
+        
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<svg class="w-5 h-5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>';
+        
+        fetch('{{ route("admin.breaking-news.store") }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            },
+            body: JSON.stringify({
+                title: title,
+                url: urlInput.value.trim() || null
+            })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                titleInput.value = '';
+                urlInput.value = '';
+                loadBreakingNews();
+                showToast('تم نشر الخبر العاجل بنجاح', 'success');
+            } else {
+                showToast(data.message || 'حدث خطأ', 'error');
+            }
+        })
+        .catch(err => {
+            showToast('حدث خطأ في الاتصال', 'error');
+        })
+        .finally(() => {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg> نشر عاجل';
+        });
+    });
+    
+    // تبديل حالة الخبر
+    window.toggleBreaking = function(id) {
+        fetch(`/admin/breaking-news/${id}/toggle`, {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            }
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                loadBreakingNews();
+                showToast(data.message, 'success');
+            }
+        });
+    };
+    
+    // حذف خبر
+    window.deleteBreaking = function(id) {
+        if (!confirm('هل تريد حذف هذا الخبر العاجل؟')) return;
+        
+        fetch(`/admin/breaking-news/${id}`, {
+            method: 'DELETE',
+            headers: {
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            }
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                loadBreakingNews();
+                showToast('تم حذف الخبر العاجل', 'success');
+            }
+        });
+    };
+    
+    // Toast notification
+    function showToast(message, type = 'success') {
+        const toast = document.createElement('div');
+        toast.className = `fixed bottom-4 left-4 px-6 py-3 rounded-lg text-white font-medium shadow-lg z-50 ${type === 'success' ? 'bg-green-600' : 'bg-red-600'}`;
+        toast.textContent = message;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 3000);
+    }
+    
+    // تحميل البيانات عند فتح الصفحة
+    loadBreakingNews();
+});
+</script>
 @endpush

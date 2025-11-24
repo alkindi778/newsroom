@@ -137,6 +137,9 @@ Route::prefix('v1')->group(function () {
     // PWA Manifest (Public)
     Route::get('/manifest', [ManifestController::class, 'getManifest']);
     
+    // Breaking News (Public) - الأخبار العاجلة
+    Route::get('/breaking-news', [\App\Http\Controllers\Admin\BreakingNewsController::class, 'getActive']);
+
     // Contact Messages (Public)
     Route::post('/contact-messages', [ContactMessageController::class, 'store']);
 
