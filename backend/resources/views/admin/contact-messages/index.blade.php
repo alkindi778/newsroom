@@ -11,7 +11,17 @@
             <p class="mt-1 text-sm text-gray-600">إدارة ومتابعة رسائل المواطنين والزوار</p>
         </div>
         
-        <div class="flex flex-wrap gap-3">
+        <div class="flex flex-wrap gap-3 items-center">
+            <a href="{{ route('admin.contact-messages.archive.index') }}" class="inline-flex items-center gap-2 px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white font-medium rounded-lg transition-colors">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/>
+                </svg>
+                الأرشيف
+                @php $archivedCount = \App\Models\ContactMessage::archived()->count(); @endphp
+                @if($archivedCount > 0)
+                <span class="bg-white/20 px-2 py-0.5 rounded-full text-xs">{{ $archivedCount }}</span>
+                @endif
+            </a>
             <div class="bg-white rounded-lg shadow-sm border border-gray-200 px-4 py-2">
                 <span class="text-gray-600 text-sm font-medium">جديد</span>
                 <span class="text-red-600 font-bold text-xl mr-2">{{ $newCount }}</span>

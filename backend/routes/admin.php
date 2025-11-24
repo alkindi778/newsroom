@@ -449,6 +449,20 @@ Route::middleware(['auth', App\Http\Middleware\AdminMiddleware::class])->group(f
         Route::get('/api/templates', [\App\Http\Controllers\Admin\ContactMessageReplyController::class, 'getTemplates'])->name('api.templates');
         Route::get('/api/templates/{templateId}/message/{messageId}', [\App\Http\Controllers\Admin\ContactMessageReplyController::class, 'getTemplate'])->name('api.template');
         
+        // الأرشيف
+        Route::prefix('archive')->name('archive.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Admin\ContactMessageArchiveController::class, 'index'])->name('index');
+            Route::get('/export', [\App\Http\Controllers\Admin\ContactMessageArchiveController::class, 'export'])->name('export');
+            Route::post('/bulk', [\App\Http\Controllers\Admin\ContactMessageArchiveController::class, 'bulkArchive'])->name('bulk');
+            Route::get('/{id}', [\App\Http\Controllers\Admin\ContactMessageArchiveController::class, 'show'])->name('show');
+            Route::put('/{id}/category', [\App\Http\Controllers\Admin\ContactMessageArchiveController::class, 'updateCategory'])->name('update-category');
+            Route::post('/{id}/reanalyze', [\App\Http\Controllers\Admin\ContactMessageArchiveController::class, 'reanalyze'])->name('reanalyze');
+        });
+        
+        // أرشفة وإلغاء أرشفة رسالة
+        Route::post('/{id}/archive', [\App\Http\Controllers\Admin\ContactMessageArchiveController::class, 'archive'])->name('archive');
+        Route::post('/{id}/unarchive', [\App\Http\Controllers\Admin\ContactMessageArchiveController::class, 'unarchive'])->name('unarchive');
+        
         // Dynamic routes يجب أن تكون في النهاية
         Route::get('/{id}', [ContactMessageController::class, 'show'])->name('show');
         Route::put('/{id}', [ContactMessageController::class, 'update'])->name('update');

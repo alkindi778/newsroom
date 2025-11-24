@@ -500,6 +500,28 @@
                         اتصال
                     </a>
                     
+                    @if(!$message->is_archived)
+                    <form action="{{ route('admin.contact-messages.archive', $message->id) }}" method="POST">
+                        @csrf
+                        <button type="submit" class="w-full px-4 py-3 bg-amber-600 hover:bg-amber-700 text-white font-medium rounded-lg transition-colors duration-200 flex items-center justify-center gap-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/>
+                            </svg>
+                            أرشفة بالذكاء الاصطناعي
+                        </button>
+                    </form>
+                    @else
+                    <form action="{{ route('admin.contact-messages.unarchive', $message->id) }}" method="POST">
+                        @csrf
+                        <button type="submit" class="w-full px-4 py-3 bg-gray-600 hover:bg-gray-700 text-white font-medium rounded-lg transition-colors duration-200 flex items-center justify-center gap-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"/>
+                            </svg>
+                            إلغاء الأرشفة
+                        </button>
+                    </form>
+                    @endif
+                    
                     @can('delete_contact_messages')
                     <div class="border-t border-gray-200 my-4"></div>
                     

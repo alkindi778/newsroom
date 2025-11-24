@@ -34,15 +34,25 @@ class ContactMessage extends Model
         'ai_sentiment',
         'ai_suggested_reply',
         'ai_category',
+        // حقول الأرشفة
+        'is_archived',
+        'archived_at',
+        'archived_by',
+        'archive_category',
+        'archive_summary',
+        'archive_tags',
     ];
     
     protected $casts = [
         'read_at' => 'datetime',
         'first_reply_at' => 'datetime',
         'approved_at' => 'datetime',
+        'archived_at' => 'datetime',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
         'replies_count' => 'integer',
+        'is_archived' => 'boolean',
+        'archive_tags' => 'array',
     ];
     
     /**
@@ -59,6 +69,30 @@ class ContactMessage extends Model
     public function approver()
     {
         return $this->belongsTo(User::class, 'approved_by');
+    }
+    
+    /**
+     * العلاقة مع المستخدم الذي أرشف
+     */
+    public function archiver()
+    {
+        return $this->belongsTo(User::class, 'archived_by');
+    }
+    
+    /**
+     * Scope للرسائل المؤرشفة
+     */
+    public function scopeArchived($query)
+    {
+        return $query->where('is_archived', true);
+    }
+    
+    /**
+     * Scope للرسائل غير المؤرشفة
+     */
+    public function scopeNotArchived($query)
+    {
+        return $query->where('is_archived', false);
     }
     
     /**
