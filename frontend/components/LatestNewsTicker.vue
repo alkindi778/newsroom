@@ -2,7 +2,7 @@
   <ClientOnly>
     <div class="latest-news-ticker bg-navy text-white py-2 shadow-md relative overflow-hidden border-b border-navy-600">
     <div class="container mx-auto px-2 md:px-4">
-      <div class="flex items-center gap-2 md:gap-4">
+      <div class="flex items-center gap-2 md:gap-4 h-10"> <!-- Fixed height -->
         <!-- عنوان الشريط -->
         <div class="flex-shrink-0 bg-primary text-navy px-2 md:px-4 py-1.5 md:py-2 rounded font-bold text-xs md:text-sm shadow-lg z-10">
           <span class="flex items-center gap-1 md:gap-2">
@@ -14,45 +14,65 @@
           </span>
         </div>
 
-        <!-- الشريط المتحرك -->
-        <div class="flex-1 overflow-hidden relative">
-          <div 
-            ref="tickerContent"
-            class="ticker-content flex items-center gap-3 md:gap-4 whitespace-nowrap"
-            :class="{ 
-              'animate-ticker': isClient && articles.length > 0 && !isPaused,
-              'paused': isPaused 
-            }"
-            @mouseenter="pauseTicker"
-            @mouseleave="resumeTicker"
-          >
-            <!-- تكرار الأخبار للحصول على حلقة متصلة -->
-            <template v-for="(article, index) in displayArticles" :key="`${article.id}-${index}`">
+        <!-- الشريط المتحرك (عمودي) -->
+        <div class="flex-1 overflow-hidden relative h-full group" @mouseenter="pauseTicker" @mouseleave="resumeTicker">
+          <Transition name="slide-vertical" mode="out-in">
+            <div 
+              v-if="currentArticle"
+              :key="currentIndex"
+              class="absolute w-full h-full flex items-center"
+            >
               <NuxtLink 
-                :to="getArticleLink(article as any)"
-                class="ticker-item flex items-center gap-1 md:gap-2 hover:text-primary transition-colors duration-200"
+                :to="getArticleLink(currentArticle as any)"
+                class="flex items-center gap-2 hover:text-primary transition-colors duration-200 w-full truncate"
               >
-                <span class="inline-block w-1 h-1 md:w-1.5 md:h-1.5 bg-primary rounded-full animate-ping"></span>
-                <span class="font-medium text-xs md:text-sm">
-                  <span v-if="article.subtitle" class="text-primary ml-1">{{ article.subtitle }} ●</span>
-                  {{ getArticleTitle(article) }}
+                <span class="inline-block w-1.5 h-1.5 bg-primary rounded-full animate-ping flex-shrink-0"></span>
+                <span class="font-medium text-sm md:text-base truncate">
+                  <span v-if="currentArticle.subtitle" class="text-primary ml-1">{{ currentArticle.subtitle }} ●</span>
+                  {{ getArticleTitle(currentArticle) }}
+                </span>
+                <span class="text-xs text-gray-400 mr-2 flex-shrink-0 hidden md:inline-block">
+                  {{ formatDate(currentArticle.published_at) }}
                 </span>
               </NuxtLink>
-            </template>
-          </div>
+            </div>
+          </Transition>
         </div>
 
         <!-- أزرار التحكم -->
-        <div class="flex-shrink-0 flex items-center gap-2">
+        <div class="flex-shrink-0 flex items-center gap-1 md:gap-2">
+          <!-- السابق -->
+          <button 
+            @click="prevNews"
+            class="p-1.5 hover:bg-primary/20 rounded transition-colors duration-200 text-gray-300 hover:text-white"
+            title="السابق"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/>
+            </svg>
+          </button>
+          
+          <!-- التالي -->
+          <button 
+            @click="nextNews"
+            class="p-1.5 hover:bg-primary/20 rounded transition-colors duration-200 text-gray-300 hover:text-white"
+            title="التالي"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+            </svg>
+          </button>
+
+          <!-- إيقاف/تشغيل -->
           <button 
             @click="togglePause"
-            class="p-1.5 md:p-2 hover:bg-primary/20 rounded transition-colors duration-200"
+            class="p-1.5 hover:bg-primary/20 rounded transition-colors duration-200 text-gray-300 hover:text-white hidden sm:block"
             :title="isPaused ? 'تشغيل' : 'إيقاف مؤقت'"
           >
-            <svg v-if="isPaused" class="w-3 h-3 md:w-4 md:h-4" fill="currentColor" viewBox="0 0 20 20">
+            <svg v-if="isPaused" class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
               <path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z"/>
             </svg>
-            <svg v-else class="w-3 h-3 md:w-4 md:h-4" fill="currentColor" viewBox="0 0 20 20">
+            <svg v-else class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
               <path d="M5 4a2 2 0 012-2h2a2 2 0 012 2v12a2 2 0 01-2 2H7a2 2 0 01-2-2V4zM13 4a2 2 0 012-2h2a2 2 0 012 2v12a2 2 0 01-2 2h-2a2 2 0 01-2-2V4z"/>
             </svg>
           </button>
@@ -91,8 +111,8 @@ interface ApiResponse {
 
 const articles = ref<TickerArticle[]>([])
 const isPaused = ref(false)
-const tickerContent = ref<HTMLElement | null>(null)
 const isClient = ref(false)
+const currentIndex = ref(0)
 
 const { apiFetch } = useApi()
 
@@ -100,15 +120,22 @@ const { apiFetch } = useApi()
 const getArticleTitle = (article: TickerArticle) => {
   const isEnglish = locale.value === 'en'
   const hasTranslation = article.title_en && article.title_en.trim() !== ''
-  
   return (isEnglish && hasTranslation) ? article.title_en : article.title
 }
 
-// تكرار الأخبار ثلاث مرات للحصول على حلقة سلسة ومتواصلة بدون حدود
-const displayArticles = computed(() => {
-  if (articles.value.length === 0) return []
-  // تكرار الأخبار ثلاث مرات - الأنيميشن سيتحرك بسلاسة بدون انقطاع
-  return [...articles.value, ...articles.value, ...articles.value]
+// تنسيق التاريخ
+const formatDate = (date: string) => {
+  if (!date) return ''
+  return new Date(date).toLocaleTimeString(locale.value === 'ar' ? 'ar-SA' : 'en-US', {
+    hour: '2-digit',
+    minute: '2-digit'
+  })
+}
+
+// الخبر الحالي
+const currentArticle = computed(() => {
+  if (articles.value.length === 0) return null
+  return articles.value[currentIndex.value]
 })
 
 // جلب آخر الأخبار
@@ -116,7 +143,7 @@ const fetchLatestNews = async () => {
   try {
     const response = await apiFetch<ApiResponse>('/articles/latest', {
       params: {
-        limit: 50
+        limit: 100 // زيادة العدد لعرض جميع الأخبار
       }
     })
     
@@ -127,6 +154,29 @@ const fetchLatestNews = async () => {
   } catch (error) {
     console.error('Error fetching latest news:', error)
   }
+}
+
+// التنقل
+const nextNews = () => {
+  if (articles.value.length === 0) return
+  currentIndex.value = (currentIndex.value + 1) % articles.value.length
+}
+
+const prevNews = () => {
+  if (articles.value.length === 0) return
+  currentIndex.value = (currentIndex.value - 1 + articles.value.length) % articles.value.length
+}
+
+// المؤقت
+let tickerInterval: NodeJS.Timeout | null = null
+
+const startTicker = () => {
+  if (tickerInterval) clearInterval(tickerInterval)
+  tickerInterval = setInterval(() => {
+    if (!isPaused.value) {
+      nextNews()
+    }
+  }, 4000) // كل 4 ثواني
 }
 
 // إيقاف/تشغيل الشريط
@@ -147,7 +197,9 @@ let refreshInterval: NodeJS.Timeout | null = null
 
 onMounted(() => {
   isClient.value = true
-  fetchLatestNews()
+  fetchLatestNews().then(() => {
+    startTicker()
+  })
   
   // تحديث كل 5 دقائق
   refreshInterval = setInterval(() => {
@@ -156,64 +208,33 @@ onMounted(() => {
 })
 
 onUnmounted(() => {
-  if (refreshInterval) {
-    clearInterval(refreshInterval)
-  }
+  if (refreshInterval) clearInterval(refreshInterval)
+  if (tickerInterval) clearInterval(tickerInterval)
 })
 </script>
 
 <style scoped>
-@keyframes ticker {
-  0% {
-    transform: translateX(0);
-  }
-  100% {
-    transform: translateX(-66.666%);
-  }
+.slide-vertical-enter-active,
+.slide-vertical-leave-active {
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.animate-ticker {
-  animation: ticker 30s linear infinite;
+.slide-vertical-enter-from {
+  transform: translateY(20px); /* يأتي من الأسفل */
+  opacity: 0;
 }
 
-/* سرعة أسرع على الشاشات الصغيرة */
-@media (max-width: 768px) {
-  .animate-ticker {
-    animation: ticker 20s linear infinite;
-  }
-}
-
-.paused {
-  animation-play-state: paused !important;
-}
-
-.ticker-item {
-  display: inline-flex;
-  padding: 0;
+.slide-vertical-leave-to {
+  transform: translateY(-20px); /* يذهب للأعلى */
+  opacity: 0;
 }
 
 @keyframes pulse-slow {
-  0%, 100% {
-    opacity: 0.1;
-  }
-  50% {
-    opacity: 0.2;
-  }
+  0%, 100% { opacity: 0.1; }
+  50% { opacity: 0.2; }
 }
 
 .animate-pulse-slow {
   animation: pulse-slow 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-}
-
-/* تحسين الظهور على الشاشات الصغيرة */
-@media (max-width: 768px) {
-  .ticker-item span:first-child {
-    display: none;
-  }
-}
-
-/* منع التفاف النص */
-.ticker-content {
-  will-change: transform;
 }
 </style>
