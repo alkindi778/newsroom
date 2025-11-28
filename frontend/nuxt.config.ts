@@ -42,7 +42,7 @@ export default defineNuxtConfig({
       ]
     },
     workbox: {
-      navigateFallback: '/',
+      // navigateFallback: '/', // تعطل لأن الموقع SSR وليس Static
       globPatterns: ['**/*.{js,css,html,png,svg,ico}'],
     },
     client: {
