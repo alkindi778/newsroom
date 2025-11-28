@@ -15,9 +15,12 @@ export default defineNuxtConfig({
   pwa: {
     registerType: 'autoUpdate',
     manifest: {
-      name: process.env.NUXT_PUBLIC_SITE_NAME || 'انتقالي العاصمة عدن', // اسم التطبيق الكامل
-      short_name: process.env.NUXT_PUBLIC_SITE_NAME || 'انتقالي العاصمة عدن', // الاسم المختصر (يظهر تحت الأيقونة)
-      description: process.env.NUXT_PUBLIC_SITE_DESCRIPTION || 'انتقالي العاصمة عدن',
+      id: '/', // App ID matches the scope
+      name: 'انتقالي العاصمة عدن', // تثبيت الاسم مباشرة لضمان ظهوره
+      short_name: 'انتقالي عدن',
+      description: 'المنصة الرسمية للمجلس الانتقالي الجنوبي - العاصمة عدن',
+      lang: 'ar',
+      dir: 'rtl',
       theme_color: '#ffffff',
       background_color: '#ffffff',
       display: 'standalone', // يفتح كتطبيق مستقل بدون شريط المتصفح
@@ -44,6 +47,7 @@ export default defineNuxtConfig({
     },
     client: {
       installPrompt: true,
+      periodicSyncForUpdates: 3600, // Check every hour
     },
     devOptions: {
       enabled: true, // لتجربة الـ PWA أثناء التطوير
