@@ -17,12 +17,31 @@
         <div class="flex-1 overflow-hidden relative">
           <Transition name="slide-fade" mode="out-in">
             <div v-if="currentNews" :key="currentIndex" class="flex items-center">
+              <!-- إذا كان خبر عاجل مستقل مع رابط خارجي -->
+              <a
+                v-if="currentNews.url"
+                :href="currentNews.url"
+                target="_blank"
+                rel="noopener"
+                class="text-white hover:text-gray-200 transition-colors duration-200 font-bold text-sm md:text-3xl truncate"
+              >
+                {{ getArticleTitle(currentNews) }}
+              </a>
+              <!-- إذا كان خبر عاجل مرتبط بمقال -->
               <NuxtLink
+                v-else-if="currentNews.slug && !String(currentNews.id).startsWith('bn_')"
                 :to="getArticleLink(currentNews as any)"
                 class="text-white hover:text-gray-200 transition-colors duration-200 font-bold text-sm md:text-3xl truncate"
               >
                 {{ getArticleTitle(currentNews) }}
               </NuxtLink>
+              <!-- إذا كان خبر عاجل مستقل بدون رابط (نص فقط) -->
+              <span
+                v-else
+                class="text-white font-bold text-sm md:text-3xl truncate"
+              >
+                {{ getArticleTitle(currentNews) }}
+              </span>
             </div>
             <div v-else class="text-white text-sm md:text-3xl">جاري التحميل...</div>
           </Transition>

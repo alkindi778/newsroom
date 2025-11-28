@@ -94,6 +94,7 @@ Route::middleware(['auth', App\Http\Middleware\AdminMiddleware::class])->group(f
         Route::post('/{id}/toggle', [\App\Http\Controllers\Admin\BreakingNewsController::class, 'toggle'])->name('toggle');
         Route::put('/{id}/priority', [\App\Http\Controllers\Admin\BreakingNewsController::class, 'updatePriority'])->name('priority');
         Route::delete('/{id}', [\App\Http\Controllers\Admin\BreakingNewsController::class, 'destroy'])->name('destroy');
+        Route::post('/{id}/delete', [\App\Http\Controllers\Admin\BreakingNewsController::class, 'destroy'])->name('delete');
     });
     
     // Categories Management

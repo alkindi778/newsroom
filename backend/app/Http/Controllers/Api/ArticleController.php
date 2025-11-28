@@ -585,43 +585,90 @@ class ArticleController extends Controller
     }
 
     /**
-     * Get breaking news articles
+     * Get breaking news articles (يجمع الأخبار العاجلة المستقلة + المقالات المعلمة كعاجلة)
      */
     public function breakingNews(Request $request): JsonResponse
     {
         try {
-            $limit = min($request->get('limit', 5), 10); // Max 10 breaking news
+            $limit = min($request->get('limit', 5), 10);
+            $result = collect();
             
-            $articles = Article::with(['category:id,name,name_en,slug'])
+            // 1. الأخبار العاجلة المستقلة (من جدول breaking_news) - أولوية أعلى
+            $independentNews = \App\Models\BreakingNews::with('article:id,slug,title,title_en')
+                ->where('is_active', true)
+                ->where(function ($q) {
+                    $q->whereNull('expires_at')
+                      ->orWhere('expires_at', '>', now());
+                })
+                ->orderByDesc('priority')
+                ->orderByDesc('created_at')
+                ->limit($limit)
+                ->get()
+                ->map(function ($news) {
+                    // إذا كان مرتبط بمقال، استخدم بيانات المقال
+                    if ($news->article) {
+                        return [
+                            'id' => 'bn_' . $news->id,
+                            'title' => $news->title,
+                            'title_en' => $news->article->title_en,
+                            'slug' => $news->article->slug,
+                            'priority' => 100 + $news->priority,
+                            'published_at' => $news->created_at->toISOString(),
+                            'type' => 'breaking',
+                        ];
+                    }
+                    
+                    // خبر عاجل مستقل بدون مقال
+                    return [
+                        'id' => 'bn_' . $news->id,
+                        'title' => $news->title,
+                        'title_en' => null,
+                        'slug' => $news->url ? null : 'breaking-news',
+                        'url' => $news->url,
+                        'priority' => 100 + $news->priority,
+                        'published_at' => $news->created_at->toISOString(),
+                        'type' => 'breaking',
+                    ];
+                });
+            
+            // 2. المقالات المعلمة كأخبار عاجلة
+            $breakingArticles = Article::with(['category:id,name,name_en,slug'])
                 ->where('is_published', true)
                 ->where('is_breaking_news', true)
                 ->whereNotNull('published_at')
                 ->where('published_at', '<=', now())
                 ->orderBy('published_at', 'desc')
                 ->limit($limit)
-                ->get();
-
-            $transformedData = $articles->map(function ($article) {
-                return [
-                    'id' => $article->id,
-                    'title' => $this->decodeHtmlEntities($article->title),
-                    'title_en' => $article->title_en,
-                    'subtitle' => $this->decodeHtmlEntities($article->subtitle),
-                    'source' => $this->decodeHtmlEntities($article->source),
-                    'slug' => $article->slug,
-                    'excerpt' => $this->decodeHtmlEntities($article->excerpt) ?? mb_substr(strip_tags($article->content), 0, 100) . '...',
-                    'image' => $article->image_path,
-                    'thumbnail' => $article->thumbnail_path,
-                    'views' => $article->views ?? 0,
-                    'published_at' => $article->published_at?->toISOString(),
-                    'category' => $article->category ? [
-                        'id' => $article->category->id,
-                        'name' => $this->decodeHtmlEntities($article->category->name),
-                        'name_en' => $article->category->name_en,
-                        'slug' => $article->category->slug
-                    ] : null
-                ];
-            });
+                ->get()
+                ->map(function ($article) {
+                    return [
+                        'id' => $article->id,
+                        'title' => $this->decodeHtmlEntities($article->title),
+                        'title_en' => $article->title_en,
+                        'subtitle' => $this->decodeHtmlEntities($article->subtitle),
+                        'source' => $this->decodeHtmlEntities($article->source),
+                        'slug' => $article->slug,
+                        'excerpt' => $this->decodeHtmlEntities($article->excerpt) ?? mb_substr(strip_tags($article->content), 0, 100) . '...',
+                        'image' => $article->image_path,
+                        'thumbnail' => $article->thumbnail_path,
+                        'views' => $article->views ?? 0,
+                        'published_at' => $article->published_at?->toISOString(),
+                        'priority' => 50,
+                        'type' => 'article',
+                        'category' => $article->category ? [
+                            'id' => $article->category->id,
+                            'name' => $this->decodeHtmlEntities($article->category->name),
+                            'name_en' => $article->category->name_en,
+                            'slug' => $article->category->slug
+                        ] : null
+                    ];
+                });
+            
+            // دمج وترتيب حسب الأولوية
+            $transformedData = $independentNews->concat($breakingArticles)
+                ->sortByDesc('priority')
+                ->take($limit)
+                ->values();
 
             return response()->json([
                 'status' => 'success',

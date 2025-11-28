@@ -76,7 +76,7 @@ export function initTinyMCE(selector = '#content') {
         paste_retain_style_properties: 'all',
         
         // Link settings
-        link_context_toolbar: true,
+        link_context_toolbar: false,  // تعطيل شريط أدوات الروابط للسماح بقائمة النسخ/اللصق على الهاتف
         link_title: false,
         target_list: false,
         link_assume_external_targets: true,
@@ -259,6 +259,17 @@ export function initTinyMCE(selector = '#content') {
         statusbar: true, // إظهار شريط الحالة
         promotion: false, // إخفاء إعلانات TinyMCE
         branding: false,  // إخفاء العلامة التجارية
+        
+        // تعطيل شريط الأدوات السريع والقوائم السياقية للسماح بقائمة النسخ/اللصق الأصلية على الهاتف
+        quickbars_selection_toolbar: false,
+        quickbars_insert_toolbar: false,
+        contextmenu: false,  // تعطيل قائمة TinyMCE السياقية للسماح بقائمة النظام
+        
+        // إعدادات خاصة بالهاتف
+        mobile: {
+            menubar: false,
+            toolbar_mode: 'scrolling'
+        },
         
         // Setup callback
         setup: (editor) => {

@@ -1,0 +1,43 @@
+# Dependencies
+node_modules/
+vendor/
+
+# Build files
+/backend/public/build/
+/frontend/.output/
+/frontend/.nuxt/
+/frontend/dist/
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+
+# Large files & archives
+*.zip
+*.rar
+*.7z
+*.tar.gz
+old_photos.zip
+
+# Cache
+.cache/
+*.cache
+
+# Temp files
+*.tmp
+*.temp

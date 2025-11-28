@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\BreakingNews;
 use App\Models\Notification;
 use App\Models\User;
+use App\Services\PushNotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
@@ -69,8 +70,11 @@ class BreakingNewsController extends Controller
                 'is_active' => true,
             ]);
 
-            // إرسال إشعار للمستخدمين
+            // إرسال إشعار للمديرين
             $this->sendNotifications($breakingNews);
+            
+            // إرسال Push Notification للزوار
+            $this->sendPushToVisitors($breakingNews);
 
             return response()->json([
                 'success' => true,
@@ -191,6 +195,20 @@ class BreakingNewsController extends Controller
             }
         } catch (\Exception $e) {
             Log::warning('فشل إرسال إشعارات الخبر العاجل: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * إرسال Push Notification للزوار
+     */
+    private function sendPushToVisitors(BreakingNews $breakingNews)
+    {
+        try {
+            $pushService = app(PushNotificationService::class);
+            $pushService->sendBreakingNewsNotification($breakingNews);
+            Log::info('تم إرسال Push Notification للخبر العاجل: ' . $breakingNews->id);
+        } catch (\Exception $e) {
+            Log::warning('فشل إرسال Push Notification للخبر العاجل: ' . $e->getMessage());
         }
     }
 

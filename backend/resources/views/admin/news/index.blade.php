@@ -487,12 +487,17 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
     
+    const baseUrl = '{{ url("/admin/breaking-news") }}';
+    
     // تبديل حالة الخبر
     window.toggleBreaking = function(id) {
-        fetch(`/admin/breaking-news/${id}/toggle`, {
+        fetch(`${baseUrl}/${id}/toggle`, {
             method: 'POST',
             headers: {
-                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                'X-Requested-With': 'XMLHttpRequest'
             }
         })
         .then(res => res.json())
@@ -501,6 +506,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 loadBreakingNews();
                 showToast(data.message, 'success');
             }
+        })
+        .catch(err => {
+            console.error(err);
+            showToast('حدث خطأ', 'error');
         });
     };
     
@@ -508,10 +517,13 @@ document.addEventListener('DOMContentLoaded', function() {
     window.deleteBreaking = function(id) {
         if (!confirm('هل تريد حذف هذا الخبر العاجل؟')) return;
         
-        fetch(`/admin/breaking-news/${id}`, {
-            method: 'DELETE',
+        fetch(`${baseUrl}/${id}/delete`, {
+            method: 'POST',
             headers: {
-                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                'X-Requested-With': 'XMLHttpRequest'
             }
         })
         .then(res => res.json())
@@ -519,7 +531,13 @@ document.addEventListener('DOMContentLoaded', function() {
             if (data.success) {
                 loadBreakingNews();
                 showToast('تم حذف الخبر العاجل', 'success');
+            } else {
+                showToast(data.message || 'فشل الحذف', 'error');
             }
+        })
+        .catch(err => {
+            console.error(err);
+            showToast('حدث خطأ في الحذف', 'error');
         });
     };
     

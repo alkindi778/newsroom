@@ -36,6 +36,10 @@ export default defineNuxtConfig({
         defineModel: true,
       },
     },
+    // إزالة console.log في الـ production
+    esbuild: {
+      drop: process.env.NODE_ENV === 'production' ? ['console', 'debugger'] : [],
+    },
     server: {
       // تقليل fetch errors أثناء التطوير
       hmr: {

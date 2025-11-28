@@ -241,6 +241,45 @@ class PushNotificationService
     }
 
     /**
+     * إرسال إشعار خبر عاجل
+     */
+    public function sendBreakingNewsNotification($breakingNews)
+    {
+        // الحصول على اسم الموقع وأيقونته من الإعدادات
+        $siteName = \App\Models\SiteSetting::where('key', 'site_name')->value('value') ?? 'عدن الغد';
+        $siteIcon = \App\Models\SiteSetting::where('key', 'site_logo')->value('value');
+        
+        // استخدام أيقونة الموقع أو الأيقونة الافتراضية
+        $iconUrl = $siteIcon ? config('app.url') . '/storage/' . ltrim($siteIcon, '/') : config('app.url') . '/icon-192x192.png';
+        
+        // تحديد الرابط
+        $url = $breakingNews->url;
+        if (!$url && $breakingNews->article) {
+            $url = config('app.url') . '/news/' . $breakingNews->article->slug;
+        }
+        if (!$url) {
+            $url = config('app.url');
+        }
+        
+        $payload = [
+            'title' => '🚨 ' . $siteName . ' -  عاجل',
+            'body' => $breakingNews->title,
+            'icon' => $iconUrl,
+            'badge' => config('app.url') . '/badge-72x72.png',
+            'tag' => 'breaking-' . $breakingNews->id,
+            'url' => $url,
+            'requireInteraction' => true, // يبقى الإشعار حتى يتفاعل المستخدم
+            'data' => [
+                'type' => 'breaking_news',
+                'id' => $breakingNews->id,
+                'url' => $url
+            ]
+        ];
+
+        $this->sendToAll($payload);
+    }
+
+    /**
      * إرسال إشعار مخصص
      */
     public function sendCustomNotification(string $title, string $body, ?string $url = null, array $options = [])

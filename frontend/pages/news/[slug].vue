@@ -3,18 +3,6 @@
     <!-- Loading State -->
     <LoadingSpinner v-if="loading" type="bars" size="lg" fullScreen text="جاري تحميل الخبر..." />
 
-    <!-- Error State -->
-    <div v-else-if="error" class="text-center py-12">
-      <svg class="w-16 h-16 mx-auto text-red-500 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-      </svg>
-      <h2 class="text-2xl font-bold text-gray-900 mb-2">حدث خطأ</h2>
-      <p class="text-gray-600 mb-4">{{ error }}</p>
-      <NuxtLink to="/" class="text-blue-600 hover:text-blue-700 font-semibold">
-        العودة للرئيسية
-      </NuxtLink>
-    </div>
-
     <!-- Article Content -->
     <div v-else-if="displayArticle" class="max-w-4xl mx-auto">
       <!-- Breadcrumb -->
@@ -257,13 +245,34 @@ const slug = computed(() => route.params.slug as string)
 const { data: articleData, error: fetchError } = await useAsyncData(
   `article-${slug.value}`,
   async () => {
-    const response = await $fetch<any>(`${apiBase}/articles/${slug.value}`)
-    return response?.data || null
+    try {
+      const response = await $fetch<any>(`${apiBase}/articles/${slug.value}`)
+      return response?.data || null
+    } catch (e: any) {
+      // إذا كان الخطأ 404، نرمي خطأ ليتم عرض صفحة 404
+      if (e?.response?.status === 404 || e?.statusCode === 404) {
+        throw createError({
+          statusCode: 404,
+          statusMessage: 'الخبر غير موجود',
+          message: 'عذراً، الخبر الذي تبحث عنه غير موجود أو تم حذفه'
+        })
+      }
+      throw e
+    }
   },
   {
     watch: [slug]
   }
 )
+
+// إذا لم يتم العثور على الخبر، نعرض صفحة 404
+if (!articleData.value && !fetchError.value) {
+  throw createError({
+    statusCode: 404,
+    statusMessage: 'الخبر غير موجود',
+    message: 'عذراً، الخبر الذي تبحث عنه غير موجود أو تم حذفه'
+  })
+}
 
 const article = computed(() => {
   const data = articleData.value
