@@ -6,8 +6,50 @@ export default defineNuxtConfig({
   modules: [
     '@nuxtjs/tailwindcss',
     '@pinia/nuxt',
-    '@nuxtjs/i18n'
+    '@nuxtjs/i18n',
+    '@vite-pwa/nuxt'
   ],
+
+  // إعدادات PWA
+  // @ts-ignore - PWA module adds this property at runtime
+  pwa: {
+    registerType: 'autoUpdate',
+    manifest: {
+      name: process.env.NUXT_PUBLIC_SITE_NAME || 'انتقالي العاصمة عدن', // اسم التطبيق الكامل
+      short_name: process.env.NUXT_PUBLIC_SITE_NAME || 'انتقالي العاصمة عدن', // الاسم المختصر (يظهر تحت الأيقونة)
+      description: process.env.NUXT_PUBLIC_SITE_DESCRIPTION || 'انتقالي العاصمة عدن',
+      theme_color: '#ffffff',
+      background_color: '#ffffff',
+      display: 'standalone', // يفتح كتطبيق مستقل بدون شريط المتصفح
+      orientation: 'portrait',
+      scope: '/',
+      start_url: '/',
+      icons: [
+        {
+          src: '/icon-192x192.png', // تأكد من وجود هذه الصورة في public
+          sizes: '192x192',
+          type: 'image/png'
+        },
+        {
+          src: '/icon-512x512.png', // تأكد من وجود هذه الصورة في public
+          sizes: '512x512',
+          type: 'image/png',
+          purpose: 'any maskable'
+        }
+      ]
+    },
+    workbox: {
+      navigateFallback: '/',
+      globPatterns: ['**/*.{js,css,html,png,svg,ico}'],
+    },
+    client: {
+      installPrompt: true,
+    },
+    devOptions: {
+      enabled: true, // لتجربة الـ PWA أثناء التطوير
+      type: 'module',
+    },
+  },
 
   // إعدادات الترجمة
   i18n: {
