@@ -106,6 +106,11 @@ class ArticleService
         // Generate embedding for the article
         $this->generateArticleEmbedding($article);
         
+        // Generate SEO data automatically via Job Queue
+        if (empty($article->meta_description) || empty($article->keywords)) {
+            \App\Jobs\GenerateArticleSeoJob::dispatch($article);
+        }
+        
         // إرسال إشعارات
         if ($isReporter && $processedData['approval_status'] === 'pending_approval') {
             // إشعار المحررين بمقال جديد بانتظار الموافقة
@@ -194,6 +199,12 @@ class ArticleService
             
             // Update embedding for the article
             $this->generateArticleEmbedding($article->fresh());
+            
+            // Generate SEO data automatically via Job Queue if missing
+            $freshArticle = $article->fresh();
+            if (empty($freshArticle->meta_description) || empty($freshArticle->keywords)) {
+                \App\Jobs\GenerateArticleSeoJob::dispatch($freshArticle);
+            }
             
             // إطلاق Event إذا تم نشر المقال للمرة الأولى
             $article->refresh();
@@ -369,10 +380,10 @@ class ArticleService
             $data['keywords'] = $this->processKeywords($data['keywords']);
         }
 
-        // Generate meta description from content if not provided
-        if (empty($data['meta_description']) && !empty($data['content'])) {
-            $data['meta_description'] = $this->generateMetaDescription($data['content']);
-        }
+        // Removed simple meta description generation to rely on AI Job
+        // if (empty($data['meta_description']) && !empty($data['content'])) {
+        //     $data['meta_description'] = $this->generateMetaDescription($data['content']);
+        // }
 
         return $data;
     }

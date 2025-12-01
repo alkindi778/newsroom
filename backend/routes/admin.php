@@ -68,6 +68,10 @@ Route::middleware(['auth', App\Http\Middleware\AdminMiddleware::class])->group(f
     Route::middleware(['permission:publish_articles'])->group(function () {
         Route::patch('articles/{article}/toggle-status', [ArticleController::class, 'toggleStatus'])->name('articles.toggle-status');
     });
+    
+    // AI SEO Generation Route
+    Route::post('articles/generate-seo', [ArticleController::class, 'generateSeo'])->name('articles.generate-seo');
+
     Route::middleware(['permission:manage_articles'])->group(function () {
         Route::prefix('articles')->name('articles.')->group(function () {
             Route::post('bulk-action', [ArticleController::class, 'bulkAction'])->name('bulk-action');

@@ -223,7 +223,7 @@
                     </div>
                 </div>
 
-                <!-- Hidden SEO Fields - Auto-generated -->
+                <!-- Hidden SEO Fields - Auto-generated via Job Queue -->
                 <input type="hidden" id="meta_description" name="meta_description" value="{{ old('meta_description') }}">
                 <input type="hidden" id="keywords" name="keywords" value="{{ old('keywords') }}">
             </div>
@@ -338,68 +338,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 .toLowerCase();
             slugInput.value = slug;
         });
-    }
-    
-    // Function to clean text
-    function cleanText(text) {
-        return text
-            .replace(/<[^>]*>/g, '') // Remove HTML tags
-            .replace(/&[^;]+;/g, ' ') // Remove HTML entities
-            .replace(/\s+/g, ' ') // Replace multiple spaces with single space
-            .trim();
-    }
-    
-    // Function to extract keywords from text
-    function extractKeywords(title, content) {
-        const allText = (title + ' ' + content).toLowerCase();
-        const cleanedText = cleanText(allText);
-        
-        // Arabic and English stop words to exclude
-        const stopWords = ['في', 'من', 'إلى', 'على', 'عن', 'مع', 'هذا', 'هذه', 'ذلك', 'تلك', 'الذي', 'التي', 'يتم', 'تم', 'كما', 'أن', 'أي', 'كل', 'بعض', 'جميع', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by', 'the', 'a', 'an', 'is', 'are', 'was', 'were', 'will', 'would', 'could', 'should', 'may', 'might', 'can'];
-        
-        // Extract words (Arabic and English)
-        const words = cleanedText.match(/[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFFa-zA-Z]{3,}/g) || [];
-        
-        // Filter out stop words and get unique words
-        const keywords = [...new Set(words.filter(word => 
-            !stopWords.includes(word.toLowerCase()) && word.length >= 3
-        ))];
-        
-        // Return first 8 keywords
-        return keywords.slice(0, 8).join('، ');
-    }
-    
-    // Auto-generate summary, meta description and keywords from content
-    if (contentInput && summaryInput && metaDescriptionInput && keywordsInput) {
-        function updateSEOFields() {
-            const content = contentInput.value;
-            const title = titleInput ? titleInput.value : '';
-            
-            if (content) {
-                const cleanContent = cleanText(content);
-                
-                // Generate summary (150 characters)
-                const summary = cleanContent.length > 150 
-                    ? cleanContent.substring(0, 150) + '...'
-                    : cleanContent;
-                summaryInput.value = summary;
-                
-                // Generate meta description (157 characters max to leave room for "...")
-                const metaDescription = cleanContent.length > 157 
-                    ? cleanContent.substring(0, 157) + '...'
-                    : cleanContent;
-                metaDescriptionInput.value = metaDescription;
-                
-                // Generate keywords
-                const keywords = extractKeywords(title, content);
-                keywordsInput.value = keywords;
-            }
-        }
-        
-        contentInput.addEventListener('input', updateSEOFields);
-        if (titleInput) {
-            titleInput.addEventListener('input', updateSEOFields);
-        }
     }
     
     // Image preview functionality

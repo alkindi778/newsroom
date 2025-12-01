@@ -10,17 +10,22 @@ use App\Models\User;
 use App\Services\ArticleService;
 use App\Repositories\Interfaces\ArticleRepositoryInterface;
 use Illuminate\Validation\Rule;
+use App\Services\GeminiService;
 
 class ArticleController extends Controller
 {
     protected $articleService;
     protected $articleRepository;
+    protected $geminiService;
+
     public function __construct(
         ArticleService $articleService,
-        ArticleRepositoryInterface $articleRepository
+        ArticleRepositoryInterface $articleRepository,
+        GeminiService $geminiService
     ) {
         $this->articleService = $articleService;
         $this->articleRepository = $articleRepository;
+        $this->geminiService = $geminiService;
     }
     /**
      * Display a listing of the resource.
@@ -380,6 +385,41 @@ class ArticleController extends Controller
             return redirect()->back()->with('success', 'تم رفض المقال وإبلاغ المراسل بالسبب');
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'حدث خطأ أثناء الرفض: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Generate SEO data using AI (AJAX)
+     */
+    public function generateSeo(Request $request)
+    {
+        $request->validate([
+            'title' => 'required|string',
+            'content' => 'required|string'
+        ]);
+
+        try {
+            $seoData = $this->geminiService->generateSeoData(
+                $request->title,
+                $request->content
+            );
+            
+            if (empty($seoData)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'فشل توليد البيانات. يرجى المحاولة مرة أخرى.'
+                ], 500);
+            }
+
+            return response()->json([
+                'success' => true,
+                'data' => $seoData
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'حدث خطأ أثناء المعالجة: ' . $e->getMessage()
+            ], 500);
         }
     }
 }
