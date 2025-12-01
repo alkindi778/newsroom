@@ -101,7 +101,6 @@
           <div 
             class="prose prose-sm sm:prose-base md:prose-lg lg:prose-xl max-w-none text-right leading-loose article-content"
             :class="{ 'ltr-content': locale === 'en' }"
-            style="font-family: 'Azer', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;"
             v-html="displayArticle.content"
           ></div>
 
@@ -503,6 +502,25 @@ watch(slug, () => {
   direction: rtl;
   text-align: right;
   font-size: 1.375rem;
+}
+
+/* إجبار الخط على محتوى المقال وتجاوز inline styles */
+:deep(.article-content),
+:deep(.article-content *),
+:deep(.article-content p),
+:deep(.article-content span),
+:deep(.article-content div),
+:deep(.article-content li),
+:deep(.article-content td),
+:deep(.article-content th) {
+  font-family: 'Azer', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+  font-size: inherit !important;
+}
+
+:deep(.article-content p),
+:deep(.article-content span) {
+  font-size: 1.375rem !important;
+  line-height: 2.1 !important;
 }
 
 :deep(.prose.ltr-content) {
