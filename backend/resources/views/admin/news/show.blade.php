@@ -114,8 +114,8 @@
             <!-- Content -->
             <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
                 <h3 class="text-lg font-medium text-gray-900 mb-4">محتوى الخبر</h3>
-                <div class="prose prose-lg max-w-none text-gray-700 leading-relaxed">
-                    {!! nl2br(e($article->content)) !!}
+                <div class="prose prose-lg max-w-none text-gray-700 leading-relaxed article-content">
+                    {!! $article->content !!}
                 </div>
             </div>
 
