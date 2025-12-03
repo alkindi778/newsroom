@@ -34,6 +34,7 @@
 
 /* Components */
 @layer components {
+
   /* Container responsive */
   .container {
     @apply max-w-7xl;
@@ -64,7 +65,7 @@
   .rtl {
     direction: rtl;
   }
-  
+
   .ltr {
     direction: ltr;
   }
@@ -74,7 +75,7 @@
     margin-right: auto !important;
     margin-left: 0 !important;
   }
-  
+
   html[dir="ltr"] .ms-auto {
     margin-left: auto !important;
     margin-right: 0 !important;
@@ -84,7 +85,7 @@
     margin-left: auto !important;
     margin-right: 0 !important;
   }
-  
+
   html[dir="ltr"] .me-auto {
     margin-right: auto !important;
     margin-left: 0 !important;
@@ -127,6 +128,7 @@
   from {
     opacity: 0;
   }
+
   to {
     opacity: 1;
   }
@@ -137,6 +139,7 @@
     transform: translateY(30px);
     opacity: 0;
   }
+
   to {
     transform: translateY(0);
     opacity: 1;
@@ -148,6 +151,7 @@
     transform: scale(0.95);
     opacity: 0;
   }
+
   to {
     transform: scale(1);
     opacity: 1;
@@ -203,6 +207,29 @@
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Golden Pattern Background */
+.bg-golden-pattern {
+  background-color: #f9fafb;
+  background-image:
+    /* Mask: Fade out pattern in center (Solid #f9fafb in middle, transparent at edges) */
+    linear-gradient(90deg, transparent 0%, #f9fafb 10%, #f9fafb 90%, transparent 100%),
+    /* Pattern Layers */
+    linear-gradient(30deg, #D4AF3715 12%, transparent 12.5%, transparent 87%, #D4AF3715 87.5%, #D4AF3715),
+    linear-gradient(150deg, #D4AF3715 12%, transparent 12.5%, transparent 87%, #D4AF3715 87.5%, #D4AF3715),
+    linear-gradient(30deg, #D4AF3715 12%, transparent 12.5%, transparent 87%, #D4AF3715 87.5%, #D4AF3715),
+    linear-gradient(150deg, #D4AF3715 12%, transparent 12.5%, transparent 87%, #D4AF3715 87.5%, #D4AF3715),
+    linear-gradient(60deg, #D4AF3715 25%, transparent 25.5%, transparent 75%, #D4AF3715 75%, #D4AF3715),
+    linear-gradient(60deg, #D4AF3715 25%, transparent 25.5%, transparent 75%, #D4AF3715 75%, #D4AF3715);
+  background-size: 100% 100%, 40px 70px, 40px 70px, 40px 70px, 40px 70px, 40px 70px, 40px 70px;
+  background-position: 0 0, 0 0, 0 0, 20px 35px, 20px 35px, 0 0, 20px 35px;
+  background-attachment: scroll, fixed, fixed, fixed, fixed, fixed, fixed;
 }

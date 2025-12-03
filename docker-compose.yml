@@ -1,0 +1,49 @@
+version: '3.7'
+
+services:
+  n8n:
+    image: n8nio/n8n
+    restart: always
+    ports:
+      - "5678:5678"
+    environment:
+      - N8N_BASIC_AUTH_ACTIVE=true
+      - N8N_BASIC_AUTH_USER=myuser
+      - N8N_BASIC_AUTH_PASSWORD=mypassword
+      # السطر التالي ضروري إذا كنت تستخدم شهادات SSL موقعة ذاتيًا لـ Baserow
+      - NODE_TLS_REJECT_UNAUTHORIZED=0 
+      - WEBHOOK_URL=http://localhost:5678/
+    volumes:
+      - ~/.n8n:/home/node/.n8n
+      # قم بإنشاء مجلد محلي لتخزين الإيصالات وربطه هنا
+      - ./receipts:/data/receipts
+    depends_on:
+      - baserow
+
+  waha:
+    image: devlikeapro/waha
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      # إعدادات النسخة المجانية (Core)
+      WAHA_API_KEY: "your-secret-key"
+      WAHA_DASHBOARD_USERNAME: "admin"
+      WAHA_DASHBOARD_PASSWORD: "775801243aass"
+      WAHA_PRINT_QR: "true" 
+    volumes:
+      # هذا السطر ضروري لضمان استمرارية جلسات واتساب بعد إعادة التشغيل
+      - ./waha-sessions:/app/sessions
+
+  baserow:
+    image: baserow/baserow:1.24.2
+    restart: always
+    ports:
+      - "8080:80"
+    environment:
+      - BASEROW_PUBLIC_URL=http://localhost:8080
+    volumes:
+      - baserow_data:/baserow/data
+
+volumes:
+  baserow_data:

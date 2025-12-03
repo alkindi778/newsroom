@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen flex flex-col">
+  <div class="min-h-screen flex flex-col bg-golden-pattern">
     <LayoutHeader />
     
     <!-- شريط آخر الأخبار -->

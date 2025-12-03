@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>دليل بناء نظام أتمتة متكامل لبيع المنتجات الرقمية عبر واتساب</title>
+    <style>
+        :root {
+            --primary-color: #25D366; /* WhatsApp Green */
+            --secondary-color: #128C7E; /* WhatsApp Dark Green */
+            --accent-color: #34B7F1;
+            --text-color: #333;
+            --bg-color: #f4f6f8;
+            --code-bg: #282c34;
+            --code-text: #abb2bf;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            color: var(--secondary-color);
+            border-bottom: 3px solid var(--primary-color);
+            padding-bottom: 15px;
+            margin-bottom: 30px;
+            font-size: 2.2em;
+            text-align: center;
+        }
+
+        h2 {
+            color: var(--secondary-color);
+            background-color: #e8f5e9;
+            padding: 10px 15px;
+            border-right: 5px solid var(--primary-color);
+            margin-top: 40px;
+            border-radius: 4px;
+        }
+
+        h3 {
+            color: #1d4e89;
+            margin-top: 25px;
+            border-bottom: 1px dashed #ccc;
+            padding-bottom: 5px;
+            display: inline-block;
+        }
+
+        p {
+            margin-bottom: 15px;
+            text-align: justify;
+        }
+
+        ul, ol {
+            margin-bottom: 20px;
+            padding-right: 25px;
+        }
+
+        li {
+            margin-bottom: 8px;
+        }
+
+        /* تنسيق الأكواد */
+        pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 15px;
+            border-radius: 6px;
+            overflow-x: auto;
+            direction: ltr;
+            text-align: left;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 0.95em;
+            margin: 15px 0;
+            border: 1px solid #ddd;
+        }
+
+        code {
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            background-color: #eee;
+            padding: 2px 5px;
+            border-radius: 3px;
+            color: #c7254e;
+            direction: ltr;
+            display: inline-block;
+        }
+
+        pre code {
+            background-color: transparent;
+            color: inherit;
+            padding: 0;
+            border: none;
+            display: block;
+        }
+
+        .note {
+            background-color: #fff3cd;
+            border: 1px solid #ffeeba;
+            color: #856404;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .note::before {
+            content: "⚠️";
+            margin-left: 10px;
+            font-size: 1.5em;
+        }
+
+        .step {
+            background-color: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .step-title {
+            font-weight: bold;
+            color: var(--secondary-color);
+            margin-bottom: 10px;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>دليل بناء نظام أتمتة متكامل لبيع المنتجات الرقمية عبر واتساب</h1>
+    
+    <p>يسعدني أن أقدم لك هذا الدليل الفني الشامل والمفصل خطوة بخطوة لبناء نظام أتمتة متكامل لبيع المنتجات الرقمية عبر واتساب. لقد قمنا بتعزيز هذا الدليل ليشمل ممارسات متقدمة مثل إدارة حالة المحادثة، واستخدام أدوات مستضافة محلياً بالكامل مثل Baserow و Gotenberg، وتفصيلاً دقيقاً لجزئية التحقق من الإيصالات باستخدام الذكاء الاصطناعي (GPT-4o / Gemini)، بالإضافة إلى طبقة متقدمة لمعالجة الأخطاء.</p>
+
+    <h2>المتطلبات الأساسية (Prerequisites)</h2>
+    <ul>
+        <li><strong>خادم أو بيئة تشغيل:</strong> جهاز كمبيوتر قوي أو VPS لتشغيل الخدمات.</li>
+        <li><strong>Docker و Docker Compose:</strong> لإدارة الحاويات والخدمات.</li>
+        <li><strong>حساب n8n مستضاف محلياً:</strong> محرك الأتمتة.</li>
+        <li><strong>رقم واتساب مخصص:</strong> للروبوت (لا تستخدم رقمك الشخصي).</li>
+        <li><strong>حساب Baserow مستضاف محلياً:</strong> قاعدة البيانات (بديل Airtable/Google Sheets).</li>
+        <li><strong>مفتاح API للذكاء الاصطناعي:</strong> OpenAI (GPT-4o) أو Google AI Studio (Gemini Pro Vision).</li>
+    </ul>
+
+    <h2>الجزء الأول: إعداد المكونات الأساسية</h2>
+
+    <h3>1. تثبيت n8n و WAHA و Baserow عبر Docker Compose</h3>
+    <p>استخدم ملف <code>docker-compose.yml</code> التالي لإعداد جميع الخدمات دفعة واحدة:</p>
+
+    <pre><code>version: '3.7'
+
+services:
+  n8n:
+    image: n8nio/n8n
+    restart: always
+    ports:
+      - "5678:5678"
+    environment:
+      - N8N_BASIC_AUTH_ACTIVE=true
+      - N8N_BASIC_AUTH_USER=myuser
+      - N8N_BASIC_AUTH_PASSWORD=mypassword
+      - NODE_TLS_REJECT_UNAUTHORIZED=0 # هام لـ Baserow Self-Signed SSL
+    volumes:
+      - ~/.n8n:/home/node/.n8n
+      - ./receipts:/data/receipts # لتخزين الإيصالات
+    depends_on:
+      - baserow
+
+  waha:
+    image: devlikeapro/waha-plus
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      WAHA_PLUS_AUTH_API_KEY: "your-secret-key"
+    volumes:
+      - ./waha-sessions:/app/sessions # لاستمرار الجلسة
+
+  baserow:
+    image: baserow/baserow:1.24.2
+    restart: always
+    ports:
+      - "8080:80"
+    environment:
+      - BASEROW_PUBLIC_URL=http://localhost:8080
+    volumes:
+      - baserow_data:/baserow/data
+
+volumes:
+  baserow_data:</code></pre>
+
+    <div class="step">
+        <span class="step-title">تشغيل الخدمات:</span>
+        نفذ الأمر: <code>docker-compose up -d</code><br>
+        - n8n: <a href="http://localhost:5678">http://localhost:5678</a><br>
+        - WAHA Dashboard: <a href="http://localhost:3000/dashboard">http://localhost:3000/dashboard</a><br>
+        - Baserow: <a href="http://localhost:8080">http://localhost:8080</a>
+    </div>
+
+    <h3>2. ربط واتساب باستخدام WAHA وعقدة n8n</h3>
+    <ol>
+        <li><strong>تثبيت العقدة:</strong> في n8n، اذهب إلى Settings > Community Nodes وثبت <code>@devlikeapro/n8n-nodes-waha</code>.</li>
+        <li><strong>الاعتمادات (Credentials):</strong> أضف "WAHA API" بالبيانات:
+            <ul>
+                <li>Host URL: <code>http://waha:3000</code></li>
+                <li>API Key: <code>your-secret-key</code></li>
+            </ul>
+        </li>
+        <li><strong>إعداد الجلسة:</strong>
+            <ul>
+                <li>أضف عقدة <strong>WAHA Trigger</strong> في n8n.</li>
+                <li>انسخ رابط الـ Webhook.</li>
+                <li>في لوحة WAHA، ابدأ جلسة جديدة والصق الرابط في Webhook URL.</li>
+                <li>امسح كود QR من واتساب.</li>
+            </ul>
+        </li>
+    </ol>
+
+    <h3>3. هيكلة قاعدة البيانات (Baserow)</h3>
+    <p>قم بإنشاء الجداول التالية في Baserow:</p>
+    
+    <div class="step">
+        <strong>جدول Accounts (المخزون):</strong>
+        <ul>
+            <li>ProductID (Text)</li>
+            <li>ProductName (Text)</li>
+            <li>Email (Text)</li>
+            <li>Password (Text)</li>
+            <li>Status (Single Select): Available, Sold, Pending Sale</li>
+            <li>CustomerID (Text)</li>
+            <li>SaleDate (Date)</li>
+        </ul>
+    </div>
+
+    <div class="step">
+        <strong>جدول Conversations (حالة العملاء):</strong>
+        <ul>
+            <li>CustomerID (Text) - المفتاح الأساسي (رقم الواتساب)</li>
+            <li>ConversationStage (Single Select): استفسار مبدئي، في انتظار التأكيد، في انتظار الدفع، مكتمل، مراجعة يدوية، ملغي.</li>
+            <li>LastProductInquired (Text)</li>
+            <li>updated_on (Last Modified)</li>
+        </ul>
+    </div>
+
+    <h2>الجزء الثاني: بناء مسار عمل الأتمتة (n8n Workflow)</h2>
+
+    <h3>الخطوة 1: استقبال الرسالة وإدارة الحالة</h3>
+    <ul>
+        <li><strong>Trigger:</strong> WAHA Trigger.</li>
+        <li><strong>Baserow (List Rows):</strong> ابحث في جدول Conversations عن <code>CustomerID</code> يطابق رقم المرسل. (فعل خيار Always Output Data).</li>
+        <li><strong>IF Node:</strong> هل العميل موجود؟
+            <ul>
+                <li><strong>False (عميل جديد):</strong> Baserow (Create Row) لإنشاء سجل جديد بـ ConversationStage = "استفسار مبدئي".</li>
+            </ul>
+        </li>
+    </ul>
+
+    <h3>الخطوة 2: منطق الردود (Switch Node)</h3>
+    <p>استخدم عقدة Switch للتوجيه بناءً على المرحلة:</p>
+    <ul>
+        <li><strong>القاعدة 1 (استفسار):</strong> المرحلة = "استفسار مبدئي" & نص الرسالة موجود.
+            <br>-> ابحث عن منتج متاح -> أرسل السعر -> حدث الحالة لـ "في انتظار التأكيد".
+        </li>
+        <li><strong>القاعدة 2 (تأكيد):</strong> المرحلة = "في انتظار التأكيد" & الرسالة تحتوي "نعم".
+            <br>-> أرسل تفاصيل البنك -> حدث الحالة لـ "في انتظار الدفع".
+        </li>
+        <li><strong>القاعدة 3 (استلام إيصال):</strong> المرحلة = "في انتظار الدفع" & المرفق صورة.
+            <br>-> انتقل للتحقق من الدفع.
+        </li>
+    </ul>
+
+    <h3>الخطوة 3: التحقق من الدفع (AI Analysis)</h3>
+    <p>استخدم عقدة <strong>HTTP Request</strong> لتحميل الصورة أولاً، ثم أرسلها للتحليل.</p>
+    
+    <div class="note">
+        <strong>الـ Prompt المقترح للذكاء الاصطناعي:</strong><br>
+        "أنت محلل مالي خبير في كشف الاحتيال... (النص الكامل في الدليل) ... يجب أن تكون الاستجابة JSON فقط."
+    </div>
+
+    <h4>هيكل JSON المتوقع من الـ Prompt:</h4>
+    <pre><code>{
+  "is_valid": true,
+  "validity_confidence": 0.95,
+  "reason": "Valid receipt details matched",
+  "data": {
+    "amount_detected": { "value": 50 },
+    "date_detected": { "value": "2023-10-25" },
+    "sender_name_detected": { "value": "Ahmed Ali" }
+  }
+}</code></pre>
+
+    <h4>خيار ب: OpenAI GPT-4o (إعداد HTTP Request)</h4>
+    <pre><code>Method: POST
+URL: https://api.openai.com/v1/chat/completions
+Headers: { "Authorization": "Bearer YOUR_KEY" }
+Body:
+{
+  "model": "gpt-4o",
+  "messages": [
+    {
+      "role": "user",
+      "content": [
+        { "type": "text", "text": "أنت محلل مالي خبير..." },
+        { 
+          "type": "image_url", 
+          "image_url": { "url": "data:image/jpeg;base64,{{$node['Download Receipt Image'].binary.data.base64}}" } 
+        }
+      ]
+    }
+  ],
+  "max_tokens": 1000
+}</code></pre>
+
+    <h3>الخطوة 4: تسليم المنتج</h3>
+    <p>استخدم <strong>IF Node</strong> لفحص رد الـ AI:</p>
+    <ul>
+        <li><strong>True (إيصال صحيح):</strong>
+            <ul>
+                <li>اسحب حساب <code>Available</code> من Baserow.</li>
+                <li>حدث الحساب إلى <code>Sold</code>.</li>
+                <li>أرسل بيانات الدخول للعميل واتساب.</li>
+                <li>حدث المحادثة إلى "مكتمل".</li>
+            </ul>
+        </li>
+        <li><strong>False (إيصال مشكوك فيه):</strong>
+            <ul>
+                <li>أرسل تنبيهاً للمشرف مع السبب.</li>
+                <li>حدث المحادثة إلى "مراجعة يدوية".</li>
+            </ul>
+        </li>
+    </ul>
+
+    <h2>الجزء الثالث: التقرير اليومي (Gotenberg)</h2>
+    
+    <h3>1. إعداد Gotenberg</h3>
+    <p>تأكد من تشغيله (مضمن في Docker Compose أعلاه) أو: <code>docker run --rm -p 3030:3000 gotenberg/gotenberg:8</code></p>
+
+    <h3>2. مسار عمل التقرير</h3>
+    <ul>
+        <li><strong>Schedule Trigger:</strong> يومياً.</li>
+        <li><strong>Baserow (List Rows):</strong> هات مبيعات "اليوم".</li>
+        <li><strong>Code Node (JS):</strong> لإنشاء كود HTML للتقرير.</li>
+    </ul>
+
+    <pre><code>// مثال لكود بناء HTML في عقدة Code
+const salesData = $items("Baserow").json.results;
+let tableRows = '';
+// ... (Loop over salesData to build rows) ...
+
+const htmlContent = `
+<!DOCTYPE html>
+<html lang="ar">
+<head>...</head>
+<body>
+  <h1>تقرير المبيعات اليومي</h1>
+  <table>...${tableRows}...</table>
+</body>
+</html>
+`;
+
+return [{ json: { html: htmlContent } }];</code></pre>
+
+    <ul>
+        <li><strong>HTTP Request (Gotenberg):</strong>
+            <ul>
+                <li>URL: <code>http://localhost:3030/forms/chromium/convert/html</code></li>
+                <li>Method: POST</li>
+                <li>Body: Form-Data -> field <code>files</code> = HTML Content.</li>
+            </ul>
+        </li>
+        <li><strong>WAHA Send File:</strong> إرسال ملف PDF الناتج (<code>$binary.data</code>) إلى المشرف.</li>
+    </ul>
+
+    <h2>الجزء الرابع: المتانة والموثوقية (Advanced)</h2>
+    
+    <h3>1. أرشفة الإيصالات</h3>
+    <p>استخدم عقدة <strong>Write Binary File</strong> لحفظ الصور محلياً:</p>
+    <pre><code>Path: /data/receipts/{{$node["WAHA Trigger"].json.body.from}}_{{$now.toFormat('yyyy-MM-dd-HHmmss')}}.jpg</code></pre>
+
+    <h3>2. منع البيع المزدوج (Retry Logic)</h3>
+    <p>في إعدادات عقدة تحديث Baserow (عند وضع علامة Sold):</p>
+    <ul>
+        <li>فعل <strong>Retry on Fail</strong>.</li>
+        <li>عدد المحاولات: 3.</li>
+    </ul>
+
+    <h3>3. معالجة الأخطاء (Error Workflow)</h3>
+    <ul>
+        <li>أنشئ مسار عمل جديد يبدأ بـ <strong>Error Trigger</strong>.</li>
+        <li>أرسل رسالة واتساب للمشرف بتفاصيل الخطأ ورابط التنفيذ <code>{{ $json.execution.url }}</code>.</li>
+        <li>اربط هذا المسار بمسار العمل الرئيسي عبر Settings > Error Workflow.</li>
+    </ul>
+
+    <h3>4. إدارة المهلة (Timeouts)</h3>
+    <p>مسار مجدول كل 15 دقيقة:</p>
+    <ul>
+        <li>ابحث عن العملاء في حالة "في انتظار الدفع".</li>
+        <li>استخدم كود JS لمقارنة <code>updated_on</code> مع الوقت الحالي.</li>
+        <li>إذا مر أكثر من 30 دقيقة -> الغ الطلب (Status = ملغي).</li>
+    </ul>
+
+    <hr>
+    
+    <h2>ملخص تنفيذي</h2>
+    <p>يقدم هذا النظام حلاً متكاملاً لأتمتة المبيعات، بدءاً من استقبال الطلب وحتى تسليم المنتج، مع ضمانات أمان عالية باستخدام الذكاء الاصطناعي للتحقق من المدفوعات. يعتمد النظام على بنية تحتية محلية (Self-hosted) لضمان الخصوصية وتقليل التكاليف، مع آليات متقدمة للتعافي من الأخطاء والتقارير اليومية.</p>
+</div>
+
+</body>
+</html>
