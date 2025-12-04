@@ -37,8 +37,8 @@
               v-if="siteLogo" 
               :src="siteLogo" 
               :alt="siteName"
-              :style="{ '--logo-width': logoWidth + 'px', '--logo-width-mobile': logoWidthMobile + 'px' }"
-              class="object-contain site-logo"
+              :style="logoStyle"
+              class="object-contain"
             />
             <!-- Site Name - يظهر فقط إذا لم يكن هناك شعار -->
             <h1 v-if="!siteLogo" class="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 tracking-tight">
@@ -389,6 +389,23 @@ const logoWidthMobile = computed(() => {
   const width = settingsStore.getSetting('site_logo_width_mobile', '120')
   return parseInt(width) || 120
 })
+
+// Responsive logo style
+const isMobile = ref(false)
+
+const logoStyle = computed(() => {
+  const width = isMobile.value ? logoWidthMobile.value : logoWidth.value
+  return {
+    width: width + 'px',
+    height: 'auto',
+    maxWidth: '100%'
+  }
+})
+
+const checkMobile = () => {
+  isMobile.value = window.innerWidth < 768
+}
+
 const showSiteName = computed(() => true) // يمكن جعله setting لاحقاً
 
 // التاريخ الحالي
@@ -428,6 +445,14 @@ onMounted(() => {
   if (categories.value.length === 0) {
     categoriesStore.fetchCategories()
   }
+  
+  // Check mobile on mount and resize
+  checkMobile()
+  window.addEventListener('resize', checkMobile)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('resize', checkMobile)
 })
 </script>
 
@@ -523,16 +548,4 @@ onMounted(() => {
   font-weight: 600;
 }
 
-/* Site Logo Responsive */
-.site-logo {
-  width: var(--logo-width-mobile);
-  height: auto;
-  max-width: 100%;
-}
-
-@media (min-width: 768px) {
-  .site-logo {
-    width: var(--logo-width);
-  }
-}
 </style>
