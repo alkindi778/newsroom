@@ -162,6 +162,46 @@
                         <p class="text-xs text-gray-500 text-center mt-2">العرض الحالي: <span id="current_width_display">{{ $settings['general']['site_logo_width'] ?? '180' }}</span>px</p>
                     </div>
                 </div>
+                
+                <!-- Mobile Logo Width Control -->
+                <div class="mt-4">
+                    <label for="site_logo_width_mobile" class="block text-sm font-medium text-gray-700 mb-2">
+                        عرض الشعار في الهاتف (بالبكسل)
+                    </label>
+                    <div class="flex items-center gap-3">
+                        <input type="range" 
+                               name="settings[site_logo_width_mobile]" 
+                               id="site_logo_width_mobile" 
+                               min="60" 
+                               max="400" 
+                               step="10"
+                               value="{{ $settings['general']['site_logo_width_mobile'] ?? '120' }}"
+                               oninput="updateMobileLogoWidth(this.value)"
+                               class="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600">
+                        <div class="flex items-center gap-2">
+                            <input type="number" 
+                                   id="site_logo_width_mobile_display" 
+                                   value="{{ $settings['general']['site_logo_width_mobile'] ?? '120' }}"
+                                   min="60" 
+                                   max="400"
+                                   onchange="document.getElementById('site_logo_width_mobile').value = this.value; updateMobileLogoWidth(this.value)"
+                                   class="w-20 px-3 py-2 border border-gray-300 rounded-lg text-center text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            <span class="text-sm text-gray-600">px</span>
+                        </div>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-2">حدد عرض الشعار في أجهزة الهاتف (من 60px إلى 400px)</p>
+                    
+                    <!-- Mobile Logo Live Preview -->
+                    <div class="mt-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                        <p class="text-xs font-medium text-gray-700 mb-2">معاينة حجم الهاتف:</p>
+                        <div class="flex items-center justify-center py-4 bg-white rounded border border-gray-200">
+                            <div id="mobile_logo_size_preview" style="width: {{ $settings['general']['site_logo_width_mobile'] ?? '120' }}px; height: auto; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 4px; display: flex; align-items: center; justify-content: center; padding: 15px;">
+                                <span class="text-white text-xs font-bold">LOGO</span>
+                            </div>
+                        </div>
+                        <p class="text-xs text-gray-500 text-center mt-2">العرض في الهاتف: <span id="mobile_current_width_display">{{ $settings['general']['site_logo_width_mobile'] ?? '120' }}</span>px</p>
+                    </div>
+                </div>
             </div>
 
             <!-- Site Favicon -->

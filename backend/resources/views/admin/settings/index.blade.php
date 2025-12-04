@@ -350,6 +350,19 @@ function updateFooterLogoWidth(value) {
         preview.style.width = value + 'px';
     }
 }
+
+// Mobile Logo Width Control
+function updateMobileLogoWidth(value) {
+    // Update display value
+    document.getElementById('site_logo_width_mobile_display').value = value;
+    document.getElementById('mobile_current_width_display').textContent = value;
+    
+    // Update preview
+    const preview = document.getElementById('mobile_logo_size_preview');
+    if (preview) {
+        preview.style.width = value + 'px';
+    }
+}
 </script>
 
 <style>
