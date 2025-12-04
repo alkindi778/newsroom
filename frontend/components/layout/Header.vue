@@ -394,7 +394,8 @@ const logoWidthMobile = computed(() => {
 const isMobile = ref(false)
 
 const logoStyle = computed(() => {
-  const width = isMobile.value ? logoWidthMobile.value : logoWidth.value
+  // في الهاتف: ثابت 320px، في سطح المكتب: من الإعدادات
+  const width = isMobile.value ? 320 : logoWidth.value
   return {
     width: width + 'px',
     height: 'auto',
