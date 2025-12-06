@@ -125,7 +125,18 @@ export default defineNuxtConfig({
       }
     },
     // Suppress common development errors
-    logLevel: 'warn'
+    logLevel: 'warn',
+    // Public assets configuration
+    prerender: {
+      crawlLinks: false,
+      routes: ['/sitemap.xml', '/robots.txt']
+    },
+    publicAssets: [
+      {
+        baseURL: '/',
+        dir: './public'
+      }
+    ]
   },
 
   // ✨ Nuxt 4.2: ميزات تجريبية جديدة
@@ -162,8 +173,6 @@ export default defineNuxtConfig({
       // استخدام IP الجهاز للوصول من الهاتف أو localhost للتطوير
       apiBase: process.env.NUXT_PUBLIC_API_BASE || 'http://localhost/newsroom/backend/public/api/v1',
       siteUrl: process.env.NUXT_PUBLIC_SITE_URL || 'https://adenlink.cloud',
-      // Google Tag Manager ID
-      gtmId: process.env.NUXT_PUBLIC_GTM_ID || 'GTM-XXXXXXX'
     }
   },
 
