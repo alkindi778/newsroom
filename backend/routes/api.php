@@ -14,6 +14,7 @@ use App\Http\Controllers\Api\ContactMessageController;
 use App\Http\Controllers\Api\SocialMediaController;
 use App\Http\Controllers\Api\RssFeedController;
 use App\Http\Controllers\Api\SmartSummaryController;
+use App\Http\Controllers\Api\HealthCheckController;
 
 /*
 |--------------------------------------------------------------------------
@@ -26,12 +27,23 @@ use App\Http\Controllers\Api\SmartSummaryController;
 |
 */
 
+// =====================================================
+// Health Check Routes (لا تحتاج Rate Limiting)
+// =====================================================
+Route::prefix('health')->group(function () {
+    Route::get('/ping', [HealthCheckController::class, 'ping']);
+    Route::get('/', [HealthCheckController::class, 'health']);
+    Route::get('/stats', [HealthCheckController::class, 'stats']);
+    // هذا الـ endpoint محمي - للمشرفين فقط
+    Route::middleware('auth:sanctum')->get('/info', [HealthCheckController::class, 'info']);
+});
+
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-// Public API routes
-Route::prefix('v1')->group(function () {
+// Public API routes - مع Rate Limiting لحماية من DDoS
+Route::prefix('v1')->middleware(['throttle.custom:api'])->group(function () {
     // Articles
     Route::get('/articles', [ArticleController::class, 'index']);
     Route::get('/articles/featured', [ArticleController::class, 'featured']);
@@ -40,7 +52,9 @@ Route::prefix('v1')->group(function () {
     Route::get('/articles/slider', [ArticleController::class, 'slider']);
     Route::get('/articles/breaking-news', [ArticleController::class, 'breakingNews']);
     Route::get('/articles/search', [ArticleController::class, 'search']);
-    Route::post('/articles/{id}/view', [ArticleController::class, 'incrementView'])->whereNumber('id');
+    Route::post('/articles/{id}/view', [ArticleController::class, 'incrementView'])
+        ->middleware(['throttle.custom:sensitive'])
+        ->whereNumber('id');
     Route::get('/articles/{article}/similar', [SearchController::class, 'similar']);
     Route::get('/articles/{article}/check-duplicates', [SearchController::class, 'checkDuplicates']);
     Route::get('/articles/{slug}', [ArticleController::class, 'show']);
@@ -84,14 +98,19 @@ Route::prefix('v1')->group(function () {
     Route::get('/opinions/featured', [\App\Http\Controllers\Api\OpinionController::class, 'featured']);
     Route::get('/opinions/{slugOrId}', [\App\Http\Controllers\Api\OpinionController::class, 'show']);
     Route::post('/opinions/{id}/like', [\App\Http\Controllers\Api\OpinionController::class, 'like'])
+        ->middleware(['throttle.custom:sensitive'])
         ->whereNumber('id');
 
     // Videos (Public)
     Route::get('/videos', [VideoController::class, 'index']);
     Route::get('/videos/featured', [VideoController::class, 'featured']);
     Route::get('/videos/search', [VideoController::class, 'search']);
-    Route::post('/videos/{id}/view', [VideoController::class, 'incrementView'])->whereNumber('id');
-    Route::post('/videos/{id}/like', [VideoController::class, 'like'])->whereNumber('id');
+    Route::post('/videos/{id}/view', [VideoController::class, 'incrementView'])
+        ->middleware(['throttle.custom:sensitive'])
+        ->whereNumber('id');
+    Route::post('/videos/{id}/like', [VideoController::class, 'like'])
+        ->middleware(['throttle.custom:sensitive'])
+        ->whereNumber('id');
     Route::get('/videos/{slug}', [VideoController::class, 'show']);
 
     // RSS Feeds (Public)
@@ -124,15 +143,23 @@ Route::prefix('v1')->group(function () {
     Route::get('/advertisements/position/{position}', [AdvertisementController::class, 'getByPosition']);
     Route::get('/advertisements/page/{page}', [AdvertisementController::class, 'getForPage']);
     Route::get('/advertisements/after-section/{sectionId}', [AdvertisementController::class, 'getAfterSection'])->whereNumber('sectionId');
-    Route::post('/advertisements/{id}/view', [AdvertisementController::class, 'trackView'])->whereNumber('id');
-    Route::post('/advertisements/{id}/click', [AdvertisementController::class, 'trackClick'])->whereNumber('id');
+    Route::post('/advertisements/{id}/view', [AdvertisementController::class, 'trackView'])
+        ->middleware(['throttle.custom:sensitive'])
+        ->whereNumber('id');
+    Route::post('/advertisements/{id}/click', [AdvertisementController::class, 'trackClick'])
+        ->middleware(['throttle.custom:sensitive'])
+        ->whereNumber('id');
 
     // Push Notifications (Public)
     Route::get('/push/public-key', [PushSubscriptionController::class, 'getPublicKey']);
-    Route::post('/push/subscribe', [PushSubscriptionController::class, 'subscribe']);
-    Route::post('/push/unsubscribe', [PushSubscriptionController::class, 'unsubscribe']);
-    Route::post('/push/update-preferences', [PushSubscriptionController::class, 'updatePreferences']);
-    Route::post('/push/test', [PushSubscriptionController::class, 'sendTestNotification']);
+    Route::post('/push/subscribe', [PushSubscriptionController::class, 'subscribe'])
+        ->middleware(['throttle.custom:sensitive']);
+    Route::post('/push/unsubscribe', [PushSubscriptionController::class, 'unsubscribe'])
+        ->middleware(['throttle.custom:sensitive']);
+    Route::post('/push/update-preferences', [PushSubscriptionController::class, 'updatePreferences'])
+        ->middleware(['throttle.custom:sensitive']);
+    Route::post('/push/test', [PushSubscriptionController::class, 'sendTestNotification'])
+        ->middleware(['throttle.custom:sensitive']);
     
     // PWA Manifest (Public)
     Route::get('/manifest', [ManifestController::class, 'getManifest']);
@@ -140,8 +167,8 @@ Route::prefix('v1')->group(function () {
     // Breaking News (Public) - الأخبار العاجلة
     Route::get('/breaking-news', [\App\Http\Controllers\Admin\BreakingNewsController::class, 'getActive']);
 
-    // Contact Messages (Public)
-    Route::post('/contact-messages', [ContactMessageController::class, 'store']);
+    // Contact Messages (Public) - مع Rate Limiting صارم لمنع spam
+    Route::middleware(['throttle.custom:contact'])->post('/contact-messages', [ContactMessageController::class, 'store']);
 
     // Social Media (Public)
     Route::get('/social-media/statistics', [SocialMediaController::class, 'getStatistics']);
