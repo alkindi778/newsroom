@@ -25,6 +25,12 @@ return Application::configure(basePath: dirname(__DIR__))
         // Trust all proxies for HTTPS detection
         $middleware->trustProxies(at: '*');
         
+        // Security Headers - يضاف لجميع الطلبات
+        $middleware->append(\App\Http\Middleware\SecurityHeaders::class);
+        
+        // Force HTTPS في الإنتاج
+        $middleware->append(\App\Http\Middleware\ForceHttps::class);
+        
         // تفعيل CORS لجميع routes
         $middleware->api(prepend: [
             \Illuminate\Http\Middleware\HandleCors::class,
@@ -34,6 +40,8 @@ return Application::configure(basePath: dirname(__DIR__))
             'role' => \Spatie\Permission\Middleware\RoleMiddleware::class,
             'permission' => \Spatie\Permission\Middleware\PermissionMiddleware::class,
             'role_or_permission' => \Spatie\Permission\Middleware\RoleOrPermissionMiddleware::class,
+            'throttle.custom' => \App\Http\Middleware\RateLimitRequests::class,
+            'cache.api' => \App\Http\Middleware\CacheApiResponse::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
