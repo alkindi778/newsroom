@@ -92,7 +92,7 @@ const {
 const copied = ref(false)
 
 const handleCopy = async () => {
-  const success = await copyToClipboard(props.url)
+  const success = await copyToClipboard(props.url, props.title)
   if (success) {
     copied.value = true
     setTimeout(() => {
