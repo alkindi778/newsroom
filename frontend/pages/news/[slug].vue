@@ -52,16 +52,18 @@
             {{ displayArticle.title }}
           </h1>
 
-          <!-- المقتطف -->
+          <!-- المقتطف (تم إيقافه) -->
+          <!--
           <p v-if="displayArticle.excerpt" class="text-lg sm:text-xl md:text-2xl lg:text-3xl text-gray-700 mb-6 md:mb-8 leading-relaxed font-medium">
             {{ displayArticle.excerpt }}
           </p>
+          -->
 
           <!-- تم حذف إحصائيات المقال -->
 
-          <!-- معلومات الخبر -->
+          <!-- معلومات الخبر (تم إيقافها) -->
+          <!--
           <div class="flex flex-wrap items-center gap-4 text-base text-gray-600 pb-6 border-b border-gray-200">
-            <!-- التاريخ -->
             <div class="flex items-center gap-2">
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
@@ -69,6 +71,7 @@
               <span>{{ formatDate(displayArticle.published_at, 'full') }}</span>
             </div>
           </div>
+          -->
         </div>
 
         <!-- الصورة الرئيسية -->
