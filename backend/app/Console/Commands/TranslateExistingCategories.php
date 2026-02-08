@@ -77,7 +77,7 @@ class TranslateExistingCategories extends Command
             foreach ($categories as $category) {
                 try {
                     // Dispatch translation job
-                    TranslateCategoryJob::dispatch($category, $force);
+                    TranslateCategoryJob::dispatch($category->id, $force);
                     $processedCount++;
                 } catch (\Exception $e) {
                     $this->error("\nFailed to dispatch job for category {$category->id}: {$e->getMessage()}");

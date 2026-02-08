@@ -22,7 +22,7 @@ class TranslateCategoryJob implements ShouldQueue
     /**
      * Create a new job instance.
      */
-    public function __construct(public int $categoryId) {}
+    public function __construct(public int $categoryId, public bool $force = false) {}
 
     /**
      * Execute the job.
@@ -37,8 +37,8 @@ class TranslateCategoryJob implements ShouldQueue
         }
 
         try {
-            // Skip if translation already exists
-            if ($category->name_en) {
+            // Skip if translation already exists, unless forced
+            if (!$this->force && $category->name_en) {
                 return;
             }
 

@@ -22,7 +22,7 @@ class CategoryObserver
         }
 
         // Dispatch translation job
-        TranslateCategoryJob::dispatch($category);
+        TranslateCategoryJob::dispatch($category->id);
     }
 
     /**
@@ -41,7 +41,7 @@ class CategoryObserver
 
         // Only re-translate if the Arabic name has changed
         if ($category->wasChanged('name')) {
-            TranslateCategoryJob::dispatch($category, force: true);
+            TranslateCategoryJob::dispatch($category->id, force: true);
         }
     }
 
@@ -52,7 +52,7 @@ class CategoryObserver
     {
         // Re-translate if translation doesn't exist
         if (!$category->name_en && config('translation.enabled', true)) {
-            TranslateCategoryJob::dispatch($category);
+            TranslateCategoryJob::dispatch($category->id);
         }
     }
 }
