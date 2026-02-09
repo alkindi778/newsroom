@@ -52,7 +52,9 @@ class CategoryRepository implements CategoryRepositoryInterface
             $query->latest();
         }
 
-        return $query->paginate($request->get('per_page', 10));
+        // Show all categories by default (large number) as requested
+        $perPage = $request->get('per_page', 1000);
+        return $query->paginate($perPage);
     }
 
     /**
