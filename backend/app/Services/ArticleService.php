@@ -367,14 +367,25 @@ class ArticleService
         // Handle image field
         // الصورة قد تكون: URL كامل، مسار نسبي من المكتبة، أو ملف مرفوع
         // نحفظ المسار النسبي مؤقتاً في _media_image_path لاستخدامه في handleImageUpload
+        \Log::info('🖼️ processArticleData - معالجة حقل الصورة', [
+            'image_isset' => isset($data['image']),
+            'image_value' => $data['image'] ?? 'غير موجود',
+            'image_type' => isset($data['image']) ? gettype($data['image']) : 'N/A',
+            'has_file_upload' => $request->hasFile('image'),
+            'request_filled_image' => $request->filled('image'),
+            'request_input_image' => $request->input('image', 'غير موجود'),
+        ]);
+
         if (isset($data['image'])) {
             $imageValue = $data['image'];
             
             if (filter_var($imageValue, FILTER_VALIDATE_URL)) {
                 // URL كامل - لا نحفظه في حقل image
+                \Log::info('🖼️ processArticleData - صورة URL كامل، سيتم حذفها', ['url' => $imageValue]);
                 unset($data['image']);
             } elseif (!empty($imageValue) && is_string($imageValue)) {
                 // مسار نسبي من مكتبة الوسائط - نحفظه مؤقتاً لربطه بالمقال لاحقاً
+                \Log::info('🖼️ processArticleData - مسار نسبي من المكتبة', ['path' => $imageValue]);
                 $data['_media_image_path'] = $imageValue;
                 unset($data['image']);
             }
@@ -384,6 +395,7 @@ class ArticleService
         if ($request->hasFile('image')) {
             // سيتم التعامل مع الصورة في handleImageUpload
             // لا نحتاج لحفظها في الـ data array
+            \Log::info('🖼️ processArticleData - ملف مرفوع، سيتم معالجته في handleImageUpload');
             unset($data['image']);
         }
 
@@ -475,8 +487,21 @@ class ArticleService
      */
     protected function handleImageUpload(Article $article, Request $request): void
     {
+        \Log::info('🖼️ handleImageUpload - بدء معالجة الصورة', [
+            'article_id' => $article->id,
+            'has_file' => $request->hasFile('image'),
+            'request_filled_image' => $request->filled('image'),
+            'request_input_image' => $request->input('image', 'غير موجود'),
+            'is_string' => is_string($request->input('image')),
+        ]);
+
         if ($request->hasFile('image')) {
             // رفع ملف مباشرة
+            \Log::info('🖼️ handleImageUpload - رفع ملف مباشر', [
+                'file_name' => $request->file('image')->getClientOriginalName(),
+                'file_size' => $request->file('image')->getSize(),
+                'mime_type' => $request->file('image')->getMimeType(),
+            ]);
             MediaHelper::addImage(
                 $article,
                 $request->file('image'),
@@ -486,9 +511,14 @@ class ArticleService
                     'title' => $article->title
                 ]
             );
+            \Log::info('✅ handleImageUpload - تم رفع الملف بنجاح');
         } elseif ($request->filled('image') && is_string($request->input('image'))) {
             // اختيار صورة من مكتبة الوسائط عبر المسار النسبي
-            $this->attachMediaLibraryImage($article, $request->input('image'));
+            $imagePath = $request->input('image');
+            \Log::info('🖼️ handleImageUpload - ربط صورة من المكتبة', ['path' => $imagePath]);
+            $this->attachMediaLibraryImage($article, $imagePath);
+        } else {
+            \Log::info('⚠️ handleImageUpload - لا يوجد صورة للمعالجة');
         }
     }
 

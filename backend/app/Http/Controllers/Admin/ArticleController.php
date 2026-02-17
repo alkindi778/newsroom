@@ -80,8 +80,29 @@ class ArticleController extends Controller
         $validated['is_breaking_news'] = $request->has('is_breaking_news') ? 1 : 0;
 
         try {
+            // 🔍 DEBUG: تتبع بيانات الصورة
+            \Log::info('📝 ArticleController@store - بداية إنشاء الخبر', [
+                'has_image_field' => isset($validated['image']),
+                'image_value' => $validated['image'] ?? 'غير موجود',
+                'has_file_upload' => $request->hasFile('image'),
+                'file_upload_valid' => $request->hasFile('image') ? $request->file('image')->isValid() : false,
+                'file_size' => $request->hasFile('image') ? $request->file('image')->getSize() : 0,
+                'request_image_input' => $request->input('image', 'غير موجود'),
+                'all_files' => array_keys($request->allFiles()),
+                'content_type' => $request->header('Content-Type'),
+            ]);
+
             $article = $this->articleService->createArticle($validated, $request);
             
+            // 🔍 DEBUG: بعد الإنشاء
+            \Log::info('✅ ArticleController@store - تم إنشاء الخبر', [
+                'article_id' => $article->id,
+                'article_image_column' => $article->getAttributes()['image'] ?? 'فارغ',
+                'has_media' => $article->hasMedia(\App\Helpers\MediaHelper::COLLECTION_ARTICLES),
+                'media_url' => $article->getFirstMediaUrl(\App\Helpers\MediaHelper::COLLECTION_ARTICLES) ?: 'لا يوجد',
+                'image_path_accessor' => $article->image_path ?? 'فارغ',
+            ]);
+
             $successMessage = 'تم إنشاء الخبر بنجاح!';
             
             // تحديد الرسالة بناءً على حالة المقال
