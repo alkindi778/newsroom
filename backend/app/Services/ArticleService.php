@@ -91,6 +91,9 @@ class ArticleService
             $processedData['approval_status'] = 'draft';
         }
 
+        // Remove temporary keys before saving
+        unset($processedData['_media_image_path']);
+        
         $article = $this->articleRepository->create($processedData);
 
         // If permalink style is ID-based, set slug to article ID after creation
@@ -190,6 +193,9 @@ class ArticleService
 
         // Track if article is being published for the first time
         $wasUnpublished = !$article->is_published;
+        
+        // Remove temporary keys before saving
+        unset($processedData['_media_image_path']);
         
         $result = $this->articleRepository->update($article, $processedData);
         
@@ -359,11 +365,17 @@ class ArticleService
         }
 
         // Handle image field
-        // IMPORTANT: Don't save full URLs in the image column when using Media Library
+        // الصورة قد تكون: URL كامل، مسار نسبي من المكتبة، أو ملف مرفوع
+        // نحفظ المسار النسبي مؤقتاً في _media_image_path لاستخدامه في handleImageUpload
         if (isset($data['image'])) {
-            // إذا كان الـ URL كامل (يحتوي على http), لا نحفظه في حقل image
-            // لأن Media Library تحتفظ بالصور في جدول media منفصل
-            if (filter_var($data['image'], FILTER_VALIDATE_URL)) {
+            $imageValue = $data['image'];
+            
+            if (filter_var($imageValue, FILTER_VALIDATE_URL)) {
+                // URL كامل - لا نحفظه في حقل image
+                unset($data['image']);
+            } elseif (!empty($imageValue) && is_string($imageValue)) {
+                // مسار نسبي من مكتبة الوسائط - نحفظه مؤقتاً لربطه بالمقال لاحقاً
+                $data['_media_image_path'] = $imageValue;
                 unset($data['image']);
             }
         }
@@ -464,6 +476,7 @@ class ArticleService
     protected function handleImageUpload(Article $article, Request $request): void
     {
         if ($request->hasFile('image')) {
+            // رفع ملف مباشرة
             MediaHelper::addImage(
                 $article,
                 $request->file('image'),
@@ -473,6 +486,84 @@ class ArticleService
                     'title' => $article->title
                 ]
             );
+        } elseif ($request->filled('image') && is_string($request->input('image'))) {
+            // اختيار صورة من مكتبة الوسائط عبر المسار النسبي
+            $this->attachMediaLibraryImage($article, $request->input('image'));
+        }
+    }
+
+    /**
+     * ربط صورة من مكتبة الوسائط بالمقال
+     */
+    protected function attachMediaLibraryImage(Article $article, string $imagePath): void
+    {
+        try {
+            // البحث عن الصورة في جدول media بناءً على file_name
+            $media = \Spatie\MediaLibrary\MediaCollections\Models\Media::where('file_name', $imagePath)
+                ->orWhere('file_name', 'LIKE', '%' . basename($imagePath))
+                ->orderBy('created_at', 'desc')
+                ->first();
+
+            if ($media) {
+                // حذف الصورة القديمة من المقال
+                MediaHelper::clearCollection($article, MediaHelper::COLLECTION_ARTICLES);
+
+                // نسخ الصورة من المكتبة وربطها بالمقال
+                $fullPath = storage_path('app/public/' . $imagePath);
+                
+                // إذا كان الملف موجود في storage
+                if (file_exists($fullPath)) {
+                    $article->addMedia($fullPath)
+                        ->preservingOriginal() // نحتفظ بالملف الأصلي في المكتبة
+                        ->withCustomProperties([
+                            'alt' => $article->title,
+                            'title' => $article->title
+                        ])
+                        ->toMediaCollection(MediaHelper::COLLECTION_ARTICLES);
+                    
+                    Log::info('تم ربط صورة من المكتبة بالمقال', [
+                        'article_id' => $article->id,
+                        'media_path' => $imagePath,
+                        'original_media_id' => $media->id
+                    ]);
+                } else {
+                    Log::warning('ملف الصورة غير موجود في المسار المتوقع', [
+                        'article_id' => $article->id,
+                        'expected_path' => $fullPath,
+                        'media_path' => $imagePath
+                    ]);
+                }
+            } else {
+                // إذا لم نجد الصورة في جدول media، نحاول إضافتها مباشرة من المسار
+                $fullPath = storage_path('app/public/' . $imagePath);
+                if (file_exists($fullPath)) {
+                    MediaHelper::clearCollection($article, MediaHelper::COLLECTION_ARTICLES);
+                    
+                    $article->addMedia($fullPath)
+                        ->preservingOriginal()
+                        ->withCustomProperties([
+                            'alt' => $article->title,
+                            'title' => $article->title
+                        ])
+                        ->toMediaCollection(MediaHelper::COLLECTION_ARTICLES);
+                    
+                    Log::info('تم إضافة صورة مباشرة من المسار للمقال', [
+                        'article_id' => $article->id,
+                        'image_path' => $imagePath
+                    ]);
+                } else {
+                    Log::warning('لم يتم العثور على الصورة في المكتبة أو المسار', [
+                        'article_id' => $article->id,
+                        'image_path' => $imagePath
+                    ]);
+                }
+            }
+        } catch (\Exception $e) {
+            Log::error('خطأ في ربط صورة من المكتبة بالمقال: ' . $e->getMessage(), [
+                'article_id' => $article->id,
+                'image_path' => $imagePath,
+                'trace' => $e->getTraceAsString()
+            ]);
         }
     }
 
@@ -772,44 +863,12 @@ class ArticleService
     /**
      * Generate embedding for an article
      */
+    /**
+     * Generate embedding for an article
+     */
     private function generateArticleEmbedding(Article $article): void
     {
-        try {
-            // Prepare text for embedding
-            $text = $this->embeddingService->prepareText(
-                $article->title,
-                $article->subtitle,
-                strip_tags($article->content)
-            );
-
-            // Generate embedding
-            $embedding = $this->embeddingService->generateEmbedding(
-                $text,
-                'RETRIEVAL_DOCUMENT'
-            );
-
-            // Delete existing embedding if exists
-            if ($article->embedding) {
-                $article->embedding->delete();
-            }
-
-            // Create new embedding
-            $article->embedding()->create([
-                'embedding' => $embedding,
-                'text_used' => $text,
-                'task_type' => 'RETRIEVAL_DOCUMENT',
-            ]);
-
-            Log::info('Article embedding generated successfully', [
-                'article_id' => $article->id,
-                'article_title' => $article->title
-            ]);
-        } catch (\Exception $e) {
-            Log::error('Failed to generate article embedding', [
-                'article_id' => $article->id,
-                'error' => $e->getMessage()
-            ]);
-            // Don't throw - continue with article creation even if embedding fails
-        }
+        // Dispatch job to generate embedding in background
+        GenerateArticleEmbeddingJob::dispatch($article);
     }
 }

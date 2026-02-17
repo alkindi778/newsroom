@@ -197,7 +197,7 @@
                                     <button type="button" onclick="document.getElementById('file-input').click()" class="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors">
                                         اختيار الملفات
                                     </button>
-                                    <p class="text-xs text-gray-500 mt-3">الحد الأقصى: 10MB لكل ملف</p>
+                                    <p class="text-xs text-gray-500 mt-3">الحد الأقصى: 20MB لكل ملف</p>
                                 </div>
                                 
                                 {{-- Upload Progress --}}
@@ -230,7 +230,7 @@
                                         <i class="fas fa-images ml-2"></i>
                                         اختيار الصور
                                     </button>
-                                    <p class="text-xs text-gray-500 mt-3">الحد الأقصى: 10MB لكل ملف</p>
+                                    <p class="text-xs text-gray-500 mt-3">الحد الأقصى: 20MB لكل ملف</p>
                                 </div>
                                 
                                 {{-- Upload Progress Mobile --}}

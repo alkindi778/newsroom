@@ -351,9 +351,9 @@ document.addEventListener('DOMContentLoaded', function() {
         imageInput.addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (file) {
-                // Check file size (10MB limit)
-                if (file.size > 10 * 1024 * 1024) {
-                    alert('حجم الملف كبير جداً. الحد الأقصى 10MB');
+                // Check file size (20MB limit)
+                if (file.size > 20 * 1024 * 1024) {
+                    alert('حجم الملف كبير جداً. الحد الأقصى 20MB');
                     this.value = '';
                     return;
                 }

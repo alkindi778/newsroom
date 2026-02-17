@@ -212,7 +212,7 @@ class MediaLibraryController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'files' => 'required|array|min:1',
-            'files.*' => 'required|file|max:10240|mimes:jpeg,png,jpg,gif,webp,svg,pdf,doc,docx,txt', // 10MB max per file
+            'files.*' => 'required|file|max:20480|mimes:jpeg,png,jpg,gif,webp,svg,pdf,doc,docx,txt', // 20MB max per file
             'collection' => 'sometimes|string',
             'alt' => 'sometimes|string|max:255',
             'title' => 'sometimes|string|max:255',
