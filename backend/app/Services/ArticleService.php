@@ -899,7 +899,17 @@ class ArticleService
      */
     private function generateArticleEmbedding(Article $article): void
     {
-        // Dispatch job to generate embedding in background
-        GenerateArticleEmbeddingJob::dispatch($article);
+        try {
+            // Try using EmbeddingService directly since the Job class may not exist
+            if ($this->embeddingService) {
+                $this->embeddingService->generateEmbedding($article);
+            }
+        } catch (\Exception $e) {
+            // Don't let embedding failures prevent article creation
+            \Log::warning('فشل توليد embedding للمقال', [
+                'article_id' => $article->id,
+                'error' => $e->getMessage()
+            ]);
+        }
     }
 }
