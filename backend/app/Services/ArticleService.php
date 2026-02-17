@@ -10,6 +10,7 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\UploadedFile;
 use App\Helpers\MediaHelper;
+use App\Jobs\GenerateArticleEmbeddingJob;
 use App\Services\NotificationService;
 use App\Services\EmbeddingService;
 use Illuminate\Support\Facades\Log;
