@@ -17,28 +17,40 @@ return [
 
     'paths' => ['api/*', 'sanctum/csrf-cookie'],
 
-    'allowed_methods' => ['*'],
+    // تم تضييق الـ methods المسموح بها لأسباب أمنية
+    'allowed_methods' => ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
 
     'allowed_origins' => [
+        env('FRONTEND_URL', 'http://localhost:3000'),
         'http://localhost:3000', 
         'http://127.0.0.1:3000',
-        'http://192.168.1.101:3000',  // IP الحالي
-        'http://192.168.1.106:3000',  // IP الجديد
-        'http://192.168.1.107:3000'   // للوصول من الهاتف
     ],
 
     'allowed_origins_patterns' => [
-        '/^http:\/\/localhost:\d+$/',      // أي منفذ على localhost
-        '/^http:\/\/127\.0\.0\.1:\d+$/',   // أي منفذ على 127.0.0.1
-        '/^http:\/\/192\.168\.1\.\d+:\d+$/' // أي IP محلي
+        // في بيئة التطوير فقط، السماح لـ localhost
+        '/^http:\/\/localhost:\d+$/',
+        '/^http:\/\/127\.0\.0\.1:\d+$/',
     ],
 
-    'allowed_headers' => ['*'],
+    // تم تحديد الـ headers المسموح بها لأسباب أمنية
+    'allowed_headers' => [
+        'Content-Type',
+        'Authorization',
+        'X-Requested-With',
+        'X-CSRF-TOKEN',
+        'Accept',
+        'Accept-Language',
+        'Origin',
+    ],
 
-    'exposed_headers' => [],
+    'exposed_headers' => [
+        'X-RateLimit-Limit',
+        'X-RateLimit-Remaining',
+        'Retry-After',
+    ],
 
-    'max_age' => 0,
+    'max_age' => 86400, // 24 ساعة cache للـ preflight
 
-    'supports_credentials' => false,
+    'supports_credentials' => true, // مطلوب للـ Sanctum
 
 ];

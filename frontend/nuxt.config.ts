@@ -42,8 +42,35 @@ export default defineNuxtConfig({
       ]
     },
     workbox: {
-      // navigateFallback: '/', // تعطل لأن الموقع SSR وليس Static
-      globPatterns: ['**/*.{js,css,html,png,svg,ico}'],
+      navigateFallback: null, // مهم: null وليس '/' لأن الموقع SSR وليس Static/SPA
+      navigateFallbackDenylist: [/./], // منع أي Navigation Fallback
+      globPatterns: ['**/*.{js,css,png,svg,ico}'], // إزالة html لأن الصفحات SSR
+      runtimeCaching: [
+        {
+          // تخزين مؤقت للـ API فقط (لا يعوض عنه)
+          urlPattern: /^https:\/\/.*\/api\/v1\/.*/i,
+          handler: 'NetworkFirst',
+          options: {
+            cacheName: 'api-cache',
+            expiration: {
+              maxEntries: 50,
+              maxAgeSeconds: 300, // 5 دقائق
+            },
+          },
+        },
+        {
+          // تخزين الصور
+          urlPattern: /\.(?:png|jpg|jpeg|svg|gif|webp)$/,
+          handler: 'CacheFirst',
+          options: {
+            cacheName: 'images-cache',
+            expiration: {
+              maxEntries: 100,
+              maxAgeSeconds: 60 * 60 * 24 * 30, // 30 يوم
+            },
+          },
+        },
+      ],
     },
     client: {
       installPrompt: true,
@@ -169,6 +196,7 @@ export default defineNuxtConfig({
     // Server-side only (private)
     geminiApiKey: process.env.GEMINI_API_KEY,
 
+    
     public: {
       // استخدام IP الجهاز للوصول من الهاتف أو localhost للتطوير
       apiBase: process.env.NUXT_PUBLIC_API_BASE || 'http://localhost/newsroom/backend/public/api/v1',
