@@ -94,10 +94,10 @@
           <!-- الملخص الذكي -->
           <div class="mb-8">
             <ArticleSmartSummary 
-              :article-id="article.id"
-              :content="article.content"
+              :article-id="displayArticle.id"
+              :content="displayArticle.content"
               type="news"
-              length="medium"
+              length="short"
             />
           </div>
 

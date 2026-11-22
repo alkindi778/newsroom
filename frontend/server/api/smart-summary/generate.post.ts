@@ -42,11 +42,12 @@ export default defineEventHandler(async (event): Promise<SummaryResponse> => {
     }
 
     const body = await readBody(event) as RequestBody
+    const lang: 'ar' | 'en' = body.language === 'en' ? 'en' : 'ar'
 
     if (!body.content || body.content.trim().length < 100) {
       return {
         success: false,
-        message: 'المحتوى مطلوب ويجب أن يكون أطول من 100 حرف',
+        message: lang === 'en' ? 'Content is too short to summarize' : 'المحتوى مطلوب ويجب أن يكون أطول من 100 حرف',
         error_code: 400
       }
     }
@@ -56,7 +57,7 @@ export default defineEventHandler(async (event): Promise<SummaryResponse> => {
     if (cleanedForValidation.length < 50) {
       return {
         success: false,
-        message: 'المحتوى لا يحتوي على نص كافٍ للتلخيص',
+        message: lang === 'en' ? 'Not enough text content to summarize' : 'المحتوى لا يحتوي على نص كافٍ للتلخيص',
         error_code: 422
       }
     }
@@ -64,17 +65,21 @@ export default defineEventHandler(async (event): Promise<SummaryResponse> => {
     if (body.content.length > 50000) {
       return {
         success: false,
-        message: 'المحتوى طويل جداً (الحد الأقصى 50000 حرف)',
+        message: lang === 'en' ? 'Content is too long' : 'المحتوى طويل جداً (الحد الأقصى 50000 حرف)',
         error_code: 400
       }
     }
 
-    // مفتاح كاش بالإصدار الجديد (v3-concise) لتجاهل الملخصات الطويلة القديمة
-    const contentHash = generateContentHash(body.content, body.type || 'news')
+    // مفتاح كاش منفصل لكل لغة (ar / en)
+    const contentHash = generateContentHash(body.content, body.type || 'news', lang)
 
     const cachedSummary = await getCachedSummaryFromDB(contentHash)
     if (cachedSummary && cachedSummary.summary) {
-      const formattedCached = enforceConciseParagraphs(cachedSummary.summary, body.type || 'news')
+      let formattedCached = enforceConciseParagraphs(cachedSummary.summary, body.type || 'news', lang)
+      // التأكد من أن الملخص الإنجليزي المحفوظ ليس بالعربية
+      if (lang === 'en' && hasArabicCharacters(formattedCached)) {
+        formattedCached = await translateToEnglishFallback(formattedCached)
+      }
       return {
         success: true,
         summary: formattedCached,
@@ -87,7 +92,7 @@ export default defineEventHandler(async (event): Promise<SummaryResponse> => {
     if (body.onlyCache) {
       return {
         success: false,
-        message: 'لا يوجد ملخص محفوظ بعد لهذا المحتوى',
+        message: lang === 'en' ? 'No cached summary found' : 'لا يوجد ملخص محفوظ بعد لهذا المحتوى',
         error_code: 404
       }
     }
@@ -97,14 +102,20 @@ export default defineEventHandler(async (event): Promise<SummaryResponse> => {
 
     let generatedText = ''
     if (apiKey) {
-      generatedText = await generateWithGemini(cleanedForValidation, body.type || 'news', apiKey)
+      generatedText = await generateWithGemini(cleanedForValidation, body.type || 'news', lang, apiKey)
     }
 
     if (!generatedText) {
-      generatedText = generateConciseExtractiveSummary(cleanedForValidation, body.type || 'news')
+      generatedText = generateConciseExtractiveSummary(cleanedForValidation, body.type || 'news', lang)
     }
 
-    const processedSummary = enforceConciseParagraphs(generatedText, body.type || 'news')
+    let processedSummary = enforceConciseParagraphs(generatedText, body.type || 'news', lang)
+
+    // إذا كانت اللغة المطلوبة إنجليزية ولكن النص المستخرج لا يزال بالعربية، نترجمه فوراً للإنجليزية
+    if (lang === 'en' && hasArabicCharacters(processedSummary)) {
+      const translated = await translateToEnglishFallback(processedSummary)
+      processedSummary = enforceConciseParagraphs(translated, body.type || 'news', 'en')
+    }
 
     const originalLength = cleanedForValidation.length
     const summaryLength = processedSummary.replace(/<[^>]*>/g, '').length
@@ -144,6 +155,40 @@ export default defineEventHandler(async (event): Promise<SummaryResponse> => {
   }
 })
 
+function hasArabicCharacters(text: string): boolean {
+  return /[\u0600-\u06FF]/.test(text)
+}
+
+/**
+ * ترجمة الملخص تلقائياً إلى الإنجليزية في حال كان المصدر عربياً أو تعذر اتصال Gemini
+ */
+async function translateToEnglishFallback(arabicSummary: string): Promise<string> {
+  try {
+    const paragraphs = arabicSummary.split(/\n\s*\n/).map(p => p.trim()).filter(Boolean)
+    const translatedParagraphs: string[] = []
+
+    for (const para of paragraphs) {
+      const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=ar&tl=en&dt=t&q=${encodeURIComponent(para)}`
+      const res = await fetch(url)
+      if (res.ok) {
+        const data: any = await res.json()
+        if (Array.isArray(data?.[0])) {
+          const translatedText = data[0].map((chunk: any) => chunk?.[0] || '').join(' ').trim()
+          if (translatedText) {
+            translatedParagraphs.push(translatedText)
+            continue
+          }
+        }
+      }
+      translatedParagraphs.push(para)
+    }
+
+    return translatedParagraphs.join('\n\n')
+  } catch {
+    return arabicSummary
+  }
+}
+
 /**
  * تنظيف المحتوى من وسوم HTML والصور والروابط والرموز
  */
@@ -169,16 +214,36 @@ function cleanHtmlAndMedia(content: string): string {
 }
 
 /**
- * توليد ملخص احترافي ومختصر جداً عبر Gemini AI
+ * توليد ملخص احترافي ومختصر جداً عبر Gemini AI (عربي أو إنجليزي)
  */
-async function generateWithGemini(cleanContent: string, type: string, apiKey: string): Promise<string> {
+async function generateWithGemini(cleanContent: string, type: string, lang: 'ar' | 'en', apiKey: string): Promise<string> {
   try {
     const inputSample = cleanContent.length > 4000 ? cleanContent.slice(0, 4000) : cleanContent
-    const roleHint = type === 'opinion'
-      ? 'لخص مقال الرأي التالي في فقرتين قصيرتين جداً (تبدأ الأولى بـ "يرى الكاتب أن").'
-      : 'لخص الخبر التالي بأسلوب صحفي احترافي ومكثف في فقرتين قصيرتين جداً.'
 
-    const prompt = `${roleHint}
+    let prompt = ''
+    if (lang === 'en') {
+      const roleHintEn = type === 'opinion'
+        ? 'Summarize the following opinion article in English into 2 very short paragraphs (start the first with "The author argues that").'
+        : 'Summarize the following news article in professional journalistic English into 2 very short paragraphs.'
+
+      prompt = `${roleHintEn}
+
+Strict rules:
+- Write the summary strictly in ENGLISH (even if the source text is in Arabic, translate and summarize it into fluent English).
+- Total length must be between 35 and 45 words maximum (ultra-concise and focused).
+- Divide into exactly 2 short paragraphs separated by a blank line:
+  Paragraph 1: The core event or main decision in one concise sentence.
+  Paragraph 2: The key outcome or essential detail in one brief sentence.
+- Do not use headings, bullet symbols, or asterisks.
+
+Source text:
+${inputSample}`
+    } else {
+      const roleHintAr = type === 'opinion'
+        ? 'لخص مقال الرأي التالي في فقرتين قصيرتين جداً (تبدأ الأولى بـ "يرى الكاتب أن").'
+        : 'لخص الخبر التالي بأسلوب صحفي احترافي ومكثف في فقرتين قصيرتين جداً.'
+
+      prompt = `${roleHintAr}
 
 الشروط الصارمة:
 - إجمالي الملخص بين 35 إلى 45 كلمة كحد أقصى (مختصر جداً ومركّز).
@@ -189,6 +254,7 @@ async function generateWithGemini(cleanContent: string, type: string, apiKey: st
 
 النص:
 ${inputSample}`
+    }
 
     const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`
     const response = await fetch(url, {
@@ -198,7 +264,7 @@ ${inputSample}`
         contents: [{ parts: [{ text: prompt }] }],
         generationConfig: {
           temperature: 0.3,
-          maxOutputTokens: 140
+          maxOutputTokens: 150
         }
       })
     })
@@ -216,45 +282,46 @@ ${inputSample}`
 }
 
 /**
- * توليد ملخص استخلاصي مختصر جداً ومنسق في فقرتين في حال عدم توفر Gemini
+ * توليد ملخص استخلاصي مختصر جداً ومنسق في فقرتين
  */
-function generateConciseExtractiveSummary(cleanContent: string, type: string): string {
-  // تقسيم المحتوى إلى جمل أو فقرات ذات معنى
+function generateConciseExtractiveSummary(cleanContent: string, type: string, lang: 'ar' | 'en'): string {
   const rawSegments = cleanContent
     .split(/(?:[.!؟\n]+|،\s+(?=و?(?:أكد|أشار|أوضح|ناقش|شدد|دعا|بحث|استعرض|أعلن|قررت|وجه)))/g)
     .map(s => s.trim())
-    .filter(s => s.length >= 25 && !s.startsWith('صادر عن') && !s.includes('﷽'))
+    .filter(s => s.length >= 25 && !s.startsWith('صادر عن') && !s.startsWith('Issued by') && !s.includes('﷽'))
 
   if (rawSegments.length === 0) {
-    const words = cleanContent.split(/\s+/).slice(0, 40)
+    const words = cleanContent.split(/\s+/).slice(0, 42)
     const mid = Math.ceil(words.length / 2)
     return `${words.slice(0, mid).join(' ')}.\n\n${words.slice(mid).join(' ')}.`
   }
 
   const trimToWords = (str: string, maxWords: number): string => {
     const words = str.trim().split(/\s+/)
-    if (words.length <= maxWords) return str.trim().replace(/[،,.]+$/, '')
-    return words.slice(0, maxWords).join(' ').replace(/[،,.]+$/, '')
+    if (words.length <= maxWords) return str.trim().replace(/[،,.;:]+$/, '')
+    return words.slice(0, maxWords).join(' ').replace(/[،,.;:]+$/, '')
   }
 
   let para1 = trimToWords(rawSegments[0]!, 24)
   let para2 = ''
 
   if (rawSegments.length > 1) {
-    // اختيار جملة ثانية مكملة من وسط أو نهاية الخبر
     const secondCandidate = rawSegments.find((s, idx) => idx > 0 && s.length >= 30) || rawSegments[1]!
     para2 = trimToWords(secondCandidate, 22)
   } else {
-    // تقسيم الجملة الطويلة إلى فقرتين قصيرتين
     const allWords = rawSegments[0]!.split(/\s+/)
     if (allWords.length > 22) {
-      para1 = allWords.slice(0, 20).join(' ').replace(/[،,.]+$/, '')
-      para2 = allWords.slice(20, 40).join(' ').replace(/[،,.]+$/, '')
+      para1 = allWords.slice(0, 20).join(' ').replace(/[،,.;:]+$/, '')
+      para2 = allWords.slice(20, 42).join(' ').replace(/[،,.;:]+$/, '')
     }
   }
 
-  if (type === 'opinion' && !para1.startsWith('يرى الكاتب')) {
-    para1 = `يرى الكاتب أن ${para1}`
+  if (type === 'opinion') {
+    if (lang === 'en' && !para1.toLowerCase().startsWith('the author')) {
+      para1 = `The author argues that ${para1}`
+    } else if (lang === 'ar' && !para1.startsWith('يرى الكاتب')) {
+      para1 = `يرى الكاتب أن ${para1}`
+    }
   }
 
   return para2 ? `${para1}.\n\n${para2}.` : `${para1}.`
@@ -263,27 +330,24 @@ function generateConciseExtractiveSummary(cleanContent: string, type: string): s
 /**
  * تنسيق الملخص وضمان كونه مختصراً جداً (بحد أقصى ~48 كلمة) ومقسماً إلى فقرتين احترافيتين
  */
-function enforceConciseParagraphs(rawText: string, type: string): string {
-  // إزالة أي HTML disclaimer قديم
+function enforceConciseParagraphs(rawText: string, type: string, lang: 'ar' | 'en'): string {
   const withoutDisclaimer = rawText.split('<div class="ai-disclaimer"')[0] || rawText
 
-  let cleaned = withoutDisclaimer
+  const cleaned = withoutDisclaimer
     .replace(/<[^>]*>/g, '')
     .replace(/^\*+|\*+$/g, '')
     .replace(/\*\*([^*]+)\*\*/g, '$1')
     .replace(/\*([^*]+)\*/g, '$1')
     .replace(/^[\*\-\•]\s*/gm, '')
-    .replace(/^(الفقرة الأولى|الفقرة الثانية|ملخص الخبر|الملخص)\s*[:：\-]?\s*/gim, '')
+    .replace(/^(الفقرة الأولى|الفقرة الثانية|ملخص الخبر|الملخص|Paragraph 1|Paragraph 2|Summary)\s*[:：\-]?\s*/gim, '')
     .replace(/&amp;nbsp;|&nbsp;|\u00A0/gi, ' ')
     .trim()
 
-  // تقسيم إلى فقرات
   let paragraphs = cleaned
     .split(/\n\s*\n|\n/)
     .map(p => p.trim())
     .filter(p => p.length > 10)
 
-  // إذا كانت فقرة واحدة، نقسمها إلى فقرتين متوازنتين
   if (paragraphs.length === 1) {
     const sentences = paragraphs[0]!
       .split(/[.!؟]+/)
@@ -298,26 +362,29 @@ function enforceConciseParagraphs(rawText: string, type: string): string {
         const mid = Math.min(22, Math.ceil(words.length / 2))
         paragraphs = [
           words.slice(0, mid).join(' '),
-          words.slice(mid, 44).join(' ')
+          words.slice(mid, 45).join(' ')
         ]
       }
     }
   }
 
-  // الاكتفاء بفقرتين كحد أقصى وتحديد سقف الكلمات لكل فقرة (حوالي 24 كلمة للفقرة = ~45-48 كلمة إجمالاً)
   const finalParagraphs = paragraphs.slice(0, 2).map((p, idx) => {
     const words = p.split(/\s+/)
     const maxW = idx === 0 ? 25 : 23
     let clipped = words.length > maxW ? words.slice(0, maxW).join(' ') : p
-    clipped = clipped.replace(/[،,.\s]+$/, '')
+    clipped = clipped.replace(/[،,.;:\s]+$/, '')
     if (!/[.!؟]$/.test(clipped)) {
       clipped += '.'
     }
     return clipped
   })
 
-  if (type === 'opinion' && finalParagraphs[0] && !finalParagraphs[0].startsWith('يرى الكاتب')) {
-    finalParagraphs[0] = `يرى الكاتب أن ${finalParagraphs[0]}`
+  if (type === 'opinion' && finalParagraphs[0]) {
+    if (lang === 'en' && !finalParagraphs[0].toLowerCase().startsWith('the author')) {
+      finalParagraphs[0] = `The author argues that ${finalParagraphs[0]}`
+    } else if (lang === 'ar' && !finalParagraphs[0].startsWith('يرى الكاتب')) {
+      finalParagraphs[0] = `يرى الكاتب أن ${finalParagraphs[0]}`
+    }
   }
 
   return finalParagraphs.join('\n\n')
@@ -329,13 +396,13 @@ function countWords(text: string): number {
   return cleanText.split(/\s+/).length
 }
 
-function generateContentHash(content: string, type: string): string {
+function generateContentHash(content: string, type: string, lang: 'ar' | 'en'): string {
   const normalizedContent = content
     .replace(/\s+/g, ' ')
     .trim()
     .toLowerCase()
 
-  const key = `v3-concise-${normalizedContent}-${type}`
+  const key = `v4-concise-${lang}-${normalizedContent}-${type}`
   return crypto.createHash('sha256').update(key).digest('hex')
 }
 
