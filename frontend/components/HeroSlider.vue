@@ -44,7 +44,7 @@
                   <NuxtLink :to="getArticleLink(article)">
                     <!-- العنوان الفرعي -->
                     <p v-if="article.subtitle" class="text-primary text-sm sm:text-base lg:text-lg font-semibold mb-0.5 lg:mb-1">
-                      {{ article.subtitle }}
+                      {{ locale === 'en' && (article as any).subtitle_en ? (article as any).subtitle_en : article.subtitle }}
                     </p>
                     <h2 class="text-white text-lg sm:text-xl lg:text-2xl font-bold leading-snug lg:leading-tight hover:text-gray-200 transition-colors line-clamp-2 lg:line-clamp-none">
                       {{ getArticleTitle(article) }}

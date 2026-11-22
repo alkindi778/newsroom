@@ -67,7 +67,7 @@
         <div class="flex-1 min-w-0 flex flex-col justify-between h-full">
           <!-- العنوان الفرعي -->
           <p v-if="article.subtitle" class="text-sm text-blue-600 font-semibold mb-1 line-clamp-1">
-            {{ article.subtitle }}
+            {{ locale === 'en' && (article as any).subtitle_en ? (article as any).subtitle_en : article.subtitle }}
           </p>
           <h3 class="text-lg font-bold text-gray-900 group-hover:text-primary transition-colors line-clamp-2 leading-snug mb-4">
             {{ getArticleTitle(article) }}

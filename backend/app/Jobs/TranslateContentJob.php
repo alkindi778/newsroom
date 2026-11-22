@@ -55,7 +55,10 @@ class TranslateContentJob implements ShouldQueue
             ]);
 
             // Skip if already translated
-            if (!empty($this->article->title_en) && !empty($this->article->content_en)) {
+            $needsSourceTranslation = !empty($this->article->source) && empty($this->article->source_en);
+            $needsSubtitleTranslation = !empty($this->article->subtitle) && empty($this->article->subtitle_en);
+
+            if (!empty($this->article->title_en) && !empty($this->article->content_en) && !$needsSourceTranslation && !$needsSubtitleTranslation) {
                 Log::info('Article already translated, skipping', [
                     'article_id' => $this->article->id
                 ]);
@@ -65,7 +68,9 @@ class TranslateContentJob implements ShouldQueue
             // Get translation from Gemini
             $translation = $translationService->translateContent(
                 $this->article->title,
-                $this->article->content
+                $this->article->content,
+                $this->article->subtitle,
+                $this->article->source
             );
 
             if (!$translation) {
@@ -78,11 +83,23 @@ class TranslateContentJob implements ShouldQueue
                 throw new \Exception('Translation service returned null');
             }
 
-            // Update article with translation
-            $this->article->update([
+            $updateData = [
                 'title_en' => $translation['title_en'],
-                'content_en' => $translation['content_en']
-            ]);
+                'content_en' => $translation['content_en'],
+            ];
+
+            if (!empty($this->article->subtitle)) {
+                $updateData['subtitle_en'] = $translation['subtitle_en']
+                    ?? $translationService->translateText($this->article->subtitle);
+            }
+
+            if (\Illuminate\Support\Facades\Schema::hasColumn('articles', 'source_en') && !empty($this->article->source)) {
+                $updateData['source_en'] = $translation['source_en']
+                    ?? $translationService->translateText($this->article->source);
+            }
+
+            // Update article with translation without triggering observer loop
+            $this->article->updateQuietly($updateData);
 
             Log::info('Article translated successfully', [
                 'article_id' => $this->article->id,

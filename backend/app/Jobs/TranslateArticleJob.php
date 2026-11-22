@@ -33,8 +33,13 @@ class TranslateArticleJob implements ShouldQueue
                 return;
             }
 
-            // Translate Title + Content together for better quality
-            $translation = $translationService->translateContent($article->title, $article->content);
+            // Translate Title + Content + Subtitle + Source together for better quality
+            $translation = $translationService->translateContent(
+                $article->title,
+                $article->content,
+                $article->subtitle,
+                $article->source
+            );
             
             if ($translation) {
                 $article->title_en = $translation['title_en'] ?? null;
@@ -42,7 +47,12 @@ class TranslateArticleJob implements ShouldQueue
                 
                 // Translate subtitle if exists
                 if ($article->subtitle && !$article->subtitle_en) {
-                    $article->subtitle_en = $translationService->translateText($article->subtitle);
+                    $article->subtitle_en = $translation['subtitle_en'] ?? $translationService->translateText($article->subtitle);
+                }
+
+                // Translate source if exists
+                if ($article->source && \Illuminate\Support\Facades\Schema::hasColumn('articles', 'source_en') && !$article->source_en) {
+                    $article->source_en = $translation['source_en'] ?? $translationService->translateText($article->source);
                 }
                 
                 $article->saveQuietly();

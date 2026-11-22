@@ -85,6 +85,7 @@ export const useHtmlEntities = () => {
       excerpt: decodeHtmlEntities(article.excerpt),
       excerpt_en: decodeHtmlEntities(article.excerpt_en),
       source: decodeHtmlEntities(article.source),
+      source_en: decodeHtmlEntities(article.source_en),
       content: decodeHtmlContent(article.content),
       content_en: decodeHtmlContent(article.content_en),
       meta_description: decodeHtmlEntities(article.meta_description),

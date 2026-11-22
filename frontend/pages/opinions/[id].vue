@@ -1,5 +1,5 @@
 <template>
-  <div class="container mx-auto px-4 py-8">
+  <div class="container mx-auto px-4 py-8" :dir="locale === 'en' ? 'ltr' : 'rtl'">
     <!-- Loading State -->
     <LoadingSpinner v-if="loading" type="bars" size="lg" fullScreen text="جاري تحميل المقال..." color="secondary" />
 
@@ -118,7 +118,12 @@
 
         <!-- المحتوى -->
         <div class="p-4 sm:p-6 md:p-8" :class="{ 'pt-12': !opinion.image }">
-          <div class="prose prose-lg max-w-none" v-html="getOpinionContent"></div>
+          <div
+            class="prose prose-lg max-w-none article-content"
+            :class="locale === 'en' ? 'ltr-content text-left' : 'text-right'"
+            :dir="locale === 'en' ? 'ltr' : 'rtl'"
+            v-html="getOpinionContent"
+          ></div>
 
           <!-- Opinion Middle Advertisement -->
           <div class="my-12">
@@ -382,7 +387,11 @@ watch(opinionId, () => {
 </script>
 
 <style scoped>
-/* تنسيق المحتوى */
+:deep(.article-content.ltr-content),
+:deep(.article-content.ltr-content p) {
+  direction: ltr !important;
+  text-align: left !important;
+}
 .article-content {
   color: #1f2937;
   line-height: 2;

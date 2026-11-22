@@ -11,15 +11,35 @@
   }
 
   /* اتجاه RTL للعربية */
+  html[dir="rtl"],
   html[dir="rtl"] body {
     direction: rtl;
     text-align: right;
   }
 
   /* اتجاه LTR للإنجليزية */
+  html[dir="ltr"],
   html[dir="ltr"] body {
     direction: ltr;
     text-align: left;
+  }
+
+  /* تصحيح المحاذاة والعناصر في الوضع الإنجليزي LTR */
+  html[dir="ltr"] .text-right,
+  .ltr .text-right {
+    text-align: left !important;
+  }
+
+  html[dir="ltr"] .border-r-4,
+  .ltr .border-r-4 {
+    border-right-width: 0 !important;
+    border-left-width: 4px !important;
+  }
+
+  html[dir="ltr"] .border-r-2,
+  .ltr .border-r-2 {
+    border-right-width: 0 !important;
+    border-left-width: 2px !important;
   }
 
   * {

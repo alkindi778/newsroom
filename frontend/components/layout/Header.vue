@@ -29,8 +29,8 @@
     <!-- الشعار والأدوات -->
     <div class="container mx-auto px-2 sm:px-4">
       <div class="flex items-center justify-between min-h-16 sm:min-h-20 py-3">
-        <!-- الشعار على اليسار -->
-        <NuxtLink to="/" class="flex-shrink-0">
+        <!-- الشعار -->
+        <NuxtLink :to="localePath('/')" class="flex-shrink-0">
           <div class="text-left flex items-center gap-3">
             <!-- Logo Image if available -->
             <img 
@@ -128,7 +128,10 @@
               </button>
               
               <!-- Dropdown menu - positioned below navbar item -->
-              <div class="absolute right-0 top-full mt-0 w-48 bg-white border border-gray-200 rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+              <div
+                class="absolute top-full mt-0 w-48 bg-white border border-gray-200 rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50"
+                :class="locale === 'en' ? 'left-0' : 'right-0'"
+              >
                 <NuxtLink 
                   v-for="child in getChildren(category.id)" 
                   :key="child.id"
@@ -175,7 +178,10 @@
             </button>
             
             <!-- Dropdown للأقسام الإضافية -->
-            <div class="absolute right-0 top-full mt-0 w-56 bg-white border border-gray-200 rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 max-h-96 overflow-y-auto">
+            <div
+              class="absolute top-full mt-0 w-56 bg-white border border-gray-200 rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 max-h-96 overflow-y-auto"
+              :class="locale === 'en' ? 'left-0' : 'right-0'"
+            >
               <NuxtLink 
                 v-for="category in moreCategories" 
                 :key="category.id"

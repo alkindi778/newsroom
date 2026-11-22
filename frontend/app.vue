@@ -15,7 +15,23 @@ const { locale, localeProperties } = useI18n()
 await settingsStore.fetchSettings()
 
 // إعدادات Meta Tags العامة من Backend
-const siteName = computed(() => settingsStore.getSetting('site_name'))
+const siteName = computed(() => {
+  if (locale.value === 'en') {
+    return settingsStore.getSetting('site_name_en') || settingsStore.getSetting('site_name')
+  }
+  return settingsStore.getSetting('site_name')
+})
+const currentDir = computed(() => (locale.value === 'en' ? 'ltr' : (localeProperties.value.dir || 'rtl')))
+
+// ضمان تحديث اتجاه الصفحة فوراً في المتصفح عند تبديل اللغة
+watch(locale, (newLocale) => {
+  if (process.client && typeof document !== 'undefined') {
+    const dir = newLocale === 'en' ? 'ltr' : 'rtl'
+    document.documentElement.setAttribute('dir', dir)
+    document.documentElement.setAttribute('lang', newLocale)
+    document.body?.setAttribute('dir', dir)
+  }
+}, { immediate: true })
 const siteDescription = computed(() => settingsStore.getSetting('site_description'))
 const siteLocale = computed(() => settingsStore.getSetting('site_locale'))
 const twitterHandle = computed(() => settingsStore.getSetting('twitter_handle'))
@@ -65,7 +81,7 @@ watchEffect(() => {
       : '%s',
     htmlAttrs: {
       lang: locale.value,
-      dir: localeProperties.value.dir || 'rtl'
+      dir: currentDir.value
     },
     meta: [
       { charset: 'utf-8' },

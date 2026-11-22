@@ -23,12 +23,14 @@ class GeminiTranslationService
      *
      * @param string $title Arabic title to translate
      * @param string $content Arabic content to translate
-     * @return array|null Returns ['title_en' => '...', 'content_en' => '...'] or null on failure
+     * @param string|null $subtitle Arabic subtitle to translate
+     * @param string|null $source Arabic source to translate
+     * @return array|null Returns ['title_en' => '...', 'content_en' => '...', 'subtitle_en' => '...', 'source_en' => '...'] or null on failure
      */
-    public function translateContent(string $title, string $content): ?array
+    public function translateContent(string $title, string $content, ?string $subtitle = null, ?string $source = null): ?array
     {
         try {
-            $prompt = $this->buildTranslationPrompt($title, $content);
+            $prompt = $this->buildTranslationPrompt($title, $content, $subtitle, $source);
             
             $response = Http::timeout(60)
                 ->withHeaders([
@@ -90,8 +92,11 @@ class GeminiTranslationService
     /**
      * Build the translation prompt for Gemini
      */
-    protected function buildTranslationPrompt(string $title, string $content): string
+    protected function buildTranslationPrompt(string $title, string $content, ?string $subtitle = null, ?string $source = null): string
     {
+        $subtitleLine = $subtitle ? "\nSubtitle (Arabic): {$subtitle}\n" : '';
+        $sourceLine = $source ? "\nSource (Arabic): {$source}\n" : '';
+
         return <<<PROMPT
 You are a professional Arabic-to-English translator with 30+ years of experience specializing in news articles, journalistic content, and media translation.
 
@@ -112,16 +117,16 @@ Translate the following Arabic news article/content to English with FULL PROFESS
 
 # Output Format Requirements
 1. Return ONLY a valid JSON object with no additional text, markdown, or code blocks
-2. The JSON must have exactly two keys: "title_en" and "content_en"
-3. Both translations must be COMPLETE and PROFESSIONAL
+2. The JSON must have keys: "title_en", "content_en", "subtitle_en", and "source_en"
+3. If Subtitle or Source is not provided, set its corresponding English key to null
 
 # Input Data
 Title (Arabic): {$title}
-
+{$subtitleLine}{$sourceLine}
 Content (Arabic): {$content}
 
 # Expected Output Format
-{"title_en":"FULL professional English translation of the complete title","content_en":"FULL professional English translation of the complete content with all HTML preserved and all details translated"}
+{"title_en":"FULL professional English translation of the complete title","subtitle_en":"English translation of subtitle or null","source_en":"English translation of news source/dateline or null","content_en":"FULL professional English translation of the complete content with all HTML preserved and all details translated"}
 
 Return only the JSON object with COMPLETE translations, nothing else.
 PROMPT;
@@ -156,7 +161,9 @@ PROMPT;
 
         return [
             'title_en' => $decoded['title_en'],
-            'content_en' => $decoded['content_en']
+            'content_en' => $decoded['content_en'],
+            'subtitle_en' => $decoded['subtitle_en'] ?? null,
+            'source_en' => $decoded['source_en'] ?? null,
         ];
     }
 

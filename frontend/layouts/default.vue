@@ -1,5 +1,9 @@
 <template>
-  <div class="min-h-screen flex flex-col bg-golden-pattern">
+  <div
+    class="min-h-screen flex flex-col bg-golden-pattern"
+    :dir="locale === 'en' ? 'ltr' : 'rtl'"
+    :class="locale === 'en' ? 'ltr text-left' : 'rtl text-right'"
+  >
     <LayoutHeader />
     
     <!-- شريط آخر الأخبار -->
@@ -33,6 +37,7 @@
 </template>
 
 <script setup lang="ts">
+const { locale } = useI18n()
 const showScrollTop = ref(false)
 
 // إظهار زر العودة للأعلى عند التمرير

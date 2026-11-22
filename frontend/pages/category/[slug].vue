@@ -7,7 +7,7 @@
           {{ getCategoryName }}
         </h1>
         <p class="text-gray-600">
-          تصفح آخر الأخبار في قسم {{ getCategoryName }}
+          {{ locale === 'en' ? `Browse the latest news in ${getCategoryName}` : `تصفح آخر الأخبار في قسم ${getCategoryName}` }}
         </p>
       </div>
 
@@ -44,7 +44,7 @@
             <div class="w-1/2 pr-8 md:pr-12 lg:pr-16">
               <!-- العنوان الفرعي -->
               <p v-if="articles[0].subtitle" class="text-white text-xl md:text-2xl lg:text-3xl font-bold mb-3 drop-shadow-lg" style="text-shadow: 0px 2px 4px rgba(0, 0, 0, 0.3);">
-                {{ articles[0].subtitle }}
+                {{ locale === 'en' && articles[0].subtitle_en ? articles[0].subtitle_en : articles[0].subtitle }}
               </p>
               <!-- العنوان -->
               <h2 class="hero-title text-white font-bold">
@@ -67,8 +67,8 @@
           
           <!-- العنوان في مستطيل أزرق -->
           <div class="hero-mobile-title bg-blue-800 p-6 rounded-b">
-            <p v-if="articles[0].subtitle" class="text-white text-lg md:text-xl font-bold mb-3 pr-4" style="text-shadow: 0px 2px 4px rgba(0, 0, 0, 0.3);">
-              {{ articles[0].subtitle }}
+            <p v-if="articles[0].subtitle" class="text-white text-lg md:text-xl font-bold mb-3 px-4" style="text-shadow: 0px 2px 4px rgba(0, 0, 0, 0.3);">
+              {{ locale === 'en' && articles[0].subtitle_en ? articles[0].subtitle_en : articles[0].subtitle }}
             </p>
             <h2 class="text-white font-bold text-3xl leading-tight pr-4 border-r-4 border-white">
               {{ getArticleTitle(articles[0]) }}

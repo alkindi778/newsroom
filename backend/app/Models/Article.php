@@ -23,6 +23,7 @@ class Article extends Model implements HasMedia
         'subtitle',
         'subtitle_en',
         'source',
+        'source_en',
         'slug',
         'content',
         'content_en',

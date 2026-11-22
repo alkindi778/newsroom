@@ -16,11 +16,14 @@
     <!-- المحتوى في الأسفل -->
     <div class="flex-1 flex flex-col justify-between p-4">
       <!-- العنوان الفرعي -->
-      <p v-if="article.subtitle" class="text-sm text-blue-600 font-semibold mb-2 line-clamp-1">
-        {{ decodeHtmlEntities(article.subtitle) }}
+      <p v-if="getArticleSubtitle" class="text-sm text-blue-600 font-semibold mb-2 line-clamp-1">
+        {{ decodeHtmlEntities(getArticleSubtitle) }}
       </p>
       <!-- العنوان -->
-      <h3 class="text-xl font-bold text-gray-900 line-clamp-3 leading-snug text-right mb-3">
+      <h3
+        class="text-xl font-bold text-gray-900 line-clamp-3 leading-snug mb-3"
+        :class="locale === 'en' ? 'text-left' : 'text-right'"
+      >
         {{ decodeHtmlEntities(getArticleTitle) }}
       </h3>
 
@@ -46,6 +49,14 @@ const { getArticleLink } = useArticleLink()
 const { getCategoryName } = useLocalizedContent()
 const { decodeHtmlEntities } = useHtmlEntities()
 const { locale } = useI18n()
+
+// دالة للحصول على العنوان الفرعي المترجم
+const getArticleSubtitle = computed(() => {
+  const isEnglish = locale.value === 'en'
+  return isEnglish && (props.article as any).subtitle_en
+    ? (props.article as any).subtitle_en
+    : props.article.subtitle
+})
 
 // دالة للحصول على عنوان المقال المترجم
 const getArticleTitle = computed(() => {

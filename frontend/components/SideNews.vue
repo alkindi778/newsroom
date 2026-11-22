@@ -17,10 +17,10 @@
       </div>
 
       <!-- العنوان تحت الصورة في الموبايل، على اليسار في الديسكتوب -->
-      <div class="flex-1 text-right">
+      <div class="flex-1" :class="locale === 'en' ? 'text-left' : 'text-right'">
         <!-- العنوان الفرعي -->
-        <p v-if="article.subtitle" class="text-xs lg:text-sm text-blue-600 font-semibold mb-1 line-clamp-1">
-          {{ article.subtitle }}
+        <p v-if="getArticleSubtitle(article)" class="text-xs lg:text-sm text-blue-600 font-semibold mb-1 line-clamp-1">
+          {{ getArticleSubtitle(article) }}
         </p>
         <h3 class="text-gray-900 text-sm lg:text-xl font-bold leading-tight line-clamp-2 lg:line-clamp-3">
           {{ getArticleTitle(article) }}
@@ -47,6 +47,11 @@ const { getImageUrl } = useImageUrl()
 const { formatDate } = useDateFormat()
 const { getArticleLink } = useArticleLink()
 const { locale } = useI18n()
+
+// دالة ترجمة العنوان الفرعي
+const getArticleSubtitle = (article: any) => {
+  return locale.value === 'en' && article.subtitle_en ? article.subtitle_en : article.subtitle
+}
 
 // دالة ترجمة العنوان
 const getArticleTitle = (article: Article) => {

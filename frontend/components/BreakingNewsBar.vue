@@ -7,9 +7,9 @@
     <div class="container mx-auto px-2 md:px-4">
       <div class="flex items-center py-2 md:py-5">
         <!-- أيقونة عاجل -->
-        <div class="flex-shrink-0 ml-2 md:ml-6">
+        <div class="flex-shrink-0 mx-2 md:mx-6">
           <span class="bg-white text-red-600 px-3 py-1.5 md:px-6 md:py-3 rounded-lg font-bold text-sm md:text-3xl animate-pulse">
-            عاجل
+            {{ locale === 'en' ? 'Breaking' : 'عاجل' }}
           </span>
         </div>
         

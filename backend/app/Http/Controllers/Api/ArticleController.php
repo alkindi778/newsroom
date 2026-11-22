@@ -68,7 +68,9 @@ class ArticleController extends Controller
                     'title' => $this->decodeHtmlEntities($article->title),
                     'title_en' => $this->decodeHtmlEntities($article->title_en),
                     'subtitle' => $this->decodeHtmlEntities($article->subtitle),
+                    'subtitle_en' => $this->decodeHtmlEntities($article->subtitle_en),
                     'source' => $this->decodeHtmlEntities($article->source),
+                    'source_en' => $this->translateSourceToEnglish($article->source_en ?? null, $article->source),
                     'slug' => $article->slug,
                     'content' => $this->fixContentImageUrls($article->content),
                     'content_en' => $this->fixContentImageUrls($article->content_en),
@@ -157,6 +159,7 @@ class ArticleController extends Controller
                 'subtitle' => $this->decodeHtmlEntities($article->subtitle),
                 'subtitle_en' => $this->decodeHtmlEntities($article->subtitle_en),
                 'source' => $this->decodeHtmlEntities($article->source),
+                'source_en' => $this->translateSourceToEnglish($article->source_en ?? null, $article->source, $article),
                 'slug' => $article->slug,
                 'content' => $this->fixContentImageUrls($article->content),
                 'content_en' => $this->fixContentImageUrls($article->content_en),
@@ -856,5 +859,89 @@ class ArticleController extends Controller
         }
 
         return $cleaned;
+    }
+
+    /**
+     * ترجمة مصدر الخبر إلى الإنجليزية (مع قاموس فوري للمصادر المتكررة وترجمة تلقائية للمصادر المخصصة)
+     */
+    private function translateSourceToEnglish(?string $sourceEn, ?string $sourceAr, ?Article $article = null): ?string
+    {
+        if (!empty($sourceEn)) {
+            return $this->decodeHtmlEntities($sourceEn);
+        }
+
+        $cleanAr = $this->decodeHtmlEntities($sourceAr);
+        if (empty($cleanAr)) {
+            return null;
+        }
+
+        $dictionary = [
+            'إعلام انتقالي العاصمة' => 'Capital Transitional Council Media',
+            'اعلام انتقالي العاصمة' => 'Capital Transitional Council Media',
+            'انتقالي العاصمة' => 'Capital Transitional Council',
+            'المجلس الانتقالي الجنوبي' => 'Southern Transitional Council',
+            'المجلس الانتقالي' => 'Transitional Council',
+            'العاصمة عدن' => 'Capital Aden',
+            '#عدن' => '#Aden',
+            'عدن' => 'Aden',
+            'خاص' => 'Exclusive',
+            'تعازي' => 'Condolences',
+            'تقرير' => 'Report',
+            'تقارير' => 'Reports',
+            'بيان' => 'Statement',
+            'متابعات' => 'Follow-ups',
+            'أخبار' => 'News',
+            'حوار' => 'Interview',
+            'المكتب الإعلامي' => 'Media Office',
+            'المركز الإعلامي' => 'Media Center',
+            'الإدارة الإعلامية' => 'Media Department',
+            'دارسعد' => 'Dar Saad',
+            'دار سعد' => 'Dar Saad',
+            'الشيخ عثمان' => 'Sheikh Othman',
+            'خورمكسر' => 'Khor Maksar',
+            'خور مكسر' => 'Khor Maksar',
+            'المعلا' => 'Al-Mualla',
+            'التواهي' => 'Al-Tawahi',
+            'كريتر' => 'Crater',
+            'صيرة' => 'Sira',
+            'المنصورة' => 'Al-Mansoura',
+            'البريقة' => 'Al-Buraiqeh',
+            'سبأ' => 'Saba',
+            'وكالات' => 'Agencies',
+        ];
+
+        $translated = $cleanAr;
+        foreach ($dictionary as $ar => $en) {
+            $translated = str_replace($ar, $en, $translated);
+        }
+
+        // تنسيق الفواصل
+        $translated = preg_replace('/\s*\/\s*/u', ' / ', $translated);
+        $translated = trim((string) preg_replace('/\s+/u', ' ', $translated));
+
+        // إذا بقي نص عربي في صفحة تفاصيل الخبر، نترجمه فورياً ونحفظه
+        if (preg_match('/[\x{0600}-\x{06FF}]/u', $translated) && $article) {
+            try {
+                $url = 'https://translate.googleapis.com/translate_a/single?client=gtx&sl=ar&tl=en&dt=t&q=' . urlencode($cleanAr);
+                $response = \Illuminate\Support\Facades\Http::timeout(4)->get($url);
+                if ($response->successful()) {
+                    $data = $response->json();
+                    if (is_array($data[0] ?? null)) {
+                        $parts = array_map(fn($chunk) => $chunk[0] ?? '', $data[0]);
+                        $googleTranslated = trim(implode(' ', $parts));
+                        if (!empty($googleTranslated)) {
+                            $translated = $googleTranslated;
+                            if (\Illuminate\Support\Facades\Schema::hasColumn('articles', 'source_en')) {
+                                $article->updateQuietly(['source_en' => $translated]);
+                            }
+                        }
+                    }
+                }
+            } catch (\Throwable $e) {
+                // الاحتفاظ بالترجمة القاموسية في حال تعذر الاتصال
+            }
+        }
+
+        return $translated;
     }
 }

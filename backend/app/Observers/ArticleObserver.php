@@ -46,16 +46,20 @@ class ArticleObserver
             return;
         }
 
-        // Check if title or content was changed
+        // Check if title, content, subtitle, or source was changed
         $titleChanged = $article->wasChanged('title');
         $contentChanged = $article->wasChanged('content');
+        $subtitleChanged = $article->wasChanged('subtitle');
+        $sourceChanged = $article->wasChanged('source');
 
         // Only re-translate if Arabic content actually changed
-        if ($titleChanged || $contentChanged) {
+        if ($titleChanged || $contentChanged || $subtitleChanged || $sourceChanged) {
             Log::info('Article content changed, re-translating', [
                 'article_id' => $article->id,
                 'title_changed' => $titleChanged,
-                'content_changed' => $contentChanged
+                'content_changed' => $contentChanged,
+                'subtitle_changed' => $subtitleChanged,
+                'source_changed' => $sourceChanged,
             ]);
 
             TranslateContentJob::dispatch($article);

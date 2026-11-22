@@ -1,9 +1,9 @@
 <template>
   <section class="mb-12">
     <div class="mb-6">
-      <NuxtLink to="/news" class="flex items-center gap-2">
+      <NuxtLink :to="localePath('/news')" class="flex items-center gap-2">
         <h2 class="text-3xl font-bold text-gray-900">
-          آخر الأخبار
+          {{ $t('home.latest_news') }}
         </h2>
         <svg class="w-6 h-6 text-gray-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
@@ -52,6 +52,7 @@
 </template>
 
 <script setup lang="ts">
+const localePath = useLocalePath()
 const articlesStore = useArticlesStore()
 
 const articles = computed(() => articlesStore.articles)

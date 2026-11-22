@@ -44,7 +44,7 @@
             <!-- Content -->
             <div class="absolute bottom-0 left-0 right-0 p-6 text-white">
               <h3 class="text-3xl font-bold mb-2 line-clamp-2 group-hover:text-blue-300 transition-colors">
-                {{ mainArticle.title }}
+                {{ getArticleTitle(mainArticle) }}
               </h3>
               <p v-if="mainArticle.excerpt || mainArticle.excerpt_en" class="text-gray-200 text-sm line-clamp-2 mb-3">
                 {{ getArticleExcerpt(mainArticle) }}

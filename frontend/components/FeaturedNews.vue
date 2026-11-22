@@ -24,7 +24,7 @@
 
       <!-- العنوان الفرعي -->
       <p v-if="article.subtitle" class="text-lg md:text-xl text-primary font-semibold mb-2">
-        {{ article.subtitle }}
+        {{ locale === 'en' && (article as any).subtitle_en ? (article as any).subtitle_en : article.subtitle }}
       </p>
 
       <!-- العنوان -->

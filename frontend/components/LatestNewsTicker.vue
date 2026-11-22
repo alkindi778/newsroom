@@ -9,8 +9,8 @@
             <svg class="w-3 h-3 md:w-4 md:h-4 animate-pulse" fill="currentColor" viewBox="0 0 20 20">
               <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z"/>
             </svg>
-            <span class="hidden sm:inline">آخر الأخبار</span>
-            <span class="sm:hidden">آخر الأخبار</span>
+            <span class="hidden sm:inline">{{ locale === 'en' ? 'Latest News' : 'آخر الأخبار' }}</span>
+            <span class="sm:hidden">{{ locale === 'en' ? 'Latest News' : 'آخر الأخبار' }}</span>
           </span>
         </div>
 
@@ -28,7 +28,7 @@
               >
                 <span class="inline-block w-1.5 h-1.5 bg-primary rounded-full animate-ping flex-shrink-0"></span>
                 <span class="font-medium text-sm md:text-base truncate">
-                  <span v-if="currentArticle.subtitle" class="text-primary ml-1">{{ currentArticle.subtitle }} ●</span>
+                  <span v-if="currentArticle.subtitle" class="text-primary mx-1">{{ locale === 'en' && (currentArticle as any).subtitle_en ? (currentArticle as any).subtitle_en : currentArticle.subtitle }} ●</span>
                   {{ getArticleTitle(currentArticle) }}
                 </span>
                 <span class="text-xs text-gray-400 mr-2 flex-shrink-0 hidden md:inline-block">
