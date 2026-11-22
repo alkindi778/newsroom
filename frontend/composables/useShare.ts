@@ -5,7 +5,7 @@ export const useShare = () => {
   const getShareSignature = () => {
     return `
 
-_إعلام انتقالـﮯ العاصمة #عدن_
+إعلام انتقالـﮯ العاصمة #عدن
 
 صفحتنا على الفيس بوك
 www.facebook.com/adenstc1
@@ -35,7 +35,7 @@ ${getShareSignature()}`
   const shareOnTwitter = (url: string, title: string) => {
     const shareText = `${title}
 
-_إعلام انتقالـﮯ العاصمة #عدن_`
+إعلام انتقالـﮯ العاصمة #عدن`
     const shareUrl = `https://twitter.com/intent/tweet?url=${encodeURIComponent(url)}&text=${encodeURIComponent(shareText)}`
     window.open(shareUrl, '_blank', 'width=600,height=400')
   }

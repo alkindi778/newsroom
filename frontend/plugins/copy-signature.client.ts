@@ -23,7 +23,7 @@ export default defineNuxtPlugin(() => {
         // بناء النص مع التوقيع
         const signature = `
 
-_إعلام انتقالـﮯ العاصمة #عدن_
+إعلام انتقالـﮯ العاصمة #عدن
 ${currentUrl}
 
 صفحتنا على الفيس بوك
