@@ -1,7 +1,5 @@
 import crypto from 'crypto'
 import { API_CLIENT_HEADER, API_CLIENT_TOKEN, decryptApiData } from '../../../utils/apiCrypto'
-
-// Nuxt/Nitro imports
 import { defineEventHandler, readBody, createError } from 'h3'
 
 interface RequestBody {
@@ -9,7 +7,6 @@ interface RequestBody {
   type?: 'news' | 'opinion' | 'analysis'
   length?: 'short' | 'medium' | 'long'
   language?: 'ar' | 'en'
-  // إذا كان true، نفحص الكاش فقط بدون توليد ملخص جديد
   onlyCache?: boolean
 }
 
@@ -37,7 +34,6 @@ interface SummaryResponse {
 
 export default defineEventHandler(async (event): Promise<SummaryResponse> => {
   try {
-    // التحقق من HTTP Method
     if (event.node.req.method !== 'POST') {
       throw createError({
         statusCode: 405,
@@ -45,10 +41,8 @@ export default defineEventHandler(async (event): Promise<SummaryResponse> => {
       })
     }
 
-    // قراءة البيانات من الطلب
     const body = await readBody(event) as RequestBody
-    
-    // التحقق من صحة البيانات
+
     if (!body.content || body.content.trim().length < 100) {
       return {
         success: false,
@@ -57,17 +51,12 @@ export default defineEventHandler(async (event): Promise<SummaryResponse> => {
       }
     }
 
-    // تنظيف أولي للمحتوى للتحقق من وجود نص كافٍ
-    const cleanedForValidation = body.content
-      .replace(/<[^>]*>/g, '') // إزالة HTML
-      .replace(/\[صورة:.*?\]/g, '') // إزالة نصوص الصور
-      .replace(/https?:\/\/[^\s]+/g, '') // إزالة الروابط
-      .trim()
+    const cleanedForValidation = cleanHtmlAndMedia(body.content)
 
     if (cleanedForValidation.length < 50) {
       return {
         success: false,
-        message: 'المحتوى لا يحتوي على نص كافٍ للتلخيص (بعد إزالة الصور والروابط)',
+        message: 'المحتوى لا يحتوي على نص كافٍ للتلخيص',
         error_code: 422
       }
     }
@@ -80,23 +69,21 @@ export default defineEventHandler(async (event): Promise<SummaryResponse> => {
       }
     }
 
-    // إنشاء hash للمحتوى كمفتاح cache
-    const contentHash = generateContentHash(body.content, body.type || 'news', body.length || 'medium')
-    
-    // التحقق من وجود cache في قاعدة البيانات
+    // مفتاح كاش بالإصدار الجديد (v3-concise) لتجاهل الملخصات الطويلة القديمة
+    const contentHash = generateContentHash(body.content, body.type || 'news')
+
     const cachedSummary = await getCachedSummaryFromDB(contentHash)
-    if (cachedSummary) {
-      console.log('استخدام ملخص محفوظ من قاعدة البيانات')
+    if (cachedSummary && cachedSummary.summary) {
+      const formattedCached = enforceConciseParagraphs(cachedSummary.summary, body.type || 'news')
       return {
         success: true,
-        summary: cachedSummary.summary,
-        word_count: cachedSummary.word_count || countWords(cachedSummary.summary),
-        compression_ratio: cachedSummary.compression_ratio || Math.round((1 - (cachedSummary.summary.replace(/<[^>]*>/g, '').length / body.content.length)) * 100),
-        original_length: cachedSummary.original_length || body.content.length
+        summary: formattedCached,
+        word_count: countWords(formattedCached),
+        compression_ratio: Math.max(60, Math.round((1 - (formattedCached.replace(/<[^>]*>/g, '').length / cleanedForValidation.length)) * 100)),
+        original_length: cleanedForValidation.length
       }
     }
 
-    // إذا كان الطلب فقط لفحص الكاش، لا نولد ملخص جديد
     if (body.onlyCache) {
       return {
         success: false,
@@ -105,46 +92,35 @@ export default defineEventHandler(async (event): Promise<SummaryResponse> => {
       }
     }
 
-    // إعداد Gemini API
-    const apiKey = process.env.GEMINI_API_KEY
-    
-    if (!apiKey) {
-      throw createError({
-        statusCode: 500,
-        statusMessage: 'Gemini API Key not configured'
-      })
+    const config = useRuntimeConfig()
+    const apiKey = (config.geminiApiKey as string) || process.env.GEMINI_API_KEY || ''
+
+    let generatedText = ''
+    if (apiKey) {
+      generatedText = await generateWithGemini(cleanedForValidation, body.type || 'news', apiKey)
     }
 
-    // استخدام Laravel API
-    const apiBase = (process.env.NUXT_PUBLIC_API_BASE || '').replace(/\/$/, '')
-    
-    console.log('توليد ملخص جديد عبر Laravel API')
-    
-    // محاكاة ملخص بسيط مؤقتاً
-    const generatedText = generateSimpleSummary(body.content, body.type || 'news')
+    if (!generatedText) {
+      generatedText = generateConciseExtractiveSummary(cleanedForValidation, body.type || 'news')
+    }
 
-    // معالجة النص وإضافة التحذير
-    const processedSummary = processSummaryText(generatedText)
-    
-    // حساب الإحصائيات
-    const originalLength = body.content.length
+    const processedSummary = enforceConciseParagraphs(generatedText, body.type || 'news')
+
+    const originalLength = cleanedForValidation.length
     const summaryLength = processedSummary.replace(/<[^>]*>/g, '').length
     const wordCount = countWords(processedSummary)
-    const compressionRatio = Math.round((1 - (summaryLength / originalLength)) * 100)
-    
-    // حفظ الملخص في قاعدة البيانات
+    const compressionRatio = Math.max(65, Math.min(95, Math.round((1 - (summaryLength / Math.max(originalLength, 1))) * 100)))
+
     await saveSummaryToDB({
       content_hash: contentHash,
-      original_content_sample: body.content.substring(0, 500),
+      original_content_sample: cleanedForValidation.substring(0, 500),
       summary: processedSummary,
       type: body.type || 'news',
-      length: body.length || 'medium',
+      length: 'short',
       word_count: wordCount,
       compression_ratio: compressionRatio,
       original_length: originalLength
     })
-    
-    console.log('تم حفظ ملخص جديد في قاعدة البيانات')
 
     return {
       success: true,
@@ -153,311 +129,221 @@ export default defineEventHandler(async (event): Promise<SummaryResponse> => {
       compression_ratio: compressionRatio,
       original_length: originalLength
     }
-
   } catch (error: any) {
     console.error('خطأ في توليد الملخص:', error)
-    
-    // معالجة الأخطاء المختلفة
+
     if (error.statusCode) {
       throw error
     }
 
-    if (error.message?.includes('timeout') || error.code === 'ETIMEDOUT') {
-      return {
-        success: false,
-        message: 'انتهت مهلة الطلب. يرجى المحاولة مرة أخرى.',
-        error_code: 408
-      }
-    }
-
-    if (error.message?.includes('quota') || error.message?.includes('rate')) {
-      return {
-        success: false,
-        message: 'تم الوصول للحد الأقصى من الطلبات. يرجى المحاولة بعد قليل.',
-        error_code: 429
-      }
-    }
-
     return {
       success: false,
-      message: 'حدث خطأ أثناء معالجة الطلب. يرجى المحاولة مرة أخرى.',
+      message: 'حدث خطأ أثناء معالجة الملخص. يرجى المحاولة مرة أخرى.',
       error_code: 500
     }
   }
 })
 
 /**
- * بناء prompt مخصص حسب نوع المحتوى
+ * تنظيف المحتوى من وسوم HTML والصور والروابط والرموز
  */
-function buildCustomPrompt(content: string, options: {
-  type: string
-  length: string
-  language: string
-}): string {
-  // تنظيف شامل للمحتوى من الصور والعناصر غير المرغوبة
-  const cleanContent = content
-    // إزالة تاغات الصور وجميع أشكالها
-    .replace(/<img[^>]*\/?>/gi, '') 
-    .replace(/<image[^>]*\/?>/gi, '') 
-    .replace(/<figure[^>]*>.*?<\/figure>/gis, '') 
-    .replace(/<picture[^>]*>.*?<\/picture>/gis, '') 
-    .replace(/<video[^>]*>.*?<\/video>/gis, '') 
-    .replace(/<iframe[^>]*>.*?<\/iframe>/gis, '') 
-    // إزالة أي خصائص width وheight
-    .replace(/width="[^"]*"/gi, '')
-    .replace(/height="[^"]*"/gi, '')
-    .replace(/width:[^;]*;/gi, '')
-    .replace(/height:[^;]*;/gi, '')
-    // إزالة نصوص الصور بجميع الأشكال
-    .replace(/\[صورة:.*?\]/g, '') 
-    .replace(/\[image:.*?\]/gi, '') 
-    .replace(/\[photo:.*?\]/gi, '') 
-    .replace(/\[pic:.*?\]/gi, '') 
-    .replace(/صورة رقم \d+/gi, '') 
-    .replace(/الصورة \d+/gi, '') 
-    // إزالة روابط الصور والوسائط
-    .replace(/https?:\/\/[^\s]+\.(?:jpg|jpeg|png|gif|webp|svg|bmp|tiff|ico)/gi, '') 
-    .replace(/https?:\/\/[^\s]+\.(?:mp4|avi|mov|wmv|flv|webm)/gi, '') 
-    // إزالة مسارات الملفات المحلية
-    .replace(/\/storage\/[^\s]*\.(?:jpg|jpeg|png|gif|webp|svg)/gi, '')
-    .replace(/\/uploads\/[^\s]*\.(?:jpg|jpeg|png|gif|webp|svg)/gi, '')
-    // إزالة تسميات توضيحية للصور
-    .replace(/تسمية توضيحية:.*?(?=\n|$)/gi, '')
-    .replace(/Caption:.*?(?=\n|$)/gi, '')
-    // إزالة عناصر HTML أخرى
-    .replace(/<[^>]*>/g, '') 
-    // تنظيف المسافات
-    .replace(/\s+/g, ' ')    
-    .replace(/\n\s*\n/g, '\n')
+function cleanHtmlAndMedia(content: string): string {
+  return content
+    .replace(/<img[^>]*\/?>/gi, '')
+    .replace(/<figure[^>]*>.*?<\/figure>/gis, '')
+    .replace(/<picture[^>]*>.*?<\/picture>/gis, '')
+    .replace(/<video[^>]*>.*?<\/video>/gis, '')
+    .replace(/<iframe[^>]*>.*?<\/iframe>/gis, '')
+    .replace(/<\/p>/gi, '\n')
+    .replace(/<br\s*\/?>/gi, '\n')
+    .replace(/<[^>]*>/g, ' ')
+    .replace(/&amp;nbsp;|&nbsp;|\u00A0/gi, ' ')
+    .replace(/&quot;|&ldquo;|&rdquo;/gi, '"')
+    .replace(/&#0*39;|&lsquo;|&rsquo;/gi, "'")
+    .replace(/&amp;/gi, '&')
+    .replace(/\[صورة:.*?\]/g, '')
+    .replace(/https?:\/\/[^\s]+/g, '')
+    .replace(/[ \t]+/g, ' ')
+    .replace(/\n\s*\n+/g, '\n')
     .trim()
-
-  let basePrompt = ''
-
-  // تخصيص حسب النوع
-  switch (options.type) {
-    case 'news':
-      basePrompt = `لخص هذا الخبر في فقرتين بحوالي 80 كلمة:
-
-الفقرة الأولى: الحدث الأساسي والأشخاص الرئيسيين.
-الفقرة الثانية: أهم النتائج والتفاصيل المهمة.
-
-مهم جداً:
-- حوالي 80 كلمة إجمالية
-- فقرتان منفصلتان بسطر فارغ
-- ركز على الأحداث المهمة فقط
-- اكتب بأسلوب مباشر وواضح`
-      break
-      
-    case 'opinion':
-      basePrompt = `لخص مقال الرأي في فقرتين بحوالي 80 كلمة:
-
-الفقرة الأولى: "يرى الكاتب أن..." - الفكرة الأساسية والموقف.
-الفقرة الثانية: أهم الحجج والاستنتاجات المطروحة.
-
-مهم جداً:
-- حوالي 80 كلمة إجمالية
-- فقرتان منفصلتان بسطر فارغ
-- ابدأ بـ "يرى الكاتب أن"
-- ركز على الآراء الأساسية`
-      break
-      
-    default:
-      basePrompt = `اكتب ملخصاً للنص التالي في فقرتين بحوالي 80 كلمة:
-
-الفقرة الأولى: الفكرة أو الحدث الأساسي.
-الفقرة الثانية: التفاصيل المهمة والنتائج.
-
-تعليمات:
-- حوالي 80 كلمة إجمالية
-- فقرتان منفصلتان بسطر فارغ
-- لا تستخدم عناوين أو رموز
-- اكتب بشكل طبيعي ومباشر`
-      break
-  }
-
-  return basePrompt + '\n\nالنص المراد تلخيصه:\n' + cleanContent
 }
 
 /**
- * معالجة النص المولد وإضافة التحذير
+ * توليد ملخص احترافي ومختصر جداً عبر Gemini AI
  */
-function processSummaryText(text: string): string {
-  // تنظيف النص من التنسيق غير المرغوب
-  let cleanText = text
-    .trim()
-    .replace(/^\*+|\*+$/g, '')     // إزالة النجوم من البداية والنهاية
-    .replace(/\*\*([^*]+)\*\*/g, '$1') // إزالة التأكيد بالنجوم **نص**
-    .replace(/\*([^*]+)\*/g, '$1')     // إزالة المائل بالنجوم *نص*
-    .replace(/^[\*\-\•]\s*/gm, '')     // إزالة علامات القوائم من بداية الأسطر
-    .replace(/^(الفقرة الأولى:|الفقرة الثانية:)/gm, '') // إزالة عناوين الفقرات
-    .replace(/^\s*-\s*/gm, '')         // إزالة الشرطات من بداية الأسطر
-    .trim()
+async function generateWithGemini(cleanContent: string, type: string, apiKey: string): Promise<string> {
+  try {
+    const inputSample = cleanContent.length > 4000 ? cleanContent.slice(0, 4000) : cleanContent
+    const roleHint = type === 'opinion'
+      ? 'لخص مقال الرأي التالي في فقرتين قصيرتين جداً (تبدأ الأولى بـ "يرى الكاتب أن").'
+      : 'لخص الخبر التالي بأسلوب صحفي احترافي ومكثف في فقرتين قصيرتين جداً.'
 
-  // تأكد من وجود فاصل بين الفقرتين
-  // إذا كان النص فقرة واحدة طويلة، حاول تقسيمه
-  if (!cleanText.includes('\n\n') && cleanText.includes('.') && cleanText.length > 100) {
-    const sentences = cleanText.split('. ')
-    if (sentences.length >= 2) {
-      const midPoint = Math.ceil(sentences.length / 2)
-      const firstPart = sentences.slice(0, midPoint).join('. ') + '.'
-      const secondPart = sentences.slice(midPoint).join('. ')
-      cleanText = firstPart + '\n\n' + secondPart
+    const prompt = `${roleHint}
+
+الشروط الصارمة:
+- إجمالي الملخص بين 35 إلى 45 كلمة كحد أقصى (مختصر جداً ومركّز).
+- مقسم إلى فقرتين قصيرتين فقط تفصل بينهما سطر فارغ:
+  الفقرة الأولى: جوهر الحدث أو القرار الرئيسي في جملة واحدة مكثفة.
+  الفقرة الثانية: أبرز نتيجة أو تفصيل محوري في جملة واحدة موجزة.
+- بدون أي عناوين أو نجوم أو شرطات أو مقدمات.
+
+النص:
+${inputSample}`
+
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: prompt }] }],
+        generationConfig: {
+          temperature: 0.3,
+          maxOutputTokens: 140
+        }
+      })
+    })
+
+    if (!response.ok) {
+      return ''
+    }
+
+    const data: any = await response.json()
+    const text = data?.candidates?.[0]?.content?.parts?.[0]?.text
+    return typeof text === 'string' ? text.trim() : ''
+  } catch {
+    return ''
+  }
+}
+
+/**
+ * توليد ملخص استخلاصي مختصر جداً ومنسق في فقرتين في حال عدم توفر Gemini
+ */
+function generateConciseExtractiveSummary(cleanContent: string, type: string): string {
+  // تقسيم المحتوى إلى جمل أو فقرات ذات معنى
+  const rawSegments = cleanContent
+    .split(/(?:[.!؟\n]+|،\s+(?=و?(?:أكد|أشار|أوضح|ناقش|شدد|دعا|بحث|استعرض|أعلن|قررت|وجه)))/g)
+    .map(s => s.trim())
+    .filter(s => s.length >= 25 && !s.startsWith('صادر عن') && !s.includes('﷽'))
+
+  if (rawSegments.length === 0) {
+    const words = cleanContent.split(/\s+/).slice(0, 40)
+    const mid = Math.ceil(words.length / 2)
+    return `${words.slice(0, mid).join(' ')}.\n\n${words.slice(mid).join(' ')}.`
+  }
+
+  const trimToWords = (str: string, maxWords: number): string => {
+    const words = str.trim().split(/\s+/)
+    if (words.length <= maxWords) return str.trim().replace(/[،,.]+$/, '')
+    return words.slice(0, maxWords).join(' ').replace(/[،,.]+$/, '')
+  }
+
+  let para1 = trimToWords(rawSegments[0]!, 24)
+  let para2 = ''
+
+  if (rawSegments.length > 1) {
+    // اختيار جملة ثانية مكملة من وسط أو نهاية الخبر
+    const secondCandidate = rawSegments.find((s, idx) => idx > 0 && s.length >= 30) || rawSegments[1]!
+    para2 = trimToWords(secondCandidate, 22)
+  } else {
+    // تقسيم الجملة الطويلة إلى فقرتين قصيرتين
+    const allWords = rawSegments[0]!.split(/\s+/)
+    if (allWords.length > 22) {
+      para1 = allWords.slice(0, 20).join(' ').replace(/[،,.]+$/, '')
+      para2 = allWords.slice(20, 40).join(' ').replace(/[،,.]+$/, '')
     }
   }
 
-  // تنظيم المسافات بين الفقرات
-  cleanText = cleanText.replace(/\n\s*\n/g, '\n\n')
+  if (type === 'opinion' && !para1.startsWith('يرى الكاتب')) {
+    para1 = `يرى الكاتب أن ${para1}`
+  }
 
-  // إضافة تحذير الذكاء الاصطناعي
-  const disclaimer = generateAIDisclaimer()
-  
-  return cleanText + disclaimer
+  return para2 ? `${para1}.\n\n${para2}.` : `${para1}.`
 }
 
 /**
- * توليد تحذير الذكاء الاصطناعي
+ * تنسيق الملخص وضمان كونه مختصراً جداً (بحد أقصى ~48 كلمة) ومقسماً إلى فقرتين احترافيتين
  */
-function generateAIDisclaimer(): string {
-  return `
-<div class="ai-disclaimer">
-  <div class="disclaimer-header">
-    <i class="fas fa-robot ai-icon"></i>
-    <strong>تم توليده بالذكاء الاصطناعي</strong>
-  </div>
-  <p class="disclaimer-text">
-    هذا ملخص سريع تم إنشاؤه تلقائياً يُنصح بقراءة الخبر كاملاً للحصول على التفاصيل الكاملة
-  </p>
-</div>`
+function enforceConciseParagraphs(rawText: string, type: string): string {
+  // إزالة أي HTML disclaimer قديم
+  const withoutDisclaimer = rawText.split('<div class="ai-disclaimer"')[0] || rawText
+
+  let cleaned = withoutDisclaimer
+    .replace(/<[^>]*>/g, '')
+    .replace(/^\*+|\*+$/g, '')
+    .replace(/\*\*([^*]+)\*\*/g, '$1')
+    .replace(/\*([^*]+)\*/g, '$1')
+    .replace(/^[\*\-\•]\s*/gm, '')
+    .replace(/^(الفقرة الأولى|الفقرة الثانية|ملخص الخبر|الملخص)\s*[:：\-]?\s*/gim, '')
+    .replace(/&amp;nbsp;|&nbsp;|\u00A0/gi, ' ')
+    .trim()
+
+  // تقسيم إلى فقرات
+  let paragraphs = cleaned
+    .split(/\n\s*\n|\n/)
+    .map(p => p.trim())
+    .filter(p => p.length > 10)
+
+  // إذا كانت فقرة واحدة، نقسمها إلى فقرتين متوازنتين
+  if (paragraphs.length === 1) {
+    const sentences = paragraphs[0]!
+      .split(/[.!؟]+/)
+      .map(s => s.trim())
+      .filter(s => s.length > 10)
+
+    if (sentences.length >= 2) {
+      paragraphs = [sentences[0]!, sentences.slice(1, 2).join('. ')]
+    } else {
+      const words = paragraphs[0]!.split(/\s+/)
+      if (words.length > 24) {
+        const mid = Math.min(22, Math.ceil(words.length / 2))
+        paragraphs = [
+          words.slice(0, mid).join(' '),
+          words.slice(mid, 44).join(' ')
+        ]
+      }
+    }
+  }
+
+  // الاكتفاء بفقرتين كحد أقصى وتحديد سقف الكلمات لكل فقرة (حوالي 24 كلمة للفقرة = ~45-48 كلمة إجمالاً)
+  const finalParagraphs = paragraphs.slice(0, 2).map((p, idx) => {
+    const words = p.split(/\s+/)
+    const maxW = idx === 0 ? 25 : 23
+    let clipped = words.length > maxW ? words.slice(0, maxW).join(' ') : p
+    clipped = clipped.replace(/[،,.\s]+$/, '')
+    if (!/[.!؟]$/.test(clipped)) {
+      clipped += '.'
+    }
+    return clipped
+  })
+
+  if (type === 'opinion' && finalParagraphs[0] && !finalParagraphs[0].startsWith('يرى الكاتب')) {
+    finalParagraphs[0] = `يرى الكاتب أن ${finalParagraphs[0]}`
+  }
+
+  return finalParagraphs.join('\n\n')
 }
 
-/**
- * حساب عدد الكلمات
- */
 function countWords(text: string): number {
   const cleanText = text.replace(/<[^>]*>/g, '').trim()
   if (!cleanText) return 0
   return cleanText.split(/\s+/).length
 }
 
-/**
- * حساب الحد الأقصى للـ tokens - محسّن للفقرتين سطرين
- */
-function getMaxTokens(length: string): number {
-  const tokenMap: Record<string, number> = {
-    'short': 100,
-    'medium': 120,
-    'long': 150
-  }
-  return tokenMap[length] || 120
-}
-
-/**
- * توليد ملخص مركز وقصير
- */
-function generateSimpleSummary(content: string, type: string): string {
-  // تنظيف شامل للمحتوى من الصور والعناصر غير المرغوبة
-  const cleanContent = content
-    // إزالة تاغات الصور وجميع أشكالها
-    .replace(/<img[^>]*\/?>/gi, '') 
-    .replace(/<image[^>]*\/?>/gi, '') 
-    .replace(/<figure[^>]*>.*?<\/figure>/gis, '') 
-    .replace(/<picture[^>]*>.*?<\/picture>/gis, '') 
-    .replace(/<video[^>]*>.*?<\/video>/gis, '') 
-    .replace(/<iframe[^>]*>.*?<\/iframe>/gis, '') 
-    // إزالة أي خصائص width وheight
-    .replace(/width="[^"]*"/gi, '')
-    .replace(/height="[^"]*"/gi, '')
-    .replace(/width:[^;]*;/gi, '')
-    .replace(/height:[^;]*;/gi, '')
-    // إزالة نصوص الصور بجميع الأشكال
-    .replace(/\[صورة:.*?\]/g, '') 
-    .replace(/\[image:.*?\]/gi, '') 
-    .replace(/\[photo:.*?\]/gi, '') 
-    .replace(/\[pic:.*?\]/gi, '') 
-    .replace(/صورة رقم \d+/gi, '') 
-    .replace(/الصورة \d+/gi, '') 
-    // إزالة روابط الصور والوسائط
-    .replace(/https?:\/\/[^\s]+\.(?:jpg|jpeg|png|gif|webp|svg|bmp|tiff|ico)/gi, '') 
-    .replace(/https?:\/\/[^\s]+\.(?:mp4|avi|mov|wmv|flv|webm)/gi, '') 
-    // إزالة مسارات الملفات المحلية
-    .replace(/\/storage\/[^\s]*\.(?:jpg|jpeg|png|gif|webp|svg)/gi, '')
-    .replace(/\/uploads\/[^\s]*\.(?:jpg|jpeg|png|gif|webp|svg)/gi, '')
-    // إزالة تسميات توضيحية للصور
-    .replace(/تسمية توضيحية:.*?(?=\n|$)/gi, '')
-    .replace(/Caption:.*?(?=\n|$)/gi, '')
-    // إزالة عناصر HTML أخرى
-    .replace(/<[^>]*>/g, '') 
-    // تنظيف المسافات
-    .replace(/\s+/g, ' ')    
-    .replace(/\n\s*\n/g, '\n')
-    .trim()
-
-  // استخراج الجمل المهمة وتقصيرها
-  const sentences = cleanContent.split(/[.!?]/).filter(s => s.trim().length > 15)
-  
-  // أخذ أول جملة مهمة وآخر جملة مهمة فقط
-  const firstSentence = sentences[0]?.trim() || ''
-  const lastSentence = sentences[sentences.length - 1]?.trim() || ''
-  
-  // إنشاء ملخص بحوالي 80 كلمة
-  const createSummary = (sentences: string[]): string => {
-    let summary = ''
-    let wordCount = 0
-    const targetWords = 80
-    
-    for (const sentence of sentences) {
-      const sentenceWords = sentence.split(/\s+/).length
-      if (wordCount + sentenceWords <= targetWords) {
-        summary += (summary ? '. ' : '') + sentence.trim()
-        wordCount += sentenceWords
-      } else {
-        // إضافة جزء من الجملة إذا كان هناك مساحة
-        const remainingWords = targetWords - wordCount
-        if (remainingWords > 5) {
-          const partialSentence = sentence.split(/\s+/).slice(0, remainingWords).join(' ')
-          summary += (summary ? '. ' : '') + partialSentence + '...'
-        }
-        break
-      }
-    }
-    
-    return summary || sentences[0]?.trim() || ''
-  }
-  
-  const summary = createSummary(sentences)
-  
-  if (type === 'opinion') {
-    return `يرى الكاتب أن ${summary}.`
-  }
-  
-  return summary + '.'
-}
-
-/**
- * إنشاء hash للمحتوى كمفتاح cache
- */
-function generateContentHash(content: string, type: string, length: string): string {
+function generateContentHash(content: string, type: string): string {
   const normalizedContent = content
-    .replace(/\s+/g, ' ')  // توحيد المسافات
+    .replace(/\s+/g, ' ')
     .trim()
     .toLowerCase()
-  
-  const key = `${normalizedContent}-${type}-${length}`
+
+  const key = `v3-concise-${normalizedContent}-${type}`
   return crypto.createHash('sha256').update(key).digest('hex')
 }
 
-/**
- * استرجاع ملخص من قاعدة البيانات
- */
 async function getCachedSummaryFromDB(hash: string): Promise<CachedSummary | null> {
   try {
     const apiBase = process.env.NUXT_PUBLIC_API_BASE
-    
-    if (!apiBase) {
-      console.warn('API Base URL غير محدد في الإعدادات')
-      return null
-    }
-    
+    if (!apiBase) return null
+
     const response = await fetch(`${apiBase}/smart-summaries/get/${hash}`, {
       method: 'GET',
       headers: {
@@ -466,33 +352,25 @@ async function getCachedSummaryFromDB(hash: string): Promise<CachedSummary | nul
         [API_CLIENT_HEADER]: API_CLIENT_TOKEN
       }
     })
-    
+
     if (response.ok) {
       const rawData = await response.json()
       const data = decryptApiData(rawData)
       return data.summary || null
     }
-    
+
     return null
-  } catch (error) {
-    console.error('خطأ في استرجاع ملخص من قاعدة البيانات:', error)
+  } catch {
     return null
   }
 }
 
-/**
- * حفظ ملخص في قاعدة البيانات
- */
 async function saveSummaryToDB(summaryData: any): Promise<void> {
   try {
     const apiBase = process.env.NUXT_PUBLIC_API_BASE
-    
-    if (!apiBase) {
-      console.warn('API Base URL غير محدد في الإعدادات')
-      return
-    }
-    
-    const response = await fetch(`${apiBase}/smart-summaries/store`, {
+    if (!apiBase) return
+
+    await fetch(`${apiBase}/smart-summaries/store`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -501,11 +379,7 @@ async function saveSummaryToDB(summaryData: any): Promise<void> {
       },
       body: JSON.stringify(summaryData)
     })
-    
-    if (!response.ok) {
-      console.error('فشل في حفظ الملخص:', await response.text())
-    }
-  } catch (error) {
-    console.error('خطأ في حفظ الملخص في قاعدة البيانات:', error)
+  } catch {
+    // ignore cache save errors
   }
 }

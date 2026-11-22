@@ -1,58 +1,129 @@
 <template>
-  <div class="smart-summary-container">
-    <!-- زر توليد الملخص -->
-    <div class="summary-button-container">
-      <!-- زر توليد الملخص -->
-      <button 
+  <div class="smart-summary-wrapper" dir="rtl">
+    <!-- شريط زر الملخص الذكي -->
+    <div class="summary-trigger-bar">
+      <button
+        type="button"
         @click="generateSummary"
         :disabled="isGenerating || !props.content"
-        class="smart-summary-button"
+        class="smart-summary-btn"
+        :class="{ 'is-active': showSummary && currentSummary, 'is-loading': isGenerating }"
       >
-        <i :class="getButtonIcon"></i>
-        <span v-if="isGenerating">جاري التوليد...</span>
-        <span v-else-if="currentSummary && showSummary">إخفاء الملخص</span>
-        <span v-else-if="currentSummary && !showSummary">إظهار الملخص</span>
-        <span v-else>ملخص سريع</span>
-        <div v-if="isGenerating" class="loading-dots">
-          <span></span><span></span><span></span>
-        </div>
+        <!-- أيقونة الذكاء الاصطناعي SVG -->
+        <span class="btn-icon-wrap">
+          <svg
+            v-if="isGenerating"
+            class="icon-svg spin-anim"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+          >
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+          </svg>
+          <svg
+            v-else-if="currentSummary && showSummary"
+            class="icon-svg"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+          >
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+          </svg>
+          <svg
+            v-else
+            class="icon-svg sparkle-anim"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+          >
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+          </svg>
+        </span>
+
+        <span class="btn-label">
+          <template v-if="isGenerating">جاري تلخيص الخبر...</template>
+          <template v-else-if="currentSummary && showSummary">إخفاء الملخص الذكي</template>
+          <template v-else-if="currentSummary && !showSummary">عرض الملخص الذكي</template>
+          <template v-else>ملخص ذكي وموجز للخبر</template>
+        </span>
+
+        <span class="ai-pill-badge">AI</span>
       </button>
     </div>
 
-    <!-- تم حذف مؤشر التحميل -->
+    <!-- بطاقة عرض الملخص الاحترافية -->
+    <transition name="summary-fade">
+      <div v-if="showSummary && summaryParagraphs.length > 0" class="summary-card">
+        <!-- رأس البطاقة -->
+        <div class="summary-card-header">
+          <div class="header-right">
+            <div class="header-icon-box">
+              <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+              </svg>
+            </div>
+            <div>
+              <h3 class="header-title">خلاصة الخبر بالذكاء الاصطناعي</h3>
+              <p class="header-subtitle">ملخص صحفي مكثف لأهم ما ورد في الخبر</p>
+            </div>
+          </div>
 
-    <!-- عرض الملخص -->
-    <div v-if="showSummary && currentSummary" class="summary-result">
-      <div class="summary-header">
-        <h3 class="summary-title">
-          <i class="fas fa-file-alt summary-icon"></i>
-          الملخص
-        </h3>
-      </div>
-
-      <!-- محتوى الملخص -->
-      <div class="summary-content">
-        <div v-if="isTyping" class="typing-effect">
-          <span>{{ typedSummary }}</span>
-          <span class="typing-cursor">|</span>
+          <div class="header-actions">
+            <button
+              type="button"
+              @click="copySummaryText"
+              class="action-copy-btn"
+              :title="copied ? 'تم النسخ' : 'نسخ الملخص'"
+            >
+              <svg v-if="!copied" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+              </svg>
+              <svg v-else class="w-4 h-4 text-emerald-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+              </svg>
+              <span>{{ copied ? 'تم النسخ' : 'نسخ' }}</span>
+            </button>
+          </div>
         </div>
-        <div v-else v-html="processedSummary" class="summary-text"></div>
-      </div>
 
-      <!-- تحذير الذكاء الاصطناعي -->
-      <div v-html="aiDisclaimer" class="ai-disclaimer"></div>
-    </div>
+        <!-- جسم الملخص: فقرات منسقة ومختصرة -->
+        <div class="summary-card-body">
+          <div class="paragraphs-list">
+            <div
+              v-for="(paragraph, idx) in displayedParagraphs"
+              :key="idx"
+              class="summary-paragraph-item"
+            >
+              <span class="paragraph-bullet" :class="idx === 0 ? 'bullet-primary' : 'bullet-secondary'"></span>
+              <p class="paragraph-text">
+                {{ paragraph }}
+                <span v-if="isTyping && idx === displayedParagraphs.length - 1" class="typing-cursor">|</span>
+              </p>
+            </div>
+          </div>
+
+          <!-- تذييل البطاقة (تنويه الذكاء الاصطناعي) -->
+          <div class="summary-card-footer">
+            <div class="footer-note">
+              <svg class="footer-info-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <span>تم توليد هذا الملخص الموجز آلياً لتقديم نظرة سريعة، وللتفاصيل الكاملة يُرجى قراءة نص الخبر أدناه.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </transition>
 
     <!-- رسائل الخطأ -->
-    <div v-if="error" class="error-container">
-      <div class="error-content">
-        <i class="fas fa-exclamation-triangle error-icon"></i>
-        <div class="error-text">
-          <h4 class="error-title">حدث خطأ</h4>
-          <p class="error-message">{{ error }}</p>
-        </div>
-        <button @click="clearError" class="error-close">
-          <i class="fas fa-times"></i>
+    <div v-if="error" class="summary-error-box">
+      <div class="error-inner">
+        <svg class="error-svg" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <p class="error-msg">{{ error }}</p>
+        <button type="button" @click="clearError" class="error-dismiss" aria-label="إغلاق">
+          ✕
         </button>
       </div>
     </div>
@@ -77,80 +148,134 @@ interface SummaryData {
 
 const props = withDefaults(defineProps<Props>(), {
   type: 'news',
-  length: 'medium',
+  length: 'short',
   autoGenerate: false
 })
 
-// تم حذف refs غير المستخدمة
-
-// State
 const currentSummary = ref('')
 const summaryData = ref<SummaryData>()
 const isGenerating = ref(false)
 const showSummary = ref(false)
 const error = ref('')
 const isTyping = ref(false)
-const typedSummary = ref('')
+const typedCharsCount = ref(0)
 const hasUsedSummary = ref(false)
-const startTime = ref(0)
-const generationTime = ref(0)
+const copied = ref(false)
 
-// تم حذف loading animation
+/**
+ * تقسيم الملخص وتنسيقه إلى فقرتين قصيرتين ومختصرتين
+ */
+const summaryParagraphs = computed<string[]>(() => {
+  if (!currentSummary.value) return []
 
-// Computed
-const hasSummary = computed(() => !!currentSummary.value)
+  // فصل المحتوى عن أي تحذير قديم مضمن
+  const raw = (currentSummary.value.split('<div class="ai-disclaimer"')[0] || '')
+    .replace(/<[^>]*>/g, '')
+    .replace(/&amp;nbsp;|&nbsp;|\u00A0/gi, ' ')
+    .replace(/^(الفقرة الأولى|الفقرة الثانية|ملخص الخبر|الملخص)\s*[:：\-]?\s*/gim, '')
+    .trim()
 
-const processedSummary = computed(() => {
-  if (!currentSummary.value) return ''
-  
-  // فصل المحتوى عن التحذير
-  const parts = currentSummary.value.split('<div class=\"ai-disclaimer\"')
-  return parts[0]?.trim() || ''
+  if (!raw) return []
+
+  let parts = raw
+    .split(/\n\s*\n|\n/)
+    .map(p => p.trim())
+    .filter(p => p.length > 8)
+
+  if (parts.length === 1) {
+    const sentences = parts[0]!
+      .split(/[.!؟]+/)
+      .map(s => s.trim())
+      .filter(s => s.length > 10)
+
+    if (sentences.length >= 2) {
+      parts = [sentences[0]!, sentences.slice(1, 2).join('. ')]
+    } else {
+      const words = parts[0]!.split(/\s+/)
+      if (words.length > 24) {
+        const mid = Math.min(22, Math.ceil(words.length / 2))
+        parts = [words.slice(0, mid).join(' '), words.slice(mid, 44).join(' ')]
+      }
+    }
+  }
+
+  // ضمان الاختصار الشديد (فقرتان قصيرتان بحد أقصى ~24 كلمة لكل فقرة)
+  return parts.slice(0, 2).map((p, idx) => {
+    const words = p.split(/\s+/)
+    const maxWords = idx === 0 ? 25 : 23
+    let text = words.length > maxWords ? words.slice(0, maxWords).join(' ') : p
+    text = text.replace(/[،,.\s]+$/, '')
+    if (!/[.!؟]$/.test(text)) {
+      text += '.'
+    }
+    return text
+  })
 })
 
-const aiDisclaimer = computed(() => {
-  if (!currentSummary.value) return ''
-  
-  const parts = currentSummary.value.split('<div class="ai-disclaimer"')
-  return parts[1] ? '<div class="ai-disclaimer"' + parts[1] : ''
+/**
+ * الفقرات المعروضة أثناء وبعد تأثير الكتابة السلس
+ */
+const displayedParagraphs = computed<string[]>(() => {
+  if (!isTyping.value) {
+    return summaryParagraphs.value
+  }
+
+  const result: string[] = []
+  let remaining = typedCharsCount.value
+
+  for (const para of summaryParagraphs.value) {
+    if (remaining <= 0) break
+    if (remaining >= para.length) {
+      result.push(para)
+      remaining -= para.length
+    } else {
+      result.push(para.slice(0, remaining))
+      remaining = 0
+    }
+  }
+
+  return result.length > 0 ? result : ['']
 })
 
-const getButtonIcon = computed(() => {
-  if (isGenerating.value) return 'fas fa-brain fa-spin'
-  if (currentSummary.value && showSummary.value) return 'fas fa-eye-slash'
-  if (currentSummary.value && !showSummary.value) return 'fas fa-database'
-  return 'fas fa-brain'
-})
+const startTypingEffect = async () => {
+  const totalChars = summaryParagraphs.value.reduce((acc, p) => acc + p.length, 0)
+  if (totalChars === 0) return
 
-// API Service
-const config = useRuntimeConfig()
+  isTyping.value = true
+  typedCharsCount.value = 0
+
+  const step = Math.max(2, Math.ceil(totalChars / 45))
+  while (typedCharsCount.value < totalChars) {
+    typedCharsCount.value = Math.min(totalChars, typedCharsCount.value + step)
+    await new Promise(resolve => setTimeout(resolve, 16))
+  }
+
+  isTyping.value = false
+}
 
 const generateSummary = async () => {
   if (isGenerating.value) return
-  
-  // إذا كان الملخص موجود، فقط أظهره/أخفه
+
   if (currentSummary.value) {
     showSummary.value = !showSummary.value
     return
   }
-  
+
   try {
     isGenerating.value = true
     error.value = ''
-    startTime.value = Date.now()
-    
-    // استخدام Nuxt server API
+
     const payload = {
       content: props.content || '',
       type: props.type,
-      length: props.length
+      length: 'short'
     }
-    
+
     const result: any = await $fetch('/api/smart-summary/generate', {
       method: 'POST',
       body: payload
     })
-    
+
     if (result.success && result.summary) {
       summaryData.value = {
         summary: result.summary,
@@ -160,17 +285,12 @@ const generateSummary = async () => {
       }
       currentSummary.value = result.summary
       hasUsedSummary.value = true
-      generationTime.value = Math.round((Date.now() - startTime.value) / 1000)
-      
       showSummary.value = true
-      
-      // تشغيل تأثير الكتابة
-      await startTypingEffect(processedSummary.value)
-      
+
+      await startTypingEffect()
     } else {
       throw new Error(result.message || 'فشل في توليد الملخص')
     }
-    
   } catch (err: any) {
     console.error('خطأ في توليد الملخص:', err)
     error.value = getErrorMessage(err)
@@ -179,27 +299,16 @@ const generateSummary = async () => {
   }
 }
 
-const toggleSummary = () => {
-  if (hasSummary.value) {
-    showSummary.value = !showSummary.value
-  } else {
-    generateSummary()
-  }
-}
-
-// تم حذف دوال copySummary و regenerateSummary
-
-const shareSummary = () => {
-  if (navigator.share) {
-    navigator.share({
-      title: 'ملخص ذكي',
-      text: processedSummary.value,
-      url: window.location.href
-    })
-  } else {
-    // Fallback - نسخ رابط + ملخص
-    const shareText = `${processedSummary.value}\n\n${window.location.href}`
-    navigator.clipboard.writeText(shareText)
+const copySummaryText = async () => {
+  if (!process.client || !navigator.clipboard || summaryParagraphs.value.length === 0) return
+  try {
+    await navigator.clipboard.writeText(summaryParagraphs.value.join('\n\n'))
+    copied.value = true
+    setTimeout(() => {
+      copied.value = false
+    }, 2000)
+  } catch {
+    // ignore copy error
   }
 }
 
@@ -207,72 +316,31 @@ const clearError = () => {
   error.value = ''
 }
 
-// تم حذف startLoadingAnimation
-
-const startTypingEffect = async (text: string) => {
-  if (!text) return
-  
-  isTyping.value = true
-  typedSummary.value = ''
-  
-  const cleanText = text.replace(/<[^>]*>/g, '')
-  const speed = 15 // milliseconds per character - أسرع
-  
-  for (let i = 0; i <= cleanText.length; i++) {
-    typedSummary.value = cleanText.slice(0, i)
-    await new Promise(resolve => setTimeout(resolve, speed))
-  }
-  
-  isTyping.value = false
-}
-
 const getErrorMessage = (err: any) => {
   if (err.status === 408 || err.message?.includes('timeout')) {
     return 'استغرق الطلب وقتاً أطول من المتوقع. يرجى المحاولة مرة أخرى.'
   }
-  if (err.status === 429) {
-    return 'تم الوصول للحد الأقصى من الطلبات. يرجى المحاولة بعد قليل.'
-  }
   if (err.status === 422) {
-    return 'المحتوى غير صالح للتلخيص. يرجى التأكد من أن النص يحتوي على محتوى كافٍ.'
+    return 'المحتوى قصير جداً ولا يحتاج إلى تلخيص.'
   }
   return err.message || 'حدث خطأ غير متوقع. يرجى المحاولة مرة أخرى.'
 }
 
-// Auto-generate on mount if requested
-onMounted(async () => {
-  hasUsedSummary.value = localStorage.getItem('has_used_smart_summary') === 'true'
-  
-  if (props.content) {
-    // التحقق من وجود cache عبر Nuxt API (الذي يتكلم مع Laravel)
-    await checkForExistingSummary()
-  }
-  
-  if (props.autoGenerate && (props.content || props.articleId)) {
-    generateSummary()
-  }
-})
-
-
-// دالة للتحقق من وجود ملخص محفوظ (تعتمد على نفس Nuxt API المستخدم في التوليد)
 const checkForExistingSummary = async () => {
   if (!props.content) return
-  
-  try {
-    const payload = {
-      content: props.content || '',
-      type: props.type,
-      length: props.length,
-      onlyCache: true
-    }
 
+  try {
     const result: any = await $fetch('/api/smart-summary/generate', {
       method: 'POST',
-      body: payload
+      body: {
+        content: props.content || '',
+        type: props.type,
+        length: 'short',
+        onlyCache: true
+      }
     })
 
     if (result.success && result.summary) {
-
       currentSummary.value = result.summary
       summaryData.value = {
         summary: result.summary,
@@ -281,390 +349,343 @@ const checkForExistingSummary = async () => {
         original_length: result.original_length
       }
       hasUsedSummary.value = true
-      // لا نظهر الملخص تلقائياً، المستخدم يضغط الزر عند الحاجة
     }
-  } catch (error) {
-
+  } catch {
+    // لا يوجد ملخص محفوظ مسبقاً
   }
 }
 
-// Store usage in localStorage
 watchEffect(() => {
-  if (hasUsedSummary.value) {
+  if (hasUsedSummary.value && process.client) {
     localStorage.setItem('has_used_smart_summary', 'true')
   }
 })
 
-onMounted(() => {
-  hasUsedSummary.value = localStorage.getItem('has_used_smart_summary') === 'true'
+onMounted(async () => {
+  if (process.client) {
+    hasUsedSummary.value = localStorage.getItem('has_used_smart_summary') === 'true'
+  }
+
+  if (props.content) {
+    await checkForExistingSummary()
+  }
+
+  if (props.autoGenerate && (props.content || props.articleId)) {
+    generateSummary()
+  }
 })
 </script>
 
-<style>
-  /* الأساسي */
-  .smart-summary-container {
-    margin: 1.5rem 0;
-    direction: rtl;
-    text-align: right;
-    font-family: 'Azer', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  }
-
-  /* زر الملخص السريع - اللون #1e2a4a */
-  .smart-summary-button {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.75rem;
-    padding: 0.875rem 1.5rem;
-    background: #1e2a4a;
-    color: white;
-    border: none;
-    border-radius: 12px;
-    font-weight: 600;
-    font-size: 1rem;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    cursor: pointer;
-    box-shadow: 0 4px 12px rgba(30, 42, 74, 0.3);
-    position: relative;
-    overflow: hidden;
-    font-family: 'Azer', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  }
-
-  .smart-summary-button:hover:not(:disabled) {
-    background: #243355;
-    box-shadow: 0 6px 20px rgba(30, 42, 74, 0.4);
-    transform: translateY(-2px);
-  }
-
-  .smart-summary-button:disabled {
-    opacity: 0.8;
-    cursor: not-allowed;
-    transform: none;
-  }
-
-  .smart-summary-button:active {
-    transform: translateY(0);
-    box-shadow: 0 2px 8px rgba(30, 42, 74, 0.3);
-  }
-
-  /* Loading dots animation */
-  .loading-dots {
-    display: inline-flex;
-    gap: 2px;
-    margin-right: 5px;
-  }
-
-  .loading-dots span {
-    width: 4px;
-    height: 4px;
-    background: rgba(255, 255, 255, 0.8);
-    border-radius: 50%;
-    animation: loading-bounce 1.4s infinite ease-in-out;
-  }
-
-  .loading-dots span:nth-child(1) { animation-delay: -0.32s; }
-  .loading-dots span:nth-child(2) { animation-delay: -0.16s; }
-
-  @keyframes loading-bounce {
-    0%, 80%, 100% {
-      transform: scale(0.8);
-      opacity: 0.5;
-    }
-    40% {
-      transform: scale(1);
-      opacity: 1;
-    }
-  }
-
-.smart-summary-btn.generating {
-  background: linear-gradient(135deg, #a855f7, #ec4899);
-  animation: pulse-glow 2s infinite;
+<style scoped>
+.smart-summary-wrapper {
+  margin: 1.5rem 0;
+  direction: rtl;
+  text-align: right;
+  font-family: 'Azer', 'IBM Plex Sans Arabic', -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
-.smart-summary-btn.has-summary {
-  background: linear-gradient(135deg, #10b981, #14b8a6);
-}
-
-.smart-summary-btn.hidden-summary {
-  background: linear-gradient(135deg, #6b7280, #3b82f6);
-}
-
-.button-content {
+.summary-trigger-bar {
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 0.75rem;
 }
 
-.button-icon {
-  font-size: 1.25rem;
-}
-
-.button-text {
+.smart-summary-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.7rem 1.25rem;
+  background: linear-gradient(135deg, #1e2a4a 0%, #2563eb 100%);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 0.75rem;
   font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.22);
+  transition: all 0.25s ease;
 }
 
-.new-badge {
-  background: #ef4444;
-  color: white;
-  padding: 0.25rem 0.5rem;
-  border-radius: 9999px;
-  font-size: 0.75rem;
+.smart-summary-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(37, 99, 235, 0.32);
+  background: linear-gradient(135deg, #17223d 0%, #1d4ed8 100%);
+}
+
+.smart-summary-btn.is-active {
+  background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+  box-shadow: 0 3px 10px rgba(30, 41, 59, 0.18);
+}
+
+.smart-summary-btn:disabled {
+  opacity: 0.75;
+  cursor: not-allowed;
+}
+
+.btn-icon-wrap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.icon-svg {
+  width: 1.15rem;
+  height: 1.15rem;
+}
+
+.ai-pill-badge {
+  background: rgba(255, 255, 255, 0.18);
+  color: #ffffff;
+  font-size: 0.7rem;
   font-weight: 700;
-  animation: pulse 2s infinite;
+  letter-spacing: 0.05em;
+  padding: 0.1rem 0.45rem;
+  border-radius: 9999px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
 }
 
-/* تم حذف CSS مؤشر التحميل */
-
-/* عرض الملخص - متناسق مع الموقع */
-.summary-result {
-  background: #ffffff;
-  border-radius: 16px;
-  border: 1px solid #e2e8f0;
-  box-shadow: 0 8px 25px rgba(30, 42, 74, 0.1);
-  overflow: hidden;
+/* بطاقة الملخص */
+.summary-card {
   margin-top: 1rem;
+  background: #ffffff;
+  border-radius: 1rem;
+  border: 1px solid #dbeafe;
+  box-shadow: 0 10px 28px -6px rgba(30, 42, 74, 0.08), 0 4px 12px -2px rgba(37, 99, 235, 0.05);
+  overflow: hidden;
 }
 
-.summary-header {
-  background: #1e2a4a;
-  color: white;
-  padding: 1.25rem 1.5rem;
+.summary-card-header {
+  background: linear-gradient(135deg, #1e2a4a 0%, #1d4ed8 100%);
+  color: #ffffff;
+  padding: 0.95rem 1.35rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
-}
-
-.summary-title {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  font-size: 1.1rem;
-  font-weight: 600;
-  margin: 0;
-}
-
-.compression-badge {
-  background: rgba(255, 255, 255, 0.2);
-  padding: 0.25rem 0.75rem;
-  border-radius: 9999px;
-  font-size: 0.75rem;
-  margin-left: 0.5rem;
-}
-
-/* أيقونات ملونة */
-.ai-icon {
-  color: #a78bfa !important;
-}
-
-.summary-icon {
-  color: rgba(255, 255, 255, 0.9) !important;
-  margin-left: 0.5rem;
-}
-
-.summary-content {
-  padding: 1.75rem 1.5rem;
-  line-height: 1.8;
-}
-
-.typing-effect {
-  font-size: 1.125rem;
-  line-height: 1.75;
-  color: #374151;
-}
-
-.typing-cursor {
-  animation: pulse 1s infinite;
-  color: #1e2a4a;
-  font-weight: 700;
-}
-
-.summary-text {
-  font-size: 1.125rem;
-  line-height: 1.8;
-  color: #2d3748;
-  font-weight: 400;
-}
-
-.summary-text strong {
-  color: #1e2a4a;
-  font-weight: 600;
-}
-
-/* AI Disclaimer - متناسق مع لون الموقع */
-.ai-disclaimer {
-  background: linear-gradient(135deg, #f8fafc, #edf2f7);
-  border: 1px solid rgba(30, 42, 74, 0.1);
-  border-radius: 12px;
-  padding: 1.25rem;
-  margin-top: 1.5rem;
-  font-size: 0.9rem;
-  box-shadow: 0 2px 8px rgba(30, 42, 74, 0.05);
-}
-
-.disclaimer-header {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  color: #1e2a4a;
-  font-weight: 600;
-  margin-bottom: 0.75rem;
-}
-
-.disclaimer-header i {
-  font-size: 1.1rem;
-}
-
-.disclaimer-text {
-  color: #4a5568;
-  line-height: 1.6;
-  margin: 0;
-  font-size: 0.9rem;
-}
-
-/* رسائل الخطأ */
-.error-container {
-  background: #fef2f2;
-  border: 2px solid #fecaca;
-  border-radius: 0.75rem;
-  padding: 1rem;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-}
-
-.error-content {
-  display: flex;
-  align-items: flex-start;
   gap: 1rem;
 }
 
-.error-icon {
-  color: #ef4444;
-  font-size: 1.5rem;
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.header-icon-box {
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 0.6rem;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
   flex-shrink: 0;
-  margin-top: 0.25rem;
 }
 
-.error-text {
-  flex: 1;
-}
-
-.error-title {
+.header-title {
+  font-size: 1rem;
   font-weight: 700;
-  color: #991b1b;
-  font-size: 1.125rem;
+  margin: 0;
+  color: #ffffff;
+  line-height: 1.3;
 }
 
-.error-message {
+.header-subtitle {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.8);
+  margin: 0.15rem 0 0 0;
+}
+
+.action-copy-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.75rem;
+  background: rgba(255, 255, 255, 0.14);
+  hover: rgba(255, 255, 255, 0.24);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 0.5rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.action-copy-btn:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+/* جسم البطاقة والفقرات */
+.summary-card-body {
+  padding: 1.25rem 1.35rem;
+  background: linear-gradient(180deg, #f8fafc 0%, #ffffff 100%);
+}
+
+.paragraphs-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.summary-paragraph-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.85rem 1rem;
+  background: #ffffff;
+  border-radius: 0.75rem;
+  border: 1px solid #e2e8f0;
+  border-right: 4px solid #2563eb;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03);
+}
+
+.summary-paragraph-item:nth-child(2) {
+  border-right-color: #0284c7;
+}
+
+.paragraph-bullet {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 9999px;
+  margin-top: 0.65rem;
+  flex-shrink: 0;
+}
+
+.bullet-primary {
+  background-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+.bullet-secondary {
+  background-color: #0284c7;
+  box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15);
+}
+
+.paragraph-text {
+  margin: 0;
+  font-size: 1.05rem;
+  line-height: 1.85;
+  color: #1e293b;
+  font-weight: 500;
+  text-align: justify;
+}
+
+.typing-cursor {
+  display: inline-block;
+  color: #2563eb;
+  font-weight: 700;
+  animation: blink 0.9s infinite;
+}
+
+/* تذييل البطاقة */
+.summary-card-footer {
+  margin-top: 1rem;
+  padding-top: 0.85rem;
+  border-top: 1px dashed #e2e8f0;
+}
+
+.footer-note {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #64748b;
+  font-size: 0.78rem;
+  line-height: 1.5;
+}
+
+.footer-info-icon {
+  width: 1rem;
+  height: 1rem;
+  color: #2563eb;
+  flex-shrink: 0;
+}
+
+/* صندوق الخطأ */
+.summary-error-box {
+  margin-top: 0.75rem;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 0.75rem;
+  padding: 0.75rem 1rem;
+}
+
+.error-inner {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.error-svg {
+  width: 1.25rem;
+  height: 1.25rem;
+  color: #dc2626;
+  flex-shrink: 0;
+}
+
+.error-msg {
+  flex: 1;
+  margin: 0;
   color: #991b1b;
   font-size: 0.875rem;
-  margin: 0;
+  font-weight: 500;
 }
 
-.error-close {
+.error-dismiss {
   background: none;
   border: none;
-  color: #6b7280;
+  color: #991b1b;
   cursor: pointer;
-  padding: 0.25rem;
-  border-radius: 0.25rem;
-  transition: all 0.3s ease;
+  font-size: 0.9rem;
+  padding: 0.2rem 0.4rem;
 }
 
-.error-close:hover {
-  background: #f3f4f6;
-  color: #374151;
+/* الحركات */
+.summary-fade-enter-active,
+.summary-fade-leave-active {
+  transition: all 0.25s ease;
 }
 
-/* Responsive Design - للهاتف والكمبيوتر */
-@media (max-width: 768px) {
-  .smart-summary-container {
-    margin: 1rem 0;
-  }
-  
-  .smart-summary-button {
+.summary-fade-enter-from,
+.summary-fade-leave-to {
+  opacity: 0;
+  transform: translateY(-6px);
+}
+
+.spin-anim {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+@media (max-width: 640px) {
+  .smart-summary-btn {
     width: 100%;
     justify-content: center;
-    padding: 1rem 1.5rem;
-    font-size: 1rem;
   }
-  
-  .summary-header {
-    padding: 1rem 1.25rem;
-    flex-direction: column;
-    gap: 1rem;
-    text-align: center;
+
+  .summary-card-header {
+    padding: 0.85rem 1rem;
   }
-  
-  .summary-title {
-    justify-content: center;
-    font-size: 1rem;
-  }
-  
-  .summary-content {
-    padding: 1.5rem 1.25rem;
-  }
-  
-  .summary-text {
-    font-size: 1rem;
-    line-height: 1.7;
-  }
-  
-  .ai-disclaimer {
+
+  .summary-card-body {
     padding: 1rem;
-    margin-top: 1.25rem;
-    font-size: 0.85rem;
   }
-}
 
-@media (max-width: 480px) {
-  .smart-summary-button {
-    padding: 0.875rem 1.25rem;
-    font-size: 0.95rem;
-    gap: 0.5rem;
+  .summary-paragraph-item {
+    padding: 0.75rem 0.85rem;
   }
-  
-  .summary-content {
-    padding: 1.25rem 1rem;
-  }
-  
-  .summary-text {
-    font-size: 0.95rem;
-  }
-  
-  .control-btn {
-    padding: 0.375rem;
-  }
-}
 
-/* Animations */
-@keyframes pulse-glow {
-  0%, 100% {
-    box-shadow: 0 0 20px rgba(147, 51, 234, 0.5);
-  }
-  50% {
-    box-shadow: 0 0 40px rgba(147, 51, 234, 0.8);
-  }
-}
-
-@keyframes pulse {
-  0%, 100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.5;
-  }
-}
-
-/* Responsive */
-@media (max-width: 640px) {
-  .summary-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 1rem;
-  }
-  
-  .smart-summary-btn {
-    font-size: 1rem;
-    padding: 0.75rem 1rem;
+  .paragraph-text {
+    font-size: 0.98rem;
+    line-height: 1.75;
   }
 }
 </style>
