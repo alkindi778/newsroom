@@ -280,6 +280,15 @@ const { data: writerData, error: fetchError } = await useAsyncData(
   }
 )
 
+if (!writerData.value) {
+  throw createError({
+    statusCode: 404,
+    statusMessage: 'الصفحة غير موجودة',
+    message: 'عذراً، صفحة الكاتب التي تبحث عنها غير موجودة.',
+    fatal: true
+  })
+}
+
 // Update writer ref when data changes
 watch(writerData, (newData) => {
   if (newData) {

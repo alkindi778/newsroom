@@ -1,3 +1,5 @@
+import { API_CLIENT_HEADER, API_CLIENT_TOKEN, decryptApiData } from '~/utils/apiCrypto'
+
 export const useApi = () => {
   const config = useRuntimeConfig()
   const baseURL = ((config as any).public?.apiBase || 'http://localhost:8000/api') as string
@@ -22,6 +24,7 @@ export const useApi = () => {
           'Accept': 'application/json',
           'Content-Type': 'application/json',
           'Cache-Control': 'no-cache',
+          [API_CLIENT_HEADER]: API_CLIENT_TOKEN,
           ...options.headers,
         },
         // زيادة timeout لتجنب abort errors
@@ -43,7 +46,7 @@ export const useApi = () => {
       }) as T
 
       clearTimeout(timeoutId)
-      return result
+      return decryptApiData<T>(result)
     } catch (error: any) {
       clearTimeout(timeoutId)
       

@@ -154,8 +154,7 @@
 import AdvertisementZone from '~/components/AdvertisementZone.vue'
 
 const route = useRoute()
-const config = useRuntimeConfig()
-const apiBase = ((config as any).public?.apiBase || '/api/v1') as string
+const { apiFetch } = useApi()
 
 const { setCategorySeoMeta } = useAppSeoMeta()
 const { locale } = useI18n()
@@ -195,7 +194,7 @@ const slug = computed(() => route.params.slug as string)
 const { data: category } = await useAsyncData(
   `category-${slug.value}`,
   async () => {
-    const response = await $fetch<any>(`${apiBase}/categories/${slug.value}`)
+    const response = await apiFetch<any>(`/categories/${slug.value}`)
     return response?.data || null
   },
   {
@@ -203,13 +202,22 @@ const { data: category } = await useAsyncData(
   }
 )
 
+if (!category.value) {
+  throw createError({
+    statusCode: 404,
+    statusMessage: 'الصفحة غير موجودة',
+    message: 'عذراً، القسم الذي تبحث عنه غير موجود.',
+    fatal: true
+  })
+}
+
 // جلب الأخبار مع SSR
 const { data: articlesData, refresh: refreshArticles } = await useAsyncData(
   () => `articles-category-${slug.value}-${currentPage.value}`,
   async () => {
     if (!category.value) return { data: [], meta: null }
     
-    const response = await $fetch<any>(`${apiBase}/articles`, {
+    const response = await apiFetch<any>('/articles', {
       params: {
         category: category.value.id,
         per_page: 9,

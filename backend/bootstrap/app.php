@@ -31,9 +31,10 @@ return Application::configure(basePath: dirname(__DIR__))
         // Force HTTPS في الإنتاج
         $middleware->append(\App\Http\Middleware\ForceHttps::class);
         
-        // تفعيل CORS لجميع routes
+        // تفعيل CORS وحماية وتشفير الـ API لجميع routes
         $middleware->api(prepend: [
             \Illuminate\Http\Middleware\HandleCors::class,
+            \App\Http\Middleware\ProtectAndEncryptApi::class,
         ]);
         
         $middleware->alias([
@@ -45,6 +46,23 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
+        // معالجة أخطاء 404 لتوحيد صفحة 404 مع الفرونت إند وحماية الـ API من التصفح المباشر
+        $exceptions->render(function (\Symfony\Component\HttpKernel\Exception\NotFoundHttpException $e, \Illuminate\Http\Request $request) {
+            if ($request->is('api/*') && \App\Http\Middleware\ProtectAndEncryptApi::isAuthorizedRequest($request)) {
+                $payload = json_encode([
+                    'status' => 'error',
+                    'message' => 'المورد المطلوب غير موجود',
+                ], JSON_UNESCAPED_UNICODE);
+
+                return response()->json([
+                    '_enc' => 1,
+                    'd' => \App\Http\Middleware\ProtectAndEncryptApi::encryptPayload($payload),
+                ], 404);
+            }
+
+            return response()->view('errors.404', [], 404);
+        });
+
         // معالجة أخطاء الصلاحيات 403
         $exceptions->render(function (\Spatie\Permission\Exceptions\UnauthorizedException $e, \Illuminate\Http\Request $request) {
             \Log::error('UnauthorizedException caught', [

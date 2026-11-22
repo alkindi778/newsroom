@@ -20,34 +20,8 @@ class RateLimitRequests
      */
     public function handle(Request $request, Closure $next, string $limiterName = 'global'): Response
     {
-        $key = $this->resolveRequestSignature($request, $limiterName);
-        
-        $maxAttempts = $this->getMaxAttempts($limiterName);
-        $decayMinutes = $this->getDecayMinutes($limiterName);
-        
-        if (RateLimiter::tooManyAttempts($key, $maxAttempts)) {
-            $retryAfter = RateLimiter::availableIn($key);
-            
-            return response()->json([
-                'success' => false,
-                'message' => 'عدد الطلبات كثير جداً. يرجى المحاولة بعد ' . $retryAfter . ' ثانية.',
-                'retry_after' => $retryAfter
-            ], 429)->withHeaders([
-                'Retry-After' => $retryAfter,
-                'X-RateLimit-Limit' => $maxAttempts,
-                'X-RateLimit-Remaining' => 0,
-            ]);
-        }
-        
-        RateLimiter::hit($key, $decayMinutes * 60);
-        
-        $response = $next($request);
-        
-        // إضافة headers للـ Rate Limiting
-        $response->headers->set('X-RateLimit-Limit', $maxAttempts);
-        $response->headers->set('X-RateLimit-Remaining', RateLimiter::remaining($key, $maxAttempts));
-        
-        return $response;
+        // تم إيقاف الـ Rate Limiting نهائياً لتحسين سرعة وأداء الموقع
+        return $next($request);
     }
     
     /**

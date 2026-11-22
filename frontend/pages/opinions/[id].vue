@@ -52,14 +52,9 @@
 
         <!-- العنوان -->
         <div class="p-8">
-          <h1 class="text-4xl font-bold text-gray-900 mb-4 leading-tight">
+          <h1 class="text-4xl font-bold text-gray-900 mb-6 leading-tight">
             {{ getOpinionTitle }}
           </h1>
-
-          <!-- المقتطف -->
-          <p v-if="getOpinionExcerpt" class="text-xl text-gray-600 font-medium leading-relaxed">
-            {{ getOpinionExcerpt }}
-          </p>
 
           <!-- معلومات الكاتب -->
           <div class="flex items-center justify-between pb-6 border-b border-gray-200">
@@ -266,7 +261,8 @@ const localePath = useLocalePath()
 const route = useRoute()
 const opinionsStore = useOpinionsStore()
 const config = useRuntimeConfig()
-const apiBase = ((config as any).public?.apiBase || '/api/v1') as string
+const { apiFetch } = useApi()
+const { decodeHtmlEntities, decodeHtmlContent } = useHtmlEntities()
 
 const { getImageUrl } = useImageUrl()
 const { formatDate } = useDateFormat()
@@ -274,35 +270,39 @@ const { setOpinionSeoMeta } = useAppSeoMeta()
 const { locale } = useI18n()
 const { shareOnFacebook, shareOnTwitter, shareOnWhatsApp, shareOnTelegram, buildShareText } = useShare()
 
-// دوال الترجمة
+// دوال الترجمة مع تنظيف HTML Entities و &nbsp;
 const getOpinionTitle = computed(() => {
   if (!opinion.value) return ''
-  return locale.value === 'en' && opinion.value.title_en ? opinion.value.title_en : opinion.value.title
+  const raw = locale.value === 'en' && opinion.value.title_en ? opinion.value.title_en : opinion.value.title
+  return decodeHtmlEntities(raw) || ''
 })
 
 const getOpinionContent = computed(() => {
   if (!opinion.value) return ''
-  return locale.value === 'en' && opinion.value.content_en ? opinion.value.content_en : opinion.value.content
+  const raw = locale.value === 'en' && opinion.value.content_en ? opinion.value.content_en : opinion.value.content
+  return decodeHtmlContent(raw) || ''
 })
 
 const getOpinionExcerpt = computed(() => {
   if (!opinion.value?.excerpt) return null
-  return locale.value === 'en' && opinion.value.excerpt_en ? opinion.value.excerpt_en : opinion.value.excerpt
+  const raw = locale.value === 'en' && opinion.value.excerpt_en ? opinion.value.excerpt_en : opinion.value.excerpt
+  return decodeHtmlEntities(raw)
 })
 
 const getWriterName = computed(() => {
   if (!opinion.value?.writer) return ''
-  return locale.value === 'en' && opinion.value.writer.name_en ? opinion.value.writer.name_en : opinion.value.writer.name
+  const raw = locale.value === 'en' && opinion.value.writer.name_en ? opinion.value.writer.name_en : opinion.value.writer.name
+  return decodeHtmlEntities(raw) || ''
 })
 
 const opinionId = computed(() => route.params.id as string)
 const hasLiked = ref(false)
 
 // جلب مقال الرأي مع SSR
-const { data: opinionData, error: fetchError } = await useAsyncData(
+const { data: opinionData, pending: loading, error: fetchError } = await useAsyncData(
   `opinion-${opinionId.value}`,
   async () => {
-    const response = await $fetch<any>(`${apiBase}/opinions/${opinionId.value}`)
+    const response = await apiFetch<any>(`/opinions/${opinionId.value}`)
     return response?.data || null
   },
   {
@@ -310,9 +310,17 @@ const { data: opinionData, error: fetchError } = await useAsyncData(
   }
 )
 
+if (!opinionData.value) {
+  throw createError({
+    statusCode: 404,
+    statusMessage: 'الصفحة غير موجودة',
+    message: 'عذراً، مقال الرأي الذي تبحث عنه غير موجود أو تم حذفه.',
+    fatal: true
+  })
+}
+
 const opinion = computed(() => opinionData.value)
-const loading = ref(false)
-const error = computed(() => fetchError.value?.message || null)
+const error = computed(() => fetchError.value ? 'عذراً، تعذر تحميل المقال المطلوب.' : null)
 
 // الكلمات الدلالية
 const keywords = computed(() => {

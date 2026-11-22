@@ -66,14 +66,14 @@ class ArticleController extends Controller
                 return [
                     'id' => $article->id,
                     'title' => $this->decodeHtmlEntities($article->title),
-                    'title_en' => $article->title_en,
+                    'title_en' => $this->decodeHtmlEntities($article->title_en),
                     'subtitle' => $this->decodeHtmlEntities($article->subtitle),
                     'source' => $this->decodeHtmlEntities($article->source),
                     'slug' => $article->slug,
                     'content' => $this->fixContentImageUrls($article->content),
-                    'content_en' => $article->content_en,
-                    'excerpt' => $this->decodeHtmlEntities($article->excerpt) ?? ($article->content ? mb_substr(strip_tags($article->content), 0, 150) . '...' : ''),
-                    'excerpt_en' => $article->content_en ? mb_substr(strip_tags($article->content_en), 0, 150) . '...' : null,
+                    'content_en' => $this->fixContentImageUrls($article->content_en),
+                    'excerpt' => $this->buildCleanExcerpt($article->excerpt, $article->content, 150),
+                    'excerpt_en' => $article->content_en ? $this->buildCleanExcerpt(null, $article->content_en, 150) : null,
                     'image' => $article->image_path,  // استخدام Media Library accessor
                     'thumbnail' => $article->thumbnail_path,  // استخدام Media Library accessor
                     'meta_description' => $this->decodeHtmlEntities($article->meta_description),
@@ -153,15 +153,15 @@ class ArticleController extends Controller
             $transformedArticle = [
                 'id' => $article->id,
                 'title' => $this->decodeHtmlEntities($article->title),
-                'title_en' => $article->title_en,
+                'title_en' => $this->decodeHtmlEntities($article->title_en),
                 'subtitle' => $this->decodeHtmlEntities($article->subtitle),
-                'subtitle_en' => $article->subtitle_en,
+                'subtitle_en' => $this->decodeHtmlEntities($article->subtitle_en),
                 'source' => $this->decodeHtmlEntities($article->source),
                 'slug' => $article->slug,
                 'content' => $this->fixContentImageUrls($article->content),
-                'content_en' => $article->content_en,
-                'excerpt' => $this->decodeHtmlEntities($article->excerpt) ?? ($article->content ? mb_substr(strip_tags($article->content), 0, 150) . '...' : ''),
-                'excerpt_en' => $article->content_en ? mb_substr(strip_tags($article->content_en), 0, 150) . '...' : null,
+                'content_en' => $this->fixContentImageUrls($article->content_en),
+                'excerpt' => $this->buildCleanExcerpt($article->excerpt, $article->content, 150),
+                'excerpt_en' => $article->content_en ? $this->buildCleanExcerpt(null, $article->content_en, 150) : null,
                 'image' => $article->image_path,
                 'thumbnail' => $article->thumbnail_path,
                 'meta_description' => $this->decodeHtmlEntities($article->meta_description),
@@ -280,15 +280,15 @@ class ArticleController extends Controller
             $transformedData = $articles->map(function ($article) {
                 return [
                     'id' => $article->id,
-                    'title' => $article->title,
-                    'title_en' => $article->title_en,
-                    'subtitle' => $article->subtitle,
-                    'subtitle_en' => $article->subtitle_en,
-                    'source' => $article->source,
+                    'title' => $this->decodeHtmlEntities($article->title),
+                    'title_en' => $this->decodeHtmlEntities($article->title_en),
+                    'subtitle' => $this->decodeHtmlEntities($article->subtitle),
+                    'subtitle_en' => $this->decodeHtmlEntities($article->subtitle_en),
+                    'source' => $this->decodeHtmlEntities($article->source),
                     'slug' => $article->slug,
                     'content' => $this->fixContentImageUrls($article->content),
-                    'content_en' => $article->content_en,
-                    'excerpt' => $article->excerpt ?? ($article->content ? mb_substr(strip_tags($article->content), 0, 150) . '...' : ''),
+                    'content_en' => $this->fixContentImageUrls($article->content_en),
+                    'excerpt' => $this->buildCleanExcerpt($article->excerpt, $article->content, 150),
                     'image' => $article->image_path,
                     'thumbnail' => $article->thumbnail_path,
                     'meta_description' => $article->meta_description,
@@ -344,13 +344,13 @@ class ArticleController extends Controller
             $transformedData = $articles->map(function ($article) {
                 return [
                     'id' => $article->id,
-                    'title' => $article->title,
-                    'title_en' => $article->title_en,
-                    'subtitle' => $article->subtitle,
-                    'subtitle_en' => $article->subtitle_en,
-                    'source' => $article->source,
+                    'title' => $this->decodeHtmlEntities($article->title),
+                    'title_en' => $this->decodeHtmlEntities($article->title_en),
+                    'subtitle' => $this->decodeHtmlEntities($article->subtitle),
+                    'subtitle_en' => $this->decodeHtmlEntities($article->subtitle_en),
+                    'source' => $this->decodeHtmlEntities($article->source),
                     'slug' => $article->slug,
-                    'excerpt' => $article->excerpt ?? mb_substr(strip_tags($article->content ?? ''), 0, 100, 'UTF-8') . '...',
+                    'excerpt' => $this->buildCleanExcerpt($article->excerpt, $article->content, 100),
                     'image' => $article->image_path,
                     'thumbnail' => $article->thumbnail_path,
                     'views' => $article->views ?? 0,
@@ -414,13 +414,13 @@ class ArticleController extends Controller
             $transformedData = $articles->map(function ($article) {
                 return [
                     'id' => $article->id,
-                    'title' => $article->title,
-                    'title_en' => $article->title_en,
-                    'subtitle' => $article->subtitle,
-                    'subtitle_en' => $article->subtitle_en,
-                    'source' => $article->source,
+                    'title' => $this->decodeHtmlEntities($article->title),
+                    'title_en' => $this->decodeHtmlEntities($article->title_en),
+                    'subtitle' => $this->decodeHtmlEntities($article->subtitle),
+                    'subtitle_en' => $this->decodeHtmlEntities($article->subtitle_en),
+                    'source' => $this->decodeHtmlEntities($article->source),
                     'slug' => $article->slug,
-                    'excerpt' => $article->excerpt ?? mb_substr(strip_tags($article->content ?? ''), 0, 100, 'UTF-8') . '...',
+                    'excerpt' => $this->buildCleanExcerpt($article->excerpt, $article->content, 100),
                     'image' => $article->image_path,
                     'thumbnail' => $article->thumbnail_path,
                     'views' => $article->views ?? 0,
@@ -483,13 +483,13 @@ class ArticleController extends Controller
             $transformedData = $articles->getCollection()->map(function ($article) {
                 return [
                     'id' => $article->id,
-                    'title' => $article->title,
-                    'title_en' => $article->title_en,
-                    'subtitle' => $article->subtitle,
-                    'subtitle_en' => $article->subtitle_en,
-                    'source' => $article->source,
+                    'title' => $this->decodeHtmlEntities($article->title),
+                    'title_en' => $this->decodeHtmlEntities($article->title_en),
+                    'subtitle' => $this->decodeHtmlEntities($article->subtitle),
+                    'subtitle_en' => $this->decodeHtmlEntities($article->subtitle_en),
+                    'source' => $this->decodeHtmlEntities($article->source),
                     'slug' => $article->slug,
-                    'excerpt' => $article->excerpt ?? ($article->content ? mb_substr(strip_tags($article->content), 0, 150) . '...' : ''),
+                    'excerpt' => $this->buildCleanExcerpt($article->excerpt, $article->content, 150),
                     'image' => $article->image_path,
                     'thumbnail' => $article->thumbnail_path,
                     'views' => $article->views ?? 0,
@@ -548,13 +548,13 @@ class ArticleController extends Controller
             $transformedData = $articles->map(function ($article) {
                 return [
                     'id' => $article->id,
-                    'title' => $article->title,
-                    'title_en' => $article->title_en,
-                    'subtitle' => $article->subtitle,
-                    'subtitle_en' => $article->subtitle_en,
-                    'source' => $article->source,
+                    'title' => $this->decodeHtmlEntities($article->title),
+                    'title_en' => $this->decodeHtmlEntities($article->title_en),
+                    'subtitle' => $this->decodeHtmlEntities($article->subtitle),
+                    'subtitle_en' => $this->decodeHtmlEntities($article->subtitle_en),
+                    'source' => $this->decodeHtmlEntities($article->source),
                     'slug' => $article->slug,
-                    'excerpt' => $article->excerpt ?? substr(strip_tags($article->content), 0, 150) . '...',
+                    'excerpt' => $this->buildCleanExcerpt($article->excerpt, $article->content, 150),
                     'image' => $article->image_path,
                     'thumbnail' => $article->thumbnail_path,
                     'views' => $article->views ?? 0,
@@ -648,7 +648,7 @@ class ArticleController extends Controller
                         'subtitle' => $this->decodeHtmlEntities($article->subtitle),
                         'source' => $this->decodeHtmlEntities($article->source),
                         'slug' => $article->slug,
-                        'excerpt' => $this->decodeHtmlEntities($article->excerpt) ?? mb_substr(strip_tags($article->content), 0, 100) . '...',
+                        'excerpt' => $this->buildCleanExcerpt($article->excerpt, $article->content, 100),
                         'image' => $article->image_path,
                         'thumbnail' => $article->thumbnail_path,
                         'views' => $article->views ?? 0,
@@ -727,8 +727,14 @@ class ArticleController extends Controller
             return $content;
         }
         
-        // فك ترميز HTML entities أولاً
+        // فك ترميز HTML entities أولاً وتنظيف &nbsp;
         $content = html_entity_decode($content, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        if (str_contains($content, '&nbsp;') || str_contains($content, '&amp;nbsp;')) {
+            $content = str_replace(['&amp;nbsp;', '&nbsp;', '&NBSP;'], ' ', $content);
+        }
+        $content = str_replace("\xC2\xA0", ' ', $content);
+        // حذف الفقرات الفارغة من بداية المقال مثل <p> </p>
+        $content = preg_replace('/^(?:\s*<p[^>]*>(?:\s|<br\s*\/?>)*<\/p>\s*)+/iu', '', $content);
         
         // إذا كان المحتوى لا يحتوي على HTML tags، نحوله إلى فقرات
         if (!preg_match('/<[^>]+>/', $content)) {
@@ -763,10 +769,13 @@ class ArticleController extends Controller
             $content = '<p>' . implode('</p><p>', array_filter($paragraphs)) . '</p>';
         }
         
-        // الحصول على base URL الكامل من config
-        $baseUrl = rtrim(config('app.url'), '/');
+        // الحصول على base URL ديناميكياً من الطلب أو الإعدادات بدون روابط ثابتة
+        $baseUrl = rtrim(config('app.url') ?: request()->root(), '/');
+        if (str_contains($baseUrl, 'localhost:3000')) {
+            $baseUrl = rtrim(request()->root(), '/');
+        }
         
-        // استبدال جميع مسارات الصور النسبية بمسارات كاملة
+        // استبدال جميع مسارات الصور النسبية بمسارات كاملة ديناميكية
         $content = preg_replace_callback(
             '/<img([^>]*)src=["\']([^"\']+)["\']([^>]*)>/i',
             function($matches) use ($baseUrl) {
@@ -774,7 +783,10 @@ class ArticleController extends Controller
                 $srcValue = $matches[2];
                 $afterSrc = $matches[3];
                 
-                // إذا كان المسار يبدأ بـ http:// أو https:// لا نغيره
+                // تنظيف أي رابط محلي قديم مخزن في قاعدة البيانات (مثل localhost أو 127.0.0.1)
+                $srcValue = preg_replace('/^https?:\/\/(localhost|127\.0\.0\.1|192\.168\.\d+\.\d+)(:\d+)?\/?/i', '/', $srcValue);
+
+                // إذا كان المسار يبدأ بـ http:// أو https:// (رابط خارجي حقيقي) لا نغيره
                 if (preg_match('/^https?:\/\//i', $srcValue)) {
                     return $matches[0];
                 }
@@ -807,7 +819,7 @@ class ArticleController extends Controller
     }
     
     /**
-     * فك ترميز HTML entities من النص
+     * فك ترميز HTML entities من النص وتنظيف &nbsp;
      */
     private function decodeHtmlEntities(?string $text): ?string
     {
@@ -815,6 +827,34 @@ class ArticleController extends Controller
             return $text;
         }
         
-        return html_entity_decode($text, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        $decoded = html_entity_decode($text, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        if (str_contains($decoded, '&')) {
+            $decoded = html_entity_decode($decoded, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        }
+        $decoded = str_replace(['&nbsp;', '&NBSP;', "\xC2\xA0"], ' ', $decoded);
+        $decoded = preg_replace('/[ \t]+/u', ' ', $decoded);
+
+        return trim((string) $decoded);
+    }
+
+    /**
+     * بناء مقتطف نظيف خالٍ من &nbsp; والوسوم
+     */
+    private function buildCleanExcerpt(?string $excerpt, ?string $content, int $length = 150): string
+    {
+        $source = !empty($excerpt) ? $excerpt : strip_tags((string) $content);
+        $cleaned = $this->decodeHtmlEntities($source) ?? '';
+        $cleaned = preg_replace('/\s+/u', ' ', $cleaned);
+        $cleaned = trim((string) $cleaned);
+
+        if ($cleaned === '') {
+            return '';
+        }
+
+        if (empty($excerpt) && mb_strlen($cleaned, 'UTF-8') > $length) {
+            return trim(mb_substr($cleaned, 0, $length, 'UTF-8')) . '...';
+        }
+
+        return $cleaned;
     }
 }

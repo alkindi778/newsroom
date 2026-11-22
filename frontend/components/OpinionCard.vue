@@ -85,16 +85,19 @@ const props = defineProps<{
 const { getImageUrl } = useImageUrl()
 const { formatDate } = useDateFormat()
 const { getOpinionLink } = useArticleLink()
+const { decodeHtmlEntities } = useHtmlEntities()
 
 // دالة للحصول على عنوان المقال المترجم
 const getOpinionTitle = computed(() => {
-  return locale.value === 'en' && props.opinion.title_en ? props.opinion.title_en : props.opinion.title
+  const raw = locale.value === 'en' && props.opinion.title_en ? props.opinion.title_en : props.opinion.title
+  return decodeHtmlEntities(raw) || ''
 })
 
 // دالة للحصول على اسم الكاتب المترجم
 const getWriterName = computed(() => {
   if (!props.opinion.writer) return ''
-  return locale.value === 'en' && props.opinion.writer.name_en ? props.opinion.writer.name_en : props.opinion.writer.name
+  const raw = locale.value === 'en' && props.opinion.writer.name_en ? props.opinion.writer.name_en : props.opinion.writer.name
+  return decodeHtmlEntities(raw) || ''
 })
 
 const { t } = useI18n()

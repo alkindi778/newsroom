@@ -1,27 +1,31 @@
+import { API_CLIENT_HEADER, API_CLIENT_TOKEN, decryptApiData } from '../../utils/apiCrypto'
+
 /**
  * Sitemap XML Generator
  * يولد خريطة الموقع تلقائياً لمحركات البحث
  */
 export default defineEventHandler(async (event) => {
   const config = useRuntimeConfig()
-  const baseUrl = config.public.siteUrl
-  const apiBase = config.public.apiBase
+  const baseUrl = (config.public.siteUrl || getRequestURL(event).origin).replace(/\/$/, '')
+  const apiBase = ((config.public.apiBase as string) || `${baseUrl}/api/v1`).replace(/\/$/, '')
+  const apiHeaders = { [API_CLIENT_HEADER]: API_CLIENT_TOKEN }
 
   try {
     // جلب الإعدادات للحصول على اسم الموقع
-    const settingsResponse = await $fetch(`${apiBase}/settings`)
+    const settingsResponse = decryptApiData(await $fetch(`${apiBase}/settings`, { headers: apiHeaders }))
     const siteName = (settingsResponse as any).data?.flat?.site_name || ''
 
     // جلب جميع الأخبار المنشورة
-    const articlesResponse = await $fetch(`${apiBase}/articles`, {
+    const articlesResponse = decryptApiData(await $fetch(`${apiBase}/articles`, {
+      headers: apiHeaders,
       params: {
         per_page: 1000,
         is_published: 1
       }
-    })
+    }))
 
     // جلب الأقسام
-    const categoriesResponse = await $fetch(`${apiBase}/categories`)
+    const categoriesResponse = decryptApiData(await $fetch(`${apiBase}/categories`, { headers: apiHeaders }))
 
     const articles = (articlesResponse as any).data || []
     const categories = (categoriesResponse as any).data || []

@@ -15,8 +15,7 @@ interface Advertisement {
 }
 
 export const useAdvertisements = () => {
-  const config = useRuntimeConfig()
-  const apiBase = ((config as any).public?.apiBase || '/api/v1') as string
+  const { apiFetch } = useApi()
 
   const advertisements: Ref<Advertisement[]> = ref([])
   const loading = ref(false)
@@ -36,12 +35,9 @@ export const useAdvertisements = () => {
         params.device = device
       }
 
-      const data: any = await $fetch(`${apiBase}/advertisements/position/${position}`, {
+      const data: any = await apiFetch(`/advertisements/position/${position}`, {
         params,
         signal, // ✨ Nuxt 4.2: دعم إلغاء الطلبات
-        onResponseError({ response }) {
-          throw new Error(response._data?.message || 'Failed to fetch advertisements')
-        }
       })
 
       if (data?.success && data?.data) {
@@ -77,11 +73,8 @@ export const useAdvertisements = () => {
         params.device = device
       }
 
-      const data: any = await $fetch(`${apiBase}/advertisements/page/${page}`, {
+      const data: any = await apiFetch(`/advertisements/page/${page}`, {
         params,
-        onResponseError({ response }) {
-          throw new Error(response._data?.message || 'Failed to fetch advertisements')
-        }
       })
 
       if (data?.success && data?.data) {
@@ -104,7 +97,7 @@ export const useAdvertisements = () => {
    */
   const trackView = async (id: number) => {
     try {
-      await $fetch(`${apiBase}/advertisements/${id}/view`, {
+      await apiFetch(`/advertisements/${id}/view`, {
         method: 'POST',
       })
     } catch (err) {
@@ -120,7 +113,7 @@ export const useAdvertisements = () => {
    */
   const trackClick = async (id: number) => {
     try {
-      await $fetch(`${apiBase}/advertisements/${id}/click`, {
+      await apiFetch(`/advertisements/${id}/click`, {
         method: 'POST',
       })
     } catch (err) {
@@ -139,12 +132,9 @@ export const useAdvertisements = () => {
     error.value = null
 
     try {
-      const data: any = await $fetch(`${apiBase}/advertisements/after-section/${sectionId}`, {
+      const data: any = await apiFetch(`/advertisements/after-section/${sectionId}`, {
         params: { page },
         signal,
-        onResponseError({ response }) {
-          throw new Error(response._data?.message || 'Failed to fetch advertisements')
-        }
       })
 
       if (data?.success && data?.data) {

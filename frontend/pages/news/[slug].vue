@@ -226,7 +226,7 @@ const { getCategoryName } = useLocalizedContent()
 const route = useRoute()
 const articlesStore = useArticlesStore()
 const config = useRuntimeConfig()
-const apiBase = ((config as any).public?.apiBase || '/api/v1') as string
+const { apiFetch } = useApi()
 
 const { getImageUrl } = useImageUrl()
 const { formatDate } = useDateFormat()
@@ -240,20 +240,8 @@ const slug = computed(() => route.params.slug as string)
 const { data: articleData, error: fetchError } = await useAsyncData(
   `article-${slug.value}`,
   async () => {
-    try {
-      const response = await $fetch<any>(`${apiBase}/articles/${slug.value}`)
-      return response?.data || null
-    } catch (e: any) {
-      // إذا كان الخطأ 404، نرمي خطأ ليتم عرض صفحة 404
-      if (e?.response?.status === 404 || e?.statusCode === 404) {
-        throw createError({
-          statusCode: 404,
-          statusMessage: 'الخبر غير موجود',
-          message: 'عذراً، الخبر الذي تبحث عنه غير موجود أو تم حذفه'
-        })
-      }
-      throw e
-    }
+    const response = await apiFetch<any>(`/articles/${slug.value}`)
+    return response?.data || null
   },
   {
     watch: [slug]
@@ -261,11 +249,12 @@ const { data: articleData, error: fetchError } = await useAsyncData(
 )
 
 // إذا لم يتم العثور على الخبر، نعرض صفحة 404
-if (!articleData.value && !fetchError.value) {
+if (!articleData.value) {
   throw createError({
     statusCode: 404,
-    statusMessage: 'الخبر غير موجود',
-    message: 'عذراً، الخبر الذي تبحث عنه غير موجود أو تم حذفه'
+    statusMessage: 'الصفحة غير موجودة',
+    message: 'عذراً، الخبر الذي تبحث عنه غير موجود أو تم حذفه.',
+    fatal: true
   })
 }
 

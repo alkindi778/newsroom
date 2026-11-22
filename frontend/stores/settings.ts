@@ -1,20 +1,25 @@
 import { defineStore } from 'pinia'
+import { API_CLIENT_HEADER, API_CLIENT_TOKEN, decryptApiData } from '~/utils/apiCrypto'
 
 // Helper function to fetch from API
 const apiFetch = async (endpoint: string, options: any = {}): Promise<any> => {
   const config = useRuntimeConfig()
-  const apiBase = (config as any).public.apiBase
+  let apiBase = ((config as any).public?.apiBase || '/api/v1').replace(/\/+$/, '')
+  if (apiBase && !apiBase.endsWith('/api/v1')) {
+    apiBase = `${apiBase}/api/v1`
+  }
+  const cleanEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`
   
-  const response = await $fetch(`${apiBase}${endpoint}`, {
+  const response = await $fetch(`${apiBase}${cleanEndpoint}`, {
     ...options,
     headers: {
       'Accept': 'application/json',
-      'Content-Type': 'application/json',
+      [API_CLIENT_HEADER]: API_CLIENT_TOKEN,
       ...options.headers
     }
   })
   
-  return response as any
+  return decryptApiData(response)
 }
 
 interface SiteSettings {

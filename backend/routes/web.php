@@ -3,7 +3,7 @@
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    return redirect('/api/v1/articles');
+    abort(404);
 });
 
 // Global login route (redirect to admin - no name to avoid conflict with Fortify)

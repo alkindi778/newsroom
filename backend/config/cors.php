@@ -22,6 +22,8 @@ return [
 
     'allowed_origins' => [
         env('FRONTEND_URL', 'http://localhost:3000'),
+        'https://adenstc.com',
+        'https://www.adenstc.com',
         'http://localhost:3000', 
         'http://127.0.0.1:3000',
     ],
@@ -38,6 +40,8 @@ return [
         'Authorization',
         'X-Requested-With',
         'X-CSRF-TOKEN',
+        'X-Aden-Client-Token',
+        'Cache-Control',
         'Accept',
         'Accept-Language',
         'Origin',

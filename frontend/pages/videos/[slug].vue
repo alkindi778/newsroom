@@ -283,6 +283,15 @@ const { data: videoData, error: fetchError } = await useAsyncData(
   }
 )
 
+if (!videoData.value) {
+  throw createError({
+    statusCode: 404,
+    statusMessage: 'الصفحة غير موجودة',
+    message: 'عذراً، الفيديو الذي تبحث عنه غير موجود أو تم حذفه.',
+    fatal: true
+  })
+}
+
 // Update video ref when data changes
 watch(videoData, (newData) => {
   if (newData) {

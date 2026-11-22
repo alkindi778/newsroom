@@ -1,9 +1,17 @@
+import { API_CLIENT_HEADER, API_CLIENT_TOKEN, decryptApiData } from '../../utils/apiCrypto'
+
 export default defineEventHandler(async (event) => {
   try {
     const config = useRuntimeConfig()
+    const apiBase = ((config.public as any).apiBase || '/api/v1').replace(/\/$/, '')
     
     // جلب البيانات من API
-    const response = await $fetch(`${config.public.apiBaseUrl}/api/v1/manifest`)
+    const rawResponse = await $fetch(`${apiBase}/manifest`, {
+      headers: {
+        [API_CLIENT_HEADER]: API_CLIENT_TOKEN
+      }
+    })
+    const response = decryptApiData(rawResponse)
     
     // إرجاع manifest.json مع headers صحيحة
     setHeader(event, 'Content-Type', 'application/manifest+json')

@@ -1,4 +1,5 @@
 import crypto from 'crypto'
+import { API_CLIENT_HEADER, API_CLIENT_TOKEN, decryptApiData } from '../../../utils/apiCrypto'
 
 // Nuxt/Nitro imports
 import { defineEventHandler, readBody, createError } from 'h3'
@@ -114,8 +115,8 @@ export default defineEventHandler(async (event): Promise<SummaryResponse> => {
       })
     }
 
-    // استخدام Laravel API بدلاً من Gemini مباشرة
-    const apiBase = process.env.NUXT_PUBLIC_API_BASE || 'http://localhost/newsroom/backend/public/api/v1'
+    // استخدام Laravel API
+    const apiBase = (process.env.NUXT_PUBLIC_API_BASE || '').replace(/\/$/, '')
     
     console.log('توليد ملخص جديد عبر Laravel API')
     
@@ -461,12 +462,14 @@ async function getCachedSummaryFromDB(hash: string): Promise<CachedSummary | nul
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
-        'Accept': 'application/json'
+        'Accept': 'application/json',
+        [API_CLIENT_HEADER]: API_CLIENT_TOKEN
       }
     })
     
     if (response.ok) {
-      const data = await response.json()
+      const rawData = await response.json()
+      const data = decryptApiData(rawData)
       return data.summary || null
     }
     
@@ -493,7 +496,8 @@ async function saveSummaryToDB(summaryData: any): Promise<void> {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Accept': 'application/json'
+        'Accept': 'application/json',
+        [API_CLIENT_HEADER]: API_CLIENT_TOKEN
       },
       body: JSON.stringify(summaryData)
     })

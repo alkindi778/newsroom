@@ -243,11 +243,19 @@ class Opinion extends Model implements HasMedia
      */
     public function getExcerptAttribute($value)
     {
+        $source = $value ?: strip_tags((string) $this->content);
+        $decoded = html_entity_decode((string) $source, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        if (str_contains($decoded, '&')) {
+            $decoded = html_entity_decode($decoded, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        }
+        $decoded = str_replace(['&nbsp;', '&NBSP;', "\xC2\xA0"], ' ', $decoded);
+        $decoded = trim((string) preg_replace('/\s+/u', ' ', $decoded));
+
         if ($value) {
-            return $value;
+            return $decoded;
         }
         
-        return Str::limit(strip_tags($this->content), 150);
+        return Str::limit($decoded, 150);
     }
 
     /**

@@ -49,16 +49,16 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         // تحديث اسم التطبيق من الإعدادات
-        if (Schema::hasTable('site_settings')) {
-            try {
+        try {
+            if (Schema::hasTable('site_settings')) {
                 $siteTitle = SiteSetting::where('key', 'site_title')->value('value');
                 if ($siteTitle) {
                     Config::set('app.name', $siteTitle);
                     Config::set('mail.from.name', $siteTitle);
                 }
-            } catch (\Exception $e) {
-                // تجاهل الأخطاء في حالة عدم اكتمال التثبيت
             }
+        } catch (\Throwable $e) {
+            // تجاهل الأخطاء في حالة عدم اكتمال التثبيت أو عدم توفر قاعدة البيانات أثناء أوامر CLI
         }
 
         // تسجيل Article Observer للترجمة التلقائية

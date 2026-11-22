@@ -73,7 +73,10 @@ class ArticleResource extends JsonResource
     private function generateExcerpt(): string
     {
         $length = request()->routeIs('api.v1.articles.show') ? 150 : 100;
-        return substr(strip_tags($this->content), 0, $length) . '...';
+        $text = html_entity_decode(strip_tags((string) $this->content), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        $text = str_replace(['&nbsp;', '&NBSP;', "\xC2\xA0"], ' ', $text);
+        $text = trim((string) preg_replace('/\s+/u', ' ', $text));
+        return mb_substr($text, 0, $length, 'UTF-8') . '...';
     }
 
     /**
